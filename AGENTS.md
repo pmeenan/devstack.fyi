@@ -119,7 +119,8 @@ docroot empty, questions 5 and 9 answered, new CSP question 10 plus two M1
 owner-side vhost fixes). The content schema draft is done (2026-09-08;
 D-014, docs/content-schema.md). The diagram mechanism is decided (2026-09-08;
 D-015, vanilla custom-element scripts, no island framework; RE-005 on CSP
-hashing). Remaining M0 items: architecture draft, toolchain decisions, ladder
-rewrite. See [docs/plan.md](docs/plan.md). No application code exists
+hashing). The architecture first full draft is done (2026-09-08;
+docs/architecture.md, three owner points at its end). Remaining M0 items:
+toolchain decisions, ladder rewrite. See [docs/plan.md](docs/plan.md). No application code exists
 yet; the Astro scaffolding is M1. Keep this paragraph short and current when
 plan.md milestone status changes (rule 4).

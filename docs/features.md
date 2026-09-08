@@ -106,8 +106,9 @@ Numbering is stable because plan.md and architecture.md refer to it.
    `services/<slug>/{AGENTS.md,README.md,docs/,content/}`, with the content
    layer's `glob()` loader reading `services/*/content/**/*.mdx` and
    excluding `_`-prefixed directories explicitly. Verified by the M0 spike on
-   2026-09-08 (content-layer spike section of architecture.md); the owner can
-   still veto in the architecture draft, but nothing technical blocks it.
+   2026-09-08 (content-layer spike section of architecture.md). The
+   architecture draft (2026-09-08) treats it as settled and lists it as an
+   owner point; silence is a yes.
 - **3. Diagram interactivity mechanism** → vanilla `<script>` in Astro
    components, each diagram a custom element; no island framework. See
    D-015. Measured 2026-09-08 against a Preact-island build of the same

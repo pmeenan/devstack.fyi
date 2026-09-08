@@ -63,7 +63,18 @@ needs evidence.
       both break under plex's current header, and the `is:inline` theme
       snippet is never hashed (RE-005). See the "Diagram mechanism spike"
       section of architecture.md.
-- [ ] First full draft of [architecture.md](architecture.md).
+- [x] First full draft of [architecture.md](architecture.md). Done
+      2026-09-08: system picture, repository layout, URLs and routing,
+      rendering and component inventory, theming, the client-side script
+      inventory, metadata and fonts (fonts API, sitemap, and 404 behavior
+      checked against current Astro docs), build and checks, hosting, cache
+      and deploy-script design (ledger-based retirement of hashed assets),
+      security headers, contribution surface, accessibility, extension
+      points; the dated spike sections kept as an evidence appendix. Three
+      owner points listed at the end of the doc (co-located layout veto,
+      deploy-script ergonomics, the five vhost changes). Open question 10
+      and the values it leaves (HTML TTL, grace duration, highlighter,
+      script inlining) roll into the toolchain item.
 - [ ] Toolchain decisions: Astro version, pnpm, TypeScript strict config,
       formatter/linter, `pnpm check` and `pnpm build` as the standard checks,
       GitHub Actions on PRs, license audit approach, the nginx reference
