@@ -14,7 +14,9 @@
     "check": "ASTRO_TELEMETRY_DISABLED=1 astro check && prettier --check . && node scripts/check-licenses.ts && node --test tests/*.test.ts",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/check-output.ts",
     "format": "prettier --write .",
-    "test": "node --test tests/*.test.ts"
+    "test": "node --test tests/*.test.ts",
+    "deploy": "bash scripts/deploy.sh",
+    "test:nginx": "python3 -B tests/nginx_fixtures.py"
   },
   "dependencies": {
     "@astrojs/mdx": "8.0.1",

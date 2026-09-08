@@ -2,7 +2,8 @@
 
 > **Status: M1.1–M1.3 implemented (2026-09-08).** The routes, collections,
 > accepted Field notes shell and CSP browser checks are complete. Delivery
-> tooling and owner launch remain M1.4. The evidence below
+> tooling and local nginx/retirement tests are complete; owner launch remains
+> pending in M1.4. The evidence below
 > records earlier spikes, not completion of those later implementation steps.
 
 The tested version pins, check commands, license exceptions, and delivery
@@ -375,9 +376,9 @@ on failure:
    print the commit being deployed.
 2. `pnpm install --frozen-lockfile`, then `pnpm check`, then `pnpm build`.
    Never publish output from a failed build.
-3. `rsync -az --delete --dry-run --itemize-changes dist/ plex:/var/www/devstack.fyi/`
-   with the protect filter below, and show the summary (files added, changed,
-   deleted), plus the proposed ledger changes and expired-asset deletions
+3. Preview both rsync transfers with `--dry-run --itemize-changes`, checksum
+   comparison and normalized public permissions, using the protect/hide
+   filters below. Show files added, changed and deleted, plus the proposed ledger changes and expired-asset deletions
    from step 5, computed without mutating the server. `--dry-run` as a script
    flag stops here. A connection failure
    fails loudly with a pointer to the `Host plex` requirement (see below).
@@ -395,8 +396,10 @@ on failure:
    paths from the ledger after successful deletion. The ledger lives in the deploy
    user's home on plex, outside the docroot, so it is neither served nor in
    the repository. The protect filter in steps 3 and 4 is
-   `--filter='protect /_astro/**'` so `--delete` never removes a hashed asset
-   itself; only step 5 does, by date.
+   `--filter='P /_astro/***'` (receiver protection) plus
+   `--filter='H /_astro/***'` (sender hiding) on the second transfer. This
+   includes the asset directory itself and all descendants; only step 5
+   deletes retired assets, by date.
 
 The grace period starts at retirement, not at the file's mtime, which is why
 a ledger is needed (D-012). D-016 sets seven full days (604800 seconds).

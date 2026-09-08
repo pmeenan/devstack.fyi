@@ -107,7 +107,7 @@ contracts; the scopes and exit criteria here determine the work order.
 No load-bearing choices change in this rewrite.
 
 Work in order, one implementation step or content pass per task unless the
-owner asks for a larger unit. M0 is approved and M1.1–M1.3 are complete; **next is M1.4**. Each
+owner asks for a larger unit. M0 is approved and M1.1–M1.3 are complete; **M1.4 implementation is ready; owner launch is pending**. Each
 handoff includes the working-tree changes and relevant verification; the
 human commits. All implementation steps require `pnpm check` and
 `pnpm build` once available. Temporary fixtures and browser output stay
@@ -227,30 +227,30 @@ design routes excluded from the sitemap. Phone captures prompted wider
 product-table columns inside the scroll region. Fictional fixtures remain
 outside the repository. nginx behavior and owner publication remain M1.4.
 
-### M1.4 — Delivery contract and owner launch
+### M1.4 — Delivery contract and owner launch `in progress`
 
-- [ ] Implement `scripts/deploy.sh` and its helper, following toolchain.md:
+- [x] Implement `scripts/deploy.sh` and its helper, following toolchain.md:
       frozen install/check/build before transfer, fixed target, default dirty
       tree refusal and confirmation (`--yes` to skip confirmation), read-only
       dry-run, remote locking, assets before HTML, protected old assets, and
       seven-day retirement tracked atomically outside the docroot. Confirm
       remote runtime availability with read-only checks before selecting a
       helper dependency.
-- [ ] Add `pnpm run deploy` as the package-script wrapper for `scripts/deploy.sh`,
+- [x] Add `pnpm run deploy` as the package-script wrapper for `scripts/deploy.sh`,
       forwarding arguments so `pnpm run deploy --dry-run` previews the operation
       and `pnpm run deploy --yes` uses the script's confirmation bypass. Document
       these human-run commands in the README and verify argument forwarding
       through the local fixture harness. Add the wrapper with the tested
       script, not as a placeholder before M1.4. Use the explicit `run` form:
       bare `pnpm deploy` is pnpm's built-in workspace packaging command.
-- [ ] Verify deployment and cleanup using temporary local fixtures covering
+- [x] Verify deployment and cleanup using temporary local fixtures covering
       first retirement, unexpired/expired assets, rollback/reactivation and
       second retirement, transfer failure, missing/corrupt state, unsafe paths
       and symlinks, lock contention, and stale previews. Verify a dry-run
       changes neither files nor ledger. Agents never run the deploy script;
       exercise the transfer/cleanup implementation through a local fixture
       harness, as required by toolchain.md.
-- [ ] Prepare `deploy/nginx/devstack.fyi.conf` preserving TLS/certbot and
+- [x] Prepare `deploy/nginx/devstack.fyi.conf` preserving TLS/certbot and
       unrelated headers, with real 404 routing, immutable assets, five-minute
       default TTL, apex redirects, and the approved CSP. Validate it with
       local nginx for successful pages/assets, slash and host redirects,
@@ -260,6 +260,21 @@ outside the repository. nginx behavior and owner publication remain M1.4.
 - [ ] **Owner:** review and commit the shell, install/test/reload the vhost on
       plex, inspect the deploy dry-run, and deploy. Check the public routes,
       redirects, headers, theme and copy interactions; record the outcome.
+
+**Verified 2026-09-08:** read-only plex checks confirmed Python 3.12.3,
+rsync 3.2.7, the current vhost and TLS includes. `pnpm check` and `pnpm build`
+pass. Nine local Python fixture cases exercise real rsync transfers and the
+remote helper protocol, seven-day retirement/reactivation, failures before
+cleanup and during ledger/deletion, missing/corrupt ledgers, unsafe paths and
+symlinked parents, locks, stale previews, read-only dry runs, and package-script
+argument forwarding. They never execute the production deploy entry point or
+contact plex. A locally extracted nginx 1.24.0 validates the actual reference
+with temporary paths/ports/certificate: 200/304 pages and assets, trailing-slash
+and HTTP/HTTPS host redirects, custom 404 bodies, CSP inheritance, single cache
+headers, and `no-store` on 403/404/405. The reference uses directives supported
+by both this local nginx and plex's 1.31.5. README has exact owner commands.
+No server files were changed; no deploy script was run. **Implementation ready;
+owner launch pending.** M2 starts after the owner launch gate above.
 
 **M1 exit:** the M1.2 style guide is owner-accepted, M1.1–M1.4
 implementation checks pass and the owner has launched and checked the shell at `https://devstack.fyi/`. Until the owner performs

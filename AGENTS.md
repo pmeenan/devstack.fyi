@@ -59,7 +59,7 @@ affected docs. Until then, these govern.
 | `docs/`              | Vision, plan, architecture, decisions, features, toolchain and license evidence |
 | `LICENSE`            | Apache-2.0 (font notices retained separately)                                   |
 
-The deploy script and reference nginx configuration land in M1.4.
+The manual deploy entry point is `scripts/deploy.sh`; `deploy/nginx/` holds the owner-installed vhost reference.
 
 ## Doc map — pull what the task needs, not everything
 
@@ -118,6 +118,6 @@ build → commit loop, on-demand reviews, and the human commit gate.
 **M0 complete** — the owner approved the plan on 2026-09-08. **M1 in progress:**
 M1.1 is complete: Astro/content foundation, frozen toolchain, license/output
 checks and PR workflow; local install/check/build and fixture tests pass. M1.2 is complete: the owner approved both themes and the
-[style guide](docs/style-guide.md) on 2026-09-08. M1.3 is complete: the responsive shell, theme/copy interactions, metadata, and CSP browser checks pass. M1.4 (delivery tooling) is next. Cloudflare remains an introductory
-draft; research is M2. Deploy/server work is M1.4 and remains human-run. See
+[style guide](docs/style-guide.md) on 2026-09-08. M1.3 is complete: the responsive shell, theme/copy interactions, metadata, and CSP browser checks pass. M1.4 delivery tooling and local fixtures are complete; owner vhost installation and launch are pending. Cloudflare remains an introductory
+draft; research is M2. Deployment and server changes remain human-run. See
 [docs/plan.md](docs/plan.md) and the README for commands and verification.

@@ -3,9 +3,8 @@
 **M0 contract, verified 2026-09-08; D-016.** The build and browser spike
 passes. The owner approved the named build-tool license exceptions; the full
 nginx CSP was approved by the owner on 2026-09-08 (question 10 answered).
-M1.1 implements the toolchain and content foundation. The remaining shell,
-real-header browser checks and delivery work follow in M1.2–M1.4; no server
-changes have been made. Exact license evidence is in
+M1.1–M1.4 implementation and local checks are complete. Owner nginx
+installation and launch remain pending; no server changes have been made. Exact license evidence is in
 [dependency-licenses.md](dependency-licenses.md).
 
 ## Versions and local setup
@@ -242,3 +241,41 @@ Prettier's Astro formatter needed a second write for adjacent custom elements
 in compact markup; the following `--check` passed (RE-007). The complete
 installed-license report exposed the D-002 conflict above (RE-006). No build
 outputs, scratch dependencies, or browser profiles were added to this repo.
+
+## M1.4 implementation evidence (2026-09-08)
+
+`scripts/deploy.sh` is the human-run package-script entry; `deploy.py` handles
+local checks, a frozen build snapshot, rsync ordering and confirmation.
+`deploy_remote.py` uses only Python's standard library and is sent over SSH
+without installation. Read-only checks confirmed Python 3.12.3, rsync 3.2.7,
+and the current nginx/Certbot source on plex before selecting this runtime.
+
+The helper holds an exclusive nonblocking `flock` on the existing docroot
+inode, opened read-only. This avoids creating state during even the first dry
+run. The docroot must not be replaced while this workflow is in use. The lock
+covers inventory, confirmation, both transfers and cleanup; connection EOF
+releases it. The snapshot fingerprints file content/metadata and raw ledger
+bytes, and is rechecked before transfer. Asset paths travel as JSON, never
+shell code. Cleanup traverses directory descriptors with `O_NOFOLLOW` and
+unlinks only regular asset files; each successful deletion is reflected in an
+atomic ledger save. The source manifest includes SHA-256 digests verified
+against the uploaded files before any ledger mutation.
+
+`tests/deploy_fixtures.py`, included in `pnpm check` through the Node test
+wrapper, uses temporary directories, real local rsync and the same Python
+protocol. It covers retirement/rollback, transfer and cleanup failures,
+missing/corrupt state, paths/symlinks, stale snapshots, locks and read-only
+previews. A separate minimal package verifies `pnpm run deploy --dry-run` and
+`--yes` forwarding to a harmless argument recorder. Neither test runs the
+production deploy entry point or uses SSH.
+
+`pnpm run test:nginx` validates the reference with a local nginx binary and
+OpenSSL, changing only paths, ports and certificate configuration in a
+throwaway copy. A locally extracted Ubuntu nginx 1.24.0 passed the routing,
+cache and CSP suite, including 200/304, slash/host redirects, missing assets,
+and uncached 403/404/405 responses. These directives also work on plex's
+1.31.5; the owner must still run `nginx -t` on the complete live configuration.
+The nginx [header documentation](https://nginx.org/en/docs/http/ngx_http_headers_module.html)
+and rsync [manual](https://download.samba.org/pub/rsync/rsync.1) were rechecked
+for inheritance, status filtering, and receiver protect/sender hide filters.
+No additional Node dependencies or shipped assets were added.
