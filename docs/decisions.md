@@ -25,6 +25,44 @@ Decision / Context / Consequences / Reopen if
 
 ---
 
+## D-014: Products are one YAML record each in a co-located data collection; limits are a tier-by-metric table; the directory name is the slug  (2026-09-08, status: accepted)
+
+**Decision.** Each documented product is its own YAML file at
+`services/<slug>/content/products/<product>.yaml`, loaded as a `products`
+data collection with the same `glob()` base as the service pages. The
+D-013 limits sub-record is a table: an ordered `tiers` list (the product's
+own plan set) and `metrics` rows whose `values` are keyed by tier id, with
+every tier required on every row. There is no `slug` frontmatter field and
+no `service` field on products: the service directory name is the URL
+segment, and a product belongs to the directory it sits in. The full schema
+is [content-schema.md](content-schema.md).
+
+**Context.** D-010 left "typed data collection or typed frontmatter array"
+to the schema draft. Cloudflare alone has about two dozen products in scope
+(answered question 8), each with sources, dates, local-dev options, and a
+limits table; as a frontmatter array that is several hundred lines of YAML
+above the prose, so every product edit churns one large file and "edit this
+page" cannot point at a single product. One file per product keeps a
+contribution to one small reviewable file, lets agents research one product
+per pass, and gives the M4 cross-service index a collection to query. For
+limits, per-tier lists of metrics were rejected because they invite metric
+names that drift between tiers; keying by tier id with a completeness check
+yields one clean comparison table per product. A separate `slug` field can
+disagree with the directory; the directory cannot disagree with itself.
+Verified 2026-09-08 with a throwaway build (see the schema doc): the glob
+loader reads YAML data entries, and the completeness checks fail the build
+with field-level messages.
+
+**Consequences.** Adding a product is adding one YAML file and, if it needs
+a new group, one line in the service frontmatter. Renaming a service means
+renaming its directory (a URL change, load-bearing per workflow.md). The
+schema doc, not this entry, is the field reference; required fields there
+are the contract with the shell.
+
+**Reopen if.** Contributors consistently fight one-file-per-product, or a
+vendor publishes limits in a shape that a tier-by-metric table cannot
+express (for example limits that depend on two plan axes).
+
 ## D-013: Plan-tier usage limits are core content; prices are not  (2026-09-08, status: accepted)
 
 **Decision.** Every documented product carries its usage limits per plan

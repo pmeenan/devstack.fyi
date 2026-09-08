@@ -40,21 +40,21 @@ to validate is the mechanism, not the intent.
   | `src/components/` | UI pieces; `diagrams/` for the SVG component library |
   | `src/styles/` | Design tokens (colors per theme, neon accents), base styles |
   | `src/content.config.ts` | Collection definitions and schemas |
-  | `services/<slug>/` | Per-service working docs (`AGENTS.md`, `README.md`, `docs/`) beside the service's rendered MDX in `content/` (open question 2, answered by the spike below) |
+  | `services/<slug>/` | Per-service working docs (`AGENTS.md`, `README.md`, `docs/`) beside the rendered content in `content/`: `index.mdx` (the service page), `products/*.yaml` (one record per product), optional `<page>/index.mdx` sub-pages (open question 2, answered by the spike below; layout in [content-schema.md](content-schema.md)) |
   | `scripts/deploy.sh` | Build + rsync to plex |
   | `public/` | Static assets copied verbatim (favicons, robots.txt) |
 
-- **Content model (D-010, hybrid).** A `services` collection where each
-  entry has frontmatter at least: `title`, `slug`, `category`, `summary`,
-  `status` (draft/reviewed; "stale" is derived, never authored), `sources[]`
-  (URL + optional title), `lastVerified` (date). Products are structured
-  records — name, capability, local-development equivalent, sources,
-  lastVerified, and a `limits` sub-record (tier set, one entry per tier,
-  pricing/limits URL, its own lastVerified; D-013) — kept in a data collection (or a typed frontmatter array;
-  the schema draft decides) and rendered into tables and diagrams. The
-  service-wide notes are free MDX prose. Stale flagging (D-011) compares
-  every `lastVerified` against a 180-day threshold at build time, warns, and
-  drives the badge.
+- **Content model (D-010, hybrid; drafted in
+  [content-schema.md](content-schema.md), D-014).** Three collections loaded
+  from `services/`: `services` (frontmatter `title`, `website`, `category`,
+  `summary`, `status` draft/reviewed, `groups`, `sources[]`, `lastVerified`;
+  the MDX body is the service-wide prose), `pages` (optional sub-pages), and
+  `products` (one YAML record per product: `name`, `aliases`, `group`,
+  `docs`, `capability`, `localDev[]`, `limits`, `sources`, `lastVerified`).
+  The `limits` sub-record is a tier-by-metric table with its own source and
+  date (D-013). The directory name is the slug; "stale" is derived, never
+  authored. Stale flagging (D-011) compares every `lastVerified` against a
+  180-day threshold at build time, warns, and drives the badge.
 - **Categories.** A fixed enum in the schema (D-010) with a display name and
   sort order per value. Initial values: Cloud Providers (and CDN), Databases,
   Event Buses and Queues.
@@ -144,6 +144,13 @@ relative import path is the authoring wart; a tsconfig `paths` alias
 (`@components/*` → `src/components/*`) was verified to work inside MDX with
 both `astro build` and `astro check`, so contributors write
 `import Diagram from '@components/Diagram.astro'`.
+
+**Schema draft (same day, same toolchain).** The spike project was extended
+to verify the three-collection schema in
+[content-schema.md](content-schema.md): YAML product records via `glob()`,
+zod 4 (`astro/zod`; the `astro:content` `z` export is deprecated in Astro 7
+and removed in 8), a clean `astro check`, and build failures with
+field-level messages for bad records. Details in that doc.
 
 **Toolchain findings that will bite in M1** (details in
 [rough-edges.md](rough-edges.md)): `typescript@latest` now resolves to

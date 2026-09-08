@@ -45,7 +45,7 @@ Status legend: `confirmed` · `proposed` · `rejected (D-NNN or triage date)`
 | Every service page cites official sources and carries a last-verified date | confirmed | D-006. Agents research from current vendor docs; owner reviews. |
 | Interactive diagrams as hand-authored SVG/Astro components | confirmed | D-007. Theme-aware; hover/click interaction as enhancement. |
 | Per-service working docs separate from user-facing content (AGENTS.md, README.md, docs/) | confirmed | D-008. Used by agents to research and map the service; never rendered. |
-| Structured product entries (capability, local equivalent, sources, verified date) rendered into tables | confirmed | D-010, the hybrid content model. Schema draft is an M0 plan item. |
+| Structured product entries (capability, local equivalent, sources, verified date) rendered into tables | confirmed | D-010, the hybrid content model. Schema drafted 2026-09-08 (D-014, [content-schema.md](content-schema.md)): one YAML record per product. |
 | Usage limits per product's applicable plan tiers with a link to the official pricing/limits page | confirmed | D-013, added by the owner after triage on 2026-09-08. Limits, not prices; each limits block carries its own source and last-verified date. Target M2 with the first product entries. |
 | Coverage/status badge per service on the catalog card | confirmed | Triage 2026-09-08, target M1 (schema field and badge) with the stale state added in the same milestone as stale flagging. Signals "draft" vs "reviewed" vs "stale". |
 | Stale-content flagging (build warning and visible badge when last-verified exceeds a threshold) | confirmed | D-011: 180 days, warn and badge, never fails the build. Target M2 alongside the first dated content. |
@@ -111,7 +111,8 @@ Numbering is stable because plan.md and architecture.md refer to it.
    2026-09-08 (content-layer spike section of architecture.md); the owner can
    still veto in the architecture draft, but nothing technical blocks it.
 - **1. Content model** → hybrid: structured product entries plus MDX prose.
-   See D-010. The collection schema draft is a remaining M0 plan item.
+   See D-010. The collection schema was drafted 2026-09-08
+   ([content-schema.md](content-schema.md), D-014).
 - **4. Initial category taxonomy** → a fixed enum in the schema (D-010)
    starting with three values: **Cloud Providers (and CDN)** (Cloudflare's
    home), **Databases**, and **Event Buses and Queues**. "Auth and Identity"

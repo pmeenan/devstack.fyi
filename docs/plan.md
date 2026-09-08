@@ -43,11 +43,16 @@ needs evidence.
       `/_astro/` immutable cache rule (D-012), the SPA `try_files` fallback
       that must become `=404;` + `error_page` for a real 404 page, and the
       strict CSP header (open question 10, RE-004).
-- [ ] Draft the content collection schema for the hybrid model (D-010):
+- [x] Draft the content collection schema for the hybrid model (D-010):
       services entry with category enum, status, sources, last-verified;
       structured product entries with capability, local equivalent, sources,
       last-verified, and a per-tier limits sub-record with its own source and
-      date (D-013). The model itself is decided (open question 1).
+      date (D-013). Done 2026-09-08: [content-schema.md](content-schema.md)
+      (three collections: `services`, `pages`, `products`; one YAML file per
+      product, tier-by-metric limits table, directory name as slug; D-014),
+      verified with a throwaway build (`astro check` clean, bad records fail
+      the build with field messages). Two owner points are listed at the end
+      of that doc; the code lands with the M1 scaffold.
 - [ ] Decide the diagram interactivity mechanism (open question 3).
 - [ ] First full draft of [architecture.md](architecture.md).
 - [ ] Toolchain decisions: Astro version, pnpm, TypeScript strict config,

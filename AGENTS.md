@@ -71,6 +71,7 @@ build → commit loop, on-demand reviews, and the human commit gate.
 | [docs/architecture.md](docs/architecture.md) | Site structure, content model, theming and deploy shape |
 | [docs/decisions.md](docs/decisions.md) | Settled choices (D-NNN). Scan headings; read only the entries your task touches |
 | [docs/rough-edges.md](docs/rough-edges.md) | Findings log (RE-NNN). Grep before adding a finding or debugging weirdness |
+| [docs/content-schema.md](docs/content-schema.md) | Adding or changing service pages, product records, limits, or the collections that load them |
 | `services/<slug>/AGENTS.md` | Working in a specific service's content — read it first (lands in M1/M2) |
 
 ## Rules for all agents
@@ -115,7 +116,8 @@ proposed rows settled, content model D-010, stale policy D-011, cache policy
 D-012). The Astro content-layer spike is done (2026-09-08; co-located
 `services/<slug>/content/` layout confirmed, Astro 7.3). The plex server check is done (2026-09-08; nginx vhost read over ssh:
 docroot empty, questions 5 and 9 answered, new CSP question 10 plus two M1
-owner-side vhost fixes). Remaining M0 items: schema draft, diagram
+owner-side vhost fixes). The content schema draft is done (2026-09-08;
+D-014, docs/content-schema.md). Remaining M0 items: diagram
 mechanism, architecture draft, toolchain decisions, ladder rewrite. See [docs/plan.md](docs/plan.md). No application code exists
 yet; the Astro scaffolding is M1. Keep this paragraph short and current when
 plan.md milestone status changes (rule 4).
