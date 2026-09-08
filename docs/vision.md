@@ -11,7 +11,7 @@ people who have shipped on the service and is usually passed along in chat.
 
 devstack.fyi writes it down. It is a static site of developer-to-developer
 implementation notes, one section per service, organized so a developer new to
-a service can answer three questions fast:
+a service can answer four questions fast:
 
 1. **What is each product, really?** A map from the vendor's product and
    feature names to the underlying capability (the thing you would search for
@@ -22,6 +22,9 @@ a service can answer three questions fast:
 3. **What must I configure service-wide?** The cross-cutting settings and
    gotchas — for Cloudflare, things like strict origin TLS and the cache rules
    needed for standards-compliant origin caching.
+4. **Will it fit my plan?** The usage limits of each product per applicable
+   plan tier, with a link to the official pricing
+   page, so a stack can be sized before it is built.
 
 The landing page is a catalog grouped by offering category ("Cloud Providers
 (and CDN)", "Databases", "Event Buses", ...); each service has its own path.
@@ -45,7 +48,8 @@ themes, neon-accented interactive diagrams, and a lighthearted tone.
 
 - A developer who has never used Cloudflare can, from `/cloudflare/` alone,
   name the capability behind each documented product, pick a local-development
-  stand-in for it, and find the service-wide settings the notes recommend.
+  stand-in for it, see its limits on each plan tier, and find the
+  service-wide settings the notes recommend.
 - Every service page states the official sources it was built from and a
   last-verified date, and a reader can tell from the page how stale it may be.
 - The published site is entirely static files: it serves correctly from a
@@ -56,19 +60,21 @@ themes, neon-accented interactive diagrams, and a lighthearted tone.
   readable with JavaScript disabled (interaction is an enhancement).
 - Adding a second service in a different category requires no changes to the
   site shell, only new content and, if needed, new diagram components.
-- No analytics, telemetry, cookies, or tracking (D-005). Eliminating all
-  third-party asset requests is separately proposed in features.md and awaits
-  M0 triage.
+- No analytics, telemetry, cookies, or tracking (D-005), and no third-party
+  asset requests at all: fonts and scripts are self-hosted (triage
+  2026-09-08).
 
 ## Non-goals
 
 - **Not a mirror of vendor docs.** The site links to official documentation
   for exhaustive reference; it does not reproduce it. Reason: it would rot
   instantly and add nothing.
-- **Not a pricing or vendor comparison site.** Prices and plan tiers change
-  too often to maintain and invite marketing disputes. Capability equivalence
-  across vendors may come later (see the proposed cross-service index in
-  [features.md](features.md)), pricing will not.
+- **Not a pricing or vendor comparison site.** Prices change too often to
+  maintain and invite marketing disputes; the site links to official pricing
+  pages instead. Usage *limits* per plan tier are in scope (D-013) because
+  they decide whether a design works at all. Capability equivalence across
+  vendors may come later (see the cross-service index, planned for M4 or
+  later, in [features.md](features.md)), pricing will not.
 - **No server-side runtime, ever.** No comments system, accounts, forms that
   post anywhere, or serverless functions. Reason: the "no running server"
   constraint is the point of the hosting model.

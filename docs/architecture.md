@@ -27,8 +27,9 @@
 
 ## Expected shape (to be validated in the M0 draft)
 
-Where a bullet below leans on a `proposed` features.md row, it is a design
-assumption to confirm during feature triage, not settled scope.
+The 2026-09-08 feature triage settled the scope these bullets lean on
+(D-010 content model, D-011 stale policy, D-012 cache policy); what remains
+to validate is the mechanism, not the intent.
 
 - **Repository layout (candidate):**
 
@@ -43,15 +44,20 @@ assumption to confirm during feature triage, not settled scope.
   | `scripts/deploy.sh` | Build + rsync to plex |
   | `public/` | Static assets copied verbatim (favicons, robots.txt) |
 
-- **Content model.** A `services` collection where each entry has frontmatter
-  at least: `title`, `slug`, `category`, `summary`, `status`
-  (draft/reviewed), `sources[]` (URL + optional title), `lastVerified`
-  (date). Whether products are structured records inside the entry or
-  free-form MDX sections is open question 1; the structured-entries row is
-  `proposed`.
-- **Categories.** Either a fixed enum in the schema (safer: typos fail the
-  build) or a separate `categories` collection with display order and blurb.
-  The initial list comes from the owner (open question 4).
+- **Content model (D-010, hybrid).** A `services` collection where each
+  entry has frontmatter at least: `title`, `slug`, `category`, `summary`,
+  `status` (draft/reviewed; "stale" is derived, never authored), `sources[]`
+  (URL + optional title), `lastVerified` (date). Products are structured
+  records — name, capability, local-development equivalent, sources,
+  lastVerified, and a `limits` sub-record (tier set, one entry per tier,
+  pricing/limits URL, its own lastVerified; D-013) — kept in a data collection (or a typed frontmatter array;
+  the schema draft decides) and rendered into tables and diagrams. The
+  service-wide notes are free MDX prose. Stale flagging (D-011) compares
+  every `lastVerified` against a 180-day threshold at build time, warns, and
+  drives the badge.
+- **Categories.** A fixed enum in the schema (D-010) with a display name and
+  sort order per value. Initial values: Cloud Providers (and CDN), Databases,
+  Event Buses and Queues.
 - **Theming.** CSS custom properties for every color; `data-theme` on
   `<html>` set by a tiny inline script before first paint from
   `localStorage` falling back to `prefers-color-scheme`; a toggle in the
@@ -62,23 +68,30 @@ assumption to confirm during feature triage, not settled scope.
   without JavaScript.
 - **Deploy script.** `pnpm install --frozen-lockfile`, `pnpm build`, then
   `rsync -az --delete dist/ plex:/var/www/devstack.fyi/`, with a dry-run
-  first (proposed) and an optional Cloudflare purge (proposed, open
-  question 7). Stop before rsync if installation or the build fails; never
-  publish stale or partial output from a failed build. Long cache TTLs apply
-  only to content-hashed asset URLs. Files in `public/` are copied unchanged,
-  so HTML and unversioned assets need revalidation or an explicit cache policy.
-  Verified 2026-09-08 against the official
+  first. No Cloudflare purge step (D-012). Stop before rsync if installation
+  or the build fails; never publish stale or partial output from a failed
+  build. Cache policy per D-012: long immutable TTLs only for content-hashed
+  asset URLs; short TTL for HTML and for files copied unchanged from
+  `public/`; previous deploys' hashed assets are protected from `--delete`
+  for a grace period so cached HTML keeps resolving. Where the
+  `Cache-Control` headers are set depends on the plex server type (open
+  question 5). The devstack.fyi Cloudflare zone honors origin cache headers
+  and uses strict origin TLS (owner, 2026-09-08), so origin headers are the
+  whole cache policy. `public/` copy behavior verified 2026-09-08 against the
+  official
   [Astro project structure docs](https://docs.astro.build/en/basics/project-structure/#public).
 - **URLs.** One directory per service (`/cloudflare/index.html`), with
   sub-pages allowed under it (`/cloudflare/local-dev/`). Trailing-slash policy
   is open question 5.
 - **Contribution surface.** "Edit this page" links point at the MDX source
-  on GitHub; a build check on pull requests is `proposed`.
+  on GitHub; GitHub Actions runs `pnpm check` and `pnpm build` on pull
+  requests (no deploy).
 
 ## Open architecture questions
 
-See the numbered list in [features.md](features.md#open-questions-answer-during-m0);
-questions 1, 2, 3, and 5 are the architecture-blocking ones. Purely technical
+See the question list in [features.md](features.md#open-questions);
+questions 2, 3, and 5 are the architecture-blocking ones still open
+(question 1 was answered by D-010). Purely technical
 additions:
 
 - Does Astro's MDX pipeline let a diagram component be used inside service

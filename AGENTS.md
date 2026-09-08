@@ -2,8 +2,8 @@
 
 devstack.fyi is a public static site of practical, developer-written notes on
 cloud services: what each product name actually gives you, what to use as a
-local-development equivalent, and the service-wide configuration gotchas that
-official docs bury. The landing page is a catalog grouped by offering category
+local-development equivalent, its usage limits per plan tier, and the
+service-wide configuration gotchas that official docs bury. The landing page is a catalog grouped by offering category
 (cloud providers and CDNs, databases, event buses, ...); each service gets its
 own path (`devstack.fyi/cloudflare` is first). It is built with Astro, deployed
 by rsync to a self-hosted Linux server, and accepts outside contributions on
@@ -110,8 +110,10 @@ build → commit loop, on-demand reviews, and the human commit gate.
 
 ## Current status
 
-Milestone **M0 (plan the plan)** — the full feature set, content model,
-architecture, and milestone ladder are being worked out through planning
-conversations. See [docs/plan.md](docs/plan.md). No application code exists
+Milestone **M0 (plan the plan)** — feature triage is done (2026-09-08; all
+proposed rows settled, content model D-010, stale policy D-011, cache policy
+D-012). Remaining M0 items: Astro content-layer spike, plex server check,
+schema draft, diagram mechanism, architecture draft, toolchain decisions,
+ladder rewrite. See [docs/plan.md](docs/plan.md). No application code exists
 yet; the Astro scaffolding is M1. Keep this paragraph short and current when
 plan.md milestone status changes (rule 4).

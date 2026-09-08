@@ -25,6 +25,140 @@ Decision / Context / Consequences / Reopen if
 
 ---
 
+## D-013: Plan-tier usage limits are core content; prices are not  (2026-09-08, status: accepted)
+
+**Decision.** Every documented product carries its usage limits per plan
+tier using the product's actual plan set (Free, Pro, Business where zone
+plans apply; product-specific plans otherwise; custom Enterprise limits
+are not enumerated) with a link to the vendor's official pricing or limits page.
+Limits are quotas and caps — requests, storage, CPU time, object size,
+rule counts — not prices. The site still publishes no prices and no
+cross-vendor cost comparison; the pricing link is where a reader goes for
+dollars.
+
+**Context.** Requested by the owner after the 2026-09-08 triage: limits are
+"critical for people to consider when building out the stack". The vision's
+non-goal "not a pricing or vendor comparison site" was written to keep
+fast-changing prices out; limits change too, but they decide whether a
+design works at all on a given tier, which is squarely the site's job.
+The non-goal is narrowed to prices, not deleted.
+
+**Consequences.** The product record (D-010) gains a `limits` sub-record:
+the tier set the product is priced on, one entry per tier, a source URL
+(the pricing or limits page), and its own `lastVerified`, because limits
+change on a different cadence than capability descriptions. Tier names are
+per product plan set, and a product may be priced on its own plan rather than the
+service's zone-level plan, so the schema must let a product name its tier
+set rather than hard-coding Free/Pro/Business site-wide. For example,
+[Workers uses Free and Paid plans independently of zone plans](https://developers.cloudflare.com/workers/platform/pricing/#fine-print)
+(verified 2026-09-08); verify each other product's plan set during research (D-006).
+The stale check (D-011) applies to the limits date as well. Research cost per
+product goes up: every entry needs a current limits source in addition to
+its capability source.
+
+**Reopen if.** Limits churn so fast that they are stale more often than
+not, or a vendor stops publishing limits per tier.
+
+## D-012: Cache freshness by TTL, not purge: short HTML TTL, immutable hashed assets, no purge step  (2026-09-08, status: accepted)
+
+**Decision.** After a deploy, freshness comes from cache headers rather than
+a purge. The origin on plex sends an explicit `Cache-Control` for everything
+it serves: a short `max-age` (minutes) for HTML and for files copied
+unchanged from `public/`, and `public, max-age=31536000, immutable` for
+Astro's content-hashed assets under `_astro/`. The deploy script does not
+call the Cloudflare API and no API token lives on the dev box. Hashed assets
+from superseded deploys are protected from `rsync --delete` for a grace
+period so HTML cached in browsers or at the edge keeps resolving its assets.
+
+**Context.** Chosen by the owner at the 2026-09-08 triage over an automated
+purge-everything step and over deferring the call. Checked the same day
+against Cloudflare's
+[default cache behavior](https://developers.cloudflare.com/cache/concepts/default-cache-behavior/):
+the CDN does not cache HTML by default; it caches by file extension (CSS,
+JS, fonts, images, and more); it respects origin `Cache-Control`; and for
+eligible responses without `Cache-Control` or `Expires` have default edge
+TTLs of 120 minutes for 200/206/301, 20 minutes for 302/303, and 3 minutes
+for 404/410.
+That last point is why the origin must set headers explicitly: an
+un-headed CSS or font file would otherwise be served stale for up to two
+hours after a deploy, while an un-headed HTML page would be fine. The owner
+confirms the devstack.fyi zone is configured to honor origin cache headers
+and uses strict origin TLS, so the site is itself an instance of the
+service-wide Cloudflare notes it will publish.
+
+**Consequences.** The web server on plex needs a header rule keyed on
+`/_astro/` versus everything else; how that rule is expressed (an
+`.htaccess` shipped from `public/` if Apache, a server config block if
+nginx) waits on the open-question 5 server check and is a toolchain item.
+The deploy script uses an rsync protect filter (or a fresh-directory swap)
+so `--delete` retains assets from all deploys still within the grace period.
+Cleanup must always preserve assets referenced by the current deploy; the
+grace period starts when an asset is last removed from the active deploy,
+not at its file modification time. This also covers multiple deploys within
+one HTML TTL. Choose the grace duration in the M0 toolchain draft to cover
+the HTML cache lifetime and a margin for already-open pages. A
+deploy becomes visible within the HTML `max-age`, not instantly. If a Cache
+Rule caching HTML at the edge is ever enabled in the Cloudflare dashboard,
+the origin `max-age` for HTML still bounds staleness.
+
+**Reopen if.** Instant visibility after deploy becomes a requirement, or the
+plex server cannot express per-path cache headers.
+
+## D-011: Stale-content policy: 180 days, warn and badge, never fail the build  (2026-09-08, status: accepted)
+
+**Decision.** A service page or product entry counts as stale when its
+`lastVerified` date is more than 180 days old at build time. The build prints
+a warning naming the entry, and the site shows a visible stale badge on the
+service page and on its catalog card. Staleness never fails the build, so a
+lapsed service can never block deploying an unrelated change.
+
+**Context.** Chosen by the owner at the 2026-09-08 triage from 90, 180, and
+365-day thresholds and from warn-versus-fail. Vendors rename and re-scope
+products on roughly a half-year cadence; 90 days would make re-verification
+the dominant maintenance cost, 365 would let a renamed product sit for most
+of a year. Follows from D-006 (dated claims).
+
+**Consequences.** The catalog status badge has three states: draft and
+reviewed are authored in frontmatter; stale is derived from the date and
+overrides the display of the other two. The threshold is one constant in the
+build, not per-service configuration. Re-verifying a service means an agent
+re-checks each cited source and bumps `lastVerified` per entry, so entries
+carry their own dates rather than inheriting the page's.
+
+**Reopen if.** The warning is routinely ignored and stale pages ship for
+months (then consider failing the build), or vendors in a category churn
+much faster or slower than 180 days.
+
+## D-010: Hybrid content model: structured product entries plus MDX prose; categories are a fixed enum  (2026-09-08, status: accepted)
+
+**Decision.** Each service is a content-collection entry with typed
+frontmatter (title, slug, category, summary, status, sources, lastVerified)
+and an MDX body for the service-wide notes. Each product the service page
+documents is a structured record — product name, underlying capability,
+local-development equivalent, sources, lastVerified — held in a typed data
+collection (or a typed frontmatter array; the schema draft decides which)
+and rendered into tables and diagrams by shared components. Categories are a
+fixed enum in the schema, initially Cloud Providers (and CDN), Databases,
+and Event Buses and Queues, each with a display name and sort order.
+
+**Context.** Open question 1 (content model) and open question 4 (category
+field shape), answered by the owner at the 2026-09-08 triage. Fully
+free-form MDX would make the stale check and the cross-service index
+impossible per product; fully structured content fits the opinionated
+service-wide notes poorly. The hybrid keeps the machine-checkable part
+structured and the opinionated part prose. A fixed enum stops contributors
+from creating near-duplicate categories.
+
+**Consequences.** Adding a category is a deliberate schema edit. Contributors
+add a product by adding a record, not by hand-writing a table row, which is
+the authoring constraint the owner accepted. The schema is the contract
+between content and the shell; changing its required fields is
+load-bearing. Enables D-011 stale flagging per entry and the M4+
+cross-service index. The schema draft is an M0 plan item.
+
+**Reopen if.** Contributors consistently fight the record format, or a
+service's products resist a single capability field.
+
 ## D-009: Light and dark themes with a lighthearted, neon-accented tech look  (2026-09-08, status: accepted)
 
 **Decision.** The site supports light and dark themes as equals from the
@@ -157,9 +291,9 @@ contributions, "without a lot of process overhead — deploys are still manual
 which is the main gate".
 
 **Consequences.** The docs in `docs/` are the project's long-term memory and
-must stay accurate. No mandatory review passes or CI gates are installed by
-default; a PR build check and CONTRIBUTING.md are `proposed` rows. The
-maintainer is the only person who deploys.
+must stay accurate. No mandatory review passes are installed by default.
+The 2026-09-08 triage confirmed a PR build check (M1) and CONTRIBUTING.md
+(M5); deployment remains manual. The maintainer is the only person who deploys.
 
 **Reopen if.** Contribution volume or a second maintainer makes the
 single-human gate a bottleneck, or a bad deploy shows the manual gate is not
@@ -198,11 +332,10 @@ Linux. The deploy is run manually by the human maintainer.
 **Consequences.** No feature may require a server process, serverless
 function, form handler, or database at runtime; search, feeds, and indexes
 must be built at build time. The deploy script must be safe to run from a
-clean checkout and should preview `--delete` before applying it (a `proposed`
-row). Whether `/var/www/devstack.fyi/` holds anything else is open question 9
-and must be verified before the first deploy. Cloudflare's cache means HTML
-may be served stale after a deploy unless TTLs or a purge step handle it
-(open question 7).
+clean checkout and preview `--delete` before applying it (confirmed in the
+2026-09-08 triage). Whether `/var/www/devstack.fyi/` holds anything else is
+open question 9 and must be verified before the first deploy. Cache freshness
+and hashed-asset retention follow D-012 (answered question 7).
 
 **Reopen if.** A feature genuinely needs a server (unlikely by design), or the
 hosting moves off plex.
