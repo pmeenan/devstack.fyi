@@ -53,7 +53,16 @@ needs evidence.
       verified with a throwaway build (`astro check` clean, bad records fail
       the build with field messages). Two owner points are listed at the end
       of that doc; the code lands with the M1 scaffold.
-- [ ] Decide the diagram interactivity mechanism (open question 3).
+- [x] Decide the diagram interactivity mechanism (open question 3). Done
+      2026-09-08 with a throwaway build (Astro 7.3.2, `@astrojs/preact`
+      6.0.5) driven in headless Chrome: vanilla `<script>` in Astro
+      components using custom elements, no island framework (D-015). The
+      same two-instance diagram cost zero JavaScript requests as a custom
+      element versus five files (11 kB gzipped) as Preact islands; both
+      paths work under Astro's `security.csp` policy sent as a header and
+      both break under plex's current header, and the `is:inline` theme
+      snippet is never hashed (RE-005). See the "Diagram mechanism spike"
+      section of architecture.md.
 - [ ] First full draft of [architecture.md](architecture.md).
 - [ ] Toolchain decisions: Astro version, pnpm, TypeScript strict config,
       formatter/linter, `pnpm check` and `pnpm build` as the standard checks,

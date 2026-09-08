@@ -43,7 +43,7 @@ Status legend: `confirmed` · `proposed` · `rejected (D-NNN or triage date)`
 | Service-wide notes (e.g. Cloudflare strict origin TLS, cache rules for standards-compliant origin caching) | confirmed | Human-reviewed, opinionated guidance. Free MDX prose (D-010). |
 | Cloudflare as the first documented service | confirmed | Product coverage list under answered question 8 below. |
 | Every service page cites official sources and carries a last-verified date | confirmed | D-006. Agents research from current vendor docs; owner reviews. |
-| Interactive diagrams as hand-authored SVG/Astro components | confirmed | D-007. Theme-aware; hover/click interaction as enhancement. |
+| Interactive diagrams as hand-authored SVG/Astro components | confirmed | D-007. Theme-aware; hover/click interaction as enhancement. Mechanism settled 2026-09-08 (D-015): vanilla custom-element scripts, no island framework. |
 | Per-service working docs separate from user-facing content (AGENTS.md, README.md, docs/) | confirmed | D-008. Used by agents to research and map the service; never rendered. |
 | Structured product entries (capability, local equivalent, sources, verified date) rendered into tables | confirmed | D-010, the hybrid content model. Schema drafted 2026-09-08 (D-014, [content-schema.md](content-schema.md)): one YAML record per product. |
 | Usage limits per product's applicable plan tiers with a link to the official pricing/limits page | confirmed | D-013, added by the owner after triage on 2026-09-08. Limits, not prices; each limits block carries its own source and last-verified date. Target M2 with the first product entries. |
@@ -72,22 +72,20 @@ Numbering is stable because plan.md and architecture.md refer to it.
 
 ### Still open (answer during M0)
 
-- **3. Diagram interactivity mechanism.** Vanilla `<script>` in Astro
-   components (lightest, no framework) versus an island framework (Preact,
-   Solid, Svelte) for richer state. Decides whether the site ships a
-   framework runtime at all. The 2026-09-08 spike showed the vanilla-script
-   path works without a framework runtime, with its small interaction script
-   inlined into HTML (see the content-layer spike section of
-   architecture.md); what remains is whether richer diagram state justifies
-   an island framework. → M0 architecture draft.
 - **10. Content-Security-Policy on plex.** The devstack.fyi vhost already
    sends a strict CSP header whose `script-src` has no `'unsafe-inline'`,
    nonce, or hash, so Astro's inlined scripts (theme no-flash snippet, small
    diagram scripts) would be blocked in production while working in
    `pnpm preview`. Options and a recommendation (trim the header, let
    Astro's `security.csp` emit hashes) are in the plex server check section
-   of architecture.md; RE-004. → M0 toolchain decisions; needs the owner
-   because the header lives in nginx config.
+   of architecture.md; RE-004. The 2026-09-08 diagram mechanism spike
+   replayed real builds under the current header and under Astro's own
+   policy as a header: the recommendation works for the chosen diagram
+   mechanism, but Astro never hashes the `is:inline` theme snippet (its hash
+   must be added by hand or the snippet made external; RE-005), and Shiki's
+   inline styles conflict with a hashed `style-src`, so the highlighter
+   choice belongs with this decision. → M0 toolchain decisions; needs the
+   owner because the header lives in nginx config.
 
 ### Answered (2026-09-08 triage)
 
@@ -110,6 +108,12 @@ Numbering is stable because plan.md and architecture.md refer to it.
    excluding `_`-prefixed directories explicitly. Verified by the M0 spike on
    2026-09-08 (content-layer spike section of architecture.md); the owner can
    still veto in the architecture draft, but nothing technical blocks it.
+- **3. Diagram interactivity mechanism** → vanilla `<script>` in Astro
+   components, each diagram a custom element; no island framework. See
+   D-015. Measured 2026-09-08 against a Preact-island build of the same
+   diagram (diagram mechanism spike section of architecture.md): zero
+   JavaScript requests versus five files and about 11 kB gzipped, equivalent
+   interaction.
 - **1. Content model** → hybrid: structured product entries plus MDX prose.
    See D-010. The collection schema was drafted 2026-09-08
    ([content-schema.md](content-schema.md), D-014).

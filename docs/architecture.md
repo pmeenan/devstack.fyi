@@ -62,10 +62,13 @@ to validate is the mechanism, not the intent.
   `<html>` set by a tiny inline script before first paint from
   `localStorage` falling back to `prefers-color-scheme`; a toggle in the
   header. Diagram components consume the same tokens so they invert cleanly.
-- **Diagrams.** Astro components emitting inline SVG with a shared neon
-  palette; hover/click behavior via a small vanilla `<script>` unless open
-  question 3 lands on an island framework. Static rendering must be readable
-  without JavaScript.
+- **Diagrams (D-015).** Astro components emitting inline SVG with a shared
+  neon palette; each interactive diagram is a custom element (`<ds-…>`)
+  whose behavior lives in the component's own `<script>`, which Astro
+  bundles once per page however many instances the page has. No island
+  framework ships with the site. Static rendering must be readable without
+  JavaScript: captions and labels are in the HTML, and the script only adds
+  the interactive layer. Measured in the diagram mechanism spike below.
 - **Deploy script.** `pnpm install --frozen-lockfile`, `pnpm build`, then
   `rsync -az --delete dist/ plex:/var/www/devstack.fyi/`, with a dry-run
   first. No Cloudflare purge step (D-012). Stop before rsync if installation
@@ -258,7 +261,14 @@ its verbatim contents drive the findings here.
   `<script src>`; (c) the owner adds `'unsafe-inline'` to `script-src`
   (weakest). Recommendation: (a). Whichever lands, `pnpm preview` does not
   send this header, so the run notes must say to test against the real header
-  (local nginx or a devtools override) before the first deploy.
+  (local nginx or a devtools override) before the first deploy. The diagram mechanism spike below replayed each
+  build under the real header: the current header breaks both inlined
+  scripts and island hydration. For the chosen mechanism, (a) allows the
+  processed diagram script, with the theme snippet's hash added to Astro's
+  policy (RE-005); (b) requires both the diagram script and the theme snippet
+  to be external. Adding a hash only to Astro's meta policy cannot override
+  the unchanged nginx header in (b)
+  ([multiple-policy enforcement](https://www.w3.org/TR/CSP3/#multiple-policies)).
 - **ssh / deploy route.** plex's sshd listens on **10022 only** (port 22 is
   refused). The owner's `~/.ssh/config` maps `Host plex` →
   `plex.meenan.us:10022`, and the dev key is now authorized, so a bare
@@ -268,12 +278,85 @@ its verbatim contents drive the findings here.
   new machine does not silently fail; have the dry run fail loudly on a
   connection error.
 
+## Diagram mechanism spike (2026-09-08)
+
+Verified with a second throwaway build in the session scratchpad (Astro
+7.3.2, `@astrojs/mdx` 8.0.1, `@astrojs/preact` 6.0.5, Preact 10.29.8, all
+MIT per their npm metadata; TypeScript pinned to 6.0.3 per RE-001), driven
+in headless Chrome 152 over the DevTools protocol, so the numbers and the
+click tests are observations, not estimates. The question was whether
+richer diagram state justifies an island framework (open question 3). The
+same diagram was built twice: a request-flow SVG with hover highlighting of
+a node and its edges, click/Enter/Space to pin a node and show its caption,
+Escape to clear, keyboard focus on every node, `aria-pressed` state, and a
+`prefers-reduced-motion` guard: the interaction level D-007 asks for.
+
+- **Vanilla custom element** (`<ds-diagram>` wrapping the SVG, a `<dl>` of
+  captions rendered in the HTML, a `<script>` defining the element in the
+  same `.astro` file). Two instances on one page produced 9,941 B of HTML
+  (2,846 B gzipped) and **zero JavaScript requests**: Astro bundled the
+  script once (1,247 B minified) and inlined it, `connectedCallback` ran per
+  instance, and clicking a node in the first instance left the second
+  untouched. Per-instance data reached the script through the markup itself
+  (`data-*` attributes and the rendered captions), the pattern the
+  [Astro scripts guide](https://docs.astro.build/en/guides/client-side-scripts/)
+  recommends for reusable components. The same component imported into an
+  MDX page via the `@components/*` alias behaved identically.
+- **Preact islands** (`client:visible`, the same markup as a `.tsx`
+  component). Two instances produced 12,808 B of HTML (4,310 B gzipped; the
+  props are serialized into each `<astro-island>`) plus five JavaScript
+  files totalling 25.6 kB raw / 11.1 kB gzipped (Preact 4.4 kB, signals
+  3.0 kB, hooks 1.2 kB, Astro's client renderer 1.4 kB, the component
+  1.0 kB). Interaction was equivalent once hydrated. The SVG is
+  server-rendered, so it is readable before hydration.
+- **Verdict.** The vanilla path costs nothing per page beyond the diagram's
+  own script, and the hover/pin/caption state these diagrams need is a few
+  fields on the element. An island framework buys a rendering model, not a
+  capability, at about 11 kB gzipped and five requests on every page that
+  carries a diagram. D-015 adopts the custom-element path and names the
+  condition for adding an island later.
+- **Inlining is a switch, not a property of the approach.** With
+  `vite.build.assetsInlineLimit: 0` the same component's script became an
+  external module
+  (`/_astro/Diagram.astro_astro_type_script_index_0_lang.<hash>.js`) and its
+  scoped `<style>` an external stylesheet; the page still worked. The
+  default limit (4 kB) inlines small scripts, so a page with a couple of
+  diagrams ships their behavior inside the HTML.
+- **CSP, measured against real headers** (feeds open question 10; RE-004,
+  RE-005). With `security: { csp: true }` Astro hashed the processed
+  component script and its own island hydration scripts, but **not** the
+  `is:inline` theme snippet, which also sits *before* the emitted `<meta>`
+  policy and therefore runs unchallenged in every local check. A 15-line
+  Node static server then replayed each build under a header:
+  - plex's current header (`script-src 'self' 'wasm-unsafe-eval'`) blocked
+    the inlined vanilla script *and* the island hydration scripts (the
+    islands never hydrated); only the external-script build kept working.
+  - Astro's own policy sent as a header let both the inlined vanilla script
+    and the islands work; only the theme snippet was blocked.
+  - In every case the theme snippet was blocked, and Chrome's violation
+    message prints the hash the policy needs.
+
+  So option (a) from the plex server check is confirmed feasible for the
+  chosen mechanism, with one addition: the theme snippet's hash goes in
+  `security.csp.scriptDirective.hashes`, or the snippet becomes an external
+  blocking script. The build also warns that Shiki's inline `style`
+  attributes conflict with a hashed `style-src`; the code-snippet
+  highlighter choice therefore belongs with the CSP decision in the
+  toolchain item.
+- **Authoring notes for the M3 component guide.** SVG `<marker>` and
+  gradient ids are page-global, so shared definitions must be namespaced or
+  hoisted once per page; SVG elements have no `.click()` method, which
+  matters for tests; the custom element updates the DOM synchronously on a
+  click, whereas a framework island renders asynchronously.
+
 ## Open architecture questions
 
 See the question list in [features.md](features.md#open-questions);
-questions 3 and 10 are the architecture-blocking ones still open (question 1
-was answered by D-010, question 2 by the content-layer spike above,
-questions 5 and 9 by the plex server check above). The two
-purely technical questions that rode along with the spike (diagram components
-in MDX without a framework runtime; keeping working docs out of the build)
-are answered in that section.
+question 10 (CSP) is the only architecture-blocking one still open, and the
+diagram mechanism spike above measured its options against real headers
+(question 1 was answered by D-010, question 2 by the content-layer spike,
+question 3 by the diagram mechanism spike and D-015, questions 5 and 9 by
+the plex server check). The two purely technical questions that rode along
+with the content-layer spike (diagram components in MDX without a framework
+runtime; keeping working docs out of the build) are answered in that
+section.

@@ -24,6 +24,14 @@ Newest first. RE-numbers are never reused.
 
 ---
 
+## RE-005: Astro's `security.csp` does not hash `is:inline` scripts, and its meta tag lands after them  (2026-09-08, status: worked-around)
+Environment: Astro 7.3.2, `security: { csp: true }`, static build; headless Chrome 152 driven over the DevTools protocol.
+Repro: a page with an `is:inline` theme script as the first child of `<head>` plus a processed component `<script>`; build; hash every inline script body and compare with the emitted `<meta http-equiv="content-security-policy">`; then serve the same HTML with that policy copied into a `Content-Security-Policy` header.
+Observed: the processed component script and Astro's own island hydration scripts are hashed; the `is:inline` script is not. The meta tag is emitted after the `is:inline` script in `<head>`, and a meta policy only governs content parsed after it, so `pnpm preview` and a browser run of the built HTML execute the script with no violation. The same policy sent as a header blocks it ("Executing inline script violates the following Content Security Policy directive 'script-src ...'").
+Expected: either a hash for every inline script the build emits, or a warning that `is:inline` scripts are unhashed.
+Impact: the theme no-flash snippet passes every local check and fails only in production, exactly the gap RE-004 describes. Work-around: add the snippet's hash through `security.csp.scriptDirective.hashes` (Chrome prints the needed value in the violation message) or ship it as an external blocking `<script src>`; either way, test against a real header before the first deploy (the diagram mechanism spike in architecture.md used a 15-line Node static server that injects the header). Related: the build also warns that Shiki's inline `style` attributes are incompatible with the hashed `style-src`, which matters for the code snippets every service page will carry; that is part of the open question 10 decision.
+Links: https://docs.astro.build/en/reference/configuration-reference/#securitycsp
+
 ## RE-004: The devstack.fyi vhost on plex sends a CSP that blocks inline scripts  (2026-09-08, status: open)
 Environment: nginx 1.31.5 on plex; confirmed by reading `/etc/nginx/sites-available/devstack.fyi` over ssh (first seen over HTTP).
 Observed: a server-level `add_header Content-Security-Policy "default-src 'self' data: blob:; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" always;` with no per-`location` override, so it is inherited by every response. No nonce, hash, or `'unsafe-inline'` in `script-src`.

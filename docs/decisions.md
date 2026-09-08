@@ -25,6 +25,46 @@ Decision / Context / Consequences / Reopen if
 
 ---
 
+## D-015: Diagram interactivity is vanilla custom-element scripts; no island framework ships with the site  (2026-09-08, status: accepted)
+
+**Decision.** Interactive diagrams (D-007) are Astro components whose SVG is
+wrapped in a custom element (`<ds-…>`) defined by the component's own
+`<script>`; state lives on the element, per-instance data travels through
+the rendered markup (`data-*` attributes, captions in the HTML), and the
+static rendering is complete without JavaScript. The site ships no UI
+framework runtime and no `client:*` islands. Adding an island framework is a
+per-diagram escalation, not a default: it requires a specific diagram whose
+state a custom element demonstrably cannot carry, an owner sign-off, and a
+new decision entry.
+
+**Context.** Open question 3. Measured 2026-09-08 with a throwaway build
+(diagram mechanism spike in [architecture.md](architecture.md)): the same
+hover/pin/caption diagram, twice on one page, cost zero JavaScript requests
+as a custom element (one 1.2 kB script, bundled once, inlined) versus five
+files and about 11 kB gzipped as Preact islands, with equivalent behavior
+once hydrated. The diagrams this site needs (highlight a node and its edges,
+pin one, show its caption, keyboard access) are a few fields of state; an
+island framework buys a rendering model, not a capability. The vanilla path
+also has the simpler Content-Security-Policy story: Astro hashes the
+component script it processes, and the script can be made external with one
+Vite setting, whereas islands depend on inline hydration scripts that plex's
+current header blocks.
+
+**Consequences.** Every diagram is an `.astro` file with SVG, a scoped
+`<style>`, and a `<script>` that defines one custom element; the M3 diagram
+library is a set of such components plus shared SVG primitives, not a
+framework component tree. Contributors write DOM code, and the M3 component
+guide must cover the custom-element pattern, page-global SVG ids, and the
+progressive-enhancement rule (readable first, interactive second). The
+`@astrojs/preact` (or similar) integration stays out of `package.json`
+until an escalation adds it.
+
+**Reopen if.** A planned diagram needs shared state across components, a
+data-driven re-render of many nodes, or animation sequencing that a custom
+element makes painful, and the extra 11 kB per diagram page is judged worth
+it for that diagram; or Astro's own script handling changes so that inline
+component scripts stop working under the site's CSP.
+
 ## D-014: Products are one YAML record each in a co-located data collection; limits are a tier-by-metric table; the directory name is the slug  (2026-09-08, status: accepted)
 
 **Decision.** Each documented product is its own YAML file at

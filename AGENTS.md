@@ -117,7 +117,9 @@ D-012). The Astro content-layer spike is done (2026-09-08; co-located
 `services/<slug>/content/` layout confirmed, Astro 7.3). The plex server check is done (2026-09-08; nginx vhost read over ssh:
 docroot empty, questions 5 and 9 answered, new CSP question 10 plus two M1
 owner-side vhost fixes). The content schema draft is done (2026-09-08;
-D-014, docs/content-schema.md). Remaining M0 items: diagram
-mechanism, architecture draft, toolchain decisions, ladder rewrite. See [docs/plan.md](docs/plan.md). No application code exists
+D-014, docs/content-schema.md). The diagram mechanism is decided (2026-09-08;
+D-015, vanilla custom-element scripts, no island framework; RE-005 on CSP
+hashing). Remaining M0 items: architecture draft, toolchain decisions, ladder
+rewrite. See [docs/plan.md](docs/plan.md). No application code exists
 yet; the Astro scaffolding is M1. Keep this paragraph short and current when
 plan.md milestone status changes (rule 4).
