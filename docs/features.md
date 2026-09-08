@@ -72,15 +72,14 @@ Numbering is stable because plan.md and architecture.md refer to it.
 
 ### Still open (answer during M0)
 
-- **2. Where do per-service working docs and content live?** Candidate:
-   `services/<slug>/{AGENTS.md,README.md,docs/,content/}` co-located, with
-   Astro's content layer loading `services/*/content/`; alternative: content
-   under `src/content/services/` and working docs under `services/`. Needs a
-   check against current Astro content-layer capabilities. → M0 spike.
 - **3. Diagram interactivity mechanism.** Vanilla `<script>` in Astro
    components (lightest, no framework) versus an island framework (Preact,
    Solid, Svelte) for richer state. Decides whether the site ships a
-   framework runtime at all. → M0 architecture draft.
+   framework runtime at all. The 2026-09-08 spike showed the vanilla-script
+   path works without a framework runtime, with its small interaction script
+   inlined into HTML (see the content-layer spike section of
+   architecture.md); what remains is whether richer diagram state justifies
+   an island framework. → M0 architecture draft.
 - **5. URL and trailing-slash policy.** `/cloudflare/` versus `/cloudflare`,
    and how the web server on plex resolves directory indexes. Decides Astro's
    `build.format` and `trailingSlash` settings and affects every published
@@ -93,6 +92,12 @@ Numbering is stable because plan.md and architecture.md refer to it.
 
 ### Answered (2026-09-08 triage)
 
+- **2. Where do per-service working docs and content live?** → co-located:
+   `services/<slug>/{AGENTS.md,README.md,docs/,content/}`, with the content
+   layer's `glob()` loader reading `services/*/content/**/*.mdx` and
+   excluding `_`-prefixed directories explicitly. Verified by the M0 spike on
+   2026-09-08 (content-layer spike section of architecture.md); the owner can
+   still veto in the architecture draft, but nothing technical blocks it.
 - **1. Content model** → hybrid: structured product entries plus MDX prose.
    See D-010. The collection schema draft is a remaining M0 plan item.
 - **4. Initial category taxonomy** → a fixed enum in the schema (D-010)

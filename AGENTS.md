@@ -112,8 +112,9 @@ build → commit loop, on-demand reviews, and the human commit gate.
 
 Milestone **M0 (plan the plan)** — feature triage is done (2026-09-08; all
 proposed rows settled, content model D-010, stale policy D-011, cache policy
-D-012). Remaining M0 items: Astro content-layer spike, plex server check,
-schema draft, diagram mechanism, architecture draft, toolchain decisions,
-ladder rewrite. See [docs/plan.md](docs/plan.md). No application code exists
+D-012). The Astro content-layer spike is done (2026-09-08; co-located
+`services/<slug>/content/` layout confirmed, Astro 7.3). Remaining M0 items:
+plex server check, schema draft, diagram mechanism, architecture draft,
+toolchain decisions, ladder rewrite. See [docs/plan.md](docs/plan.md). No application code exists
 yet; the Astro scaffolding is M1. Keep this paragraph short and current when
 plan.md milestone status changes (rule 4).

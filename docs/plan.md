@@ -26,11 +26,11 @@ needs evidence.
 - [x] Owner supplied the initial category taxonomy and the Cloudflare product
       coverage list for the first pass (open questions 4 and 8; see the
       answered-questions section of features.md).
-- [ ] Spike: confirm against current Astro docs that the content layer can
-      load MDX from `services/*/content/` (or whichever layout wins open
-      question 2), and note the current Astro major version and MDX
-      integration status. Output: a paragraph in architecture.md with dated
-      source links.
+- [x] Spike: confirmed 2026-09-08 with a throwaway build (Astro 7.3, MDX
+      integration 8.0) that the content layer loads MDX from
+      `services/*/content/` while excluding the working docs; see the
+      "Content-layer spike" section of architecture.md. Answered open
+      question 2 (co-located layout) and logged RE-001 to RE-003.
 - [ ] Check on plex: web server type, directory-index and trailing-slash
       behavior, and whether `/var/www/devstack.fyi/` holds anything the build
       does not own (open questions 5 and 9). Output: notes in architecture.md.

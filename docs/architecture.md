@@ -40,7 +40,7 @@ to validate is the mechanism, not the intent.
   | `src/components/` | UI pieces; `diagrams/` for the SVG component library |
   | `src/styles/` | Design tokens (colors per theme, neon accents), base styles |
   | `src/content.config.ts` | Collection definitions and schemas |
-  | `services/<slug>/` | Per-service working docs and, pending open question 2, the service's MDX content |
+  | `services/<slug>/` | Per-service working docs (`AGENTS.md`, `README.md`, `docs/`) beside the service's rendered MDX in `content/` (open question 2, answered by the spike below) |
   | `scripts/deploy.sh` | Build + rsync to plex |
   | `public/` | Static assets copied verbatim (favicons, robots.txt) |
 
@@ -87,15 +87,76 @@ to validate is the mechanism, not the intent.
   on GitHub; GitHub Actions runs `pnpm check` and `pnpm build` on pull
   requests (no deploy).
 
+## Content-layer spike (2026-09-08)
+
+Verified by building a throwaway project in the session scratchpad, not from
+training knowledge. Versions: the spike ran Astro 7.3.1 and `@astrojs/mdx`
+8.0.0; the npm registry showed Astro 7.3.2 and `@astrojs/mdx` 8.0.1 as
+latest the same day (both MIT). Astro requires Node 22.12 or newer (package
+`engines`; confirmed by the
+[v6 upgrade guide](https://docs.astro.build/en/guides/upgrade-to/v6/), which
+dropped Node 18 and 20). Astro 6.0 (2026-03-10) removed the legacy
+`src/content/` collections: every collection now needs a `loader`, config
+lives in `src/content.config.ts`, and MDX is rendered with `render(entry)`
+imported from `astro:content`
+([content collections guide](https://docs.astro.build/en/guides/content-collections/)).
+Astro 7.0 (2026-06-22) switched the default Markdown processor for `.md`
+*and* `.mdx` to Sätteri; the remark/rehype pipeline is opt-in via
+`@astrojs/markdown-remark` (an optional peer dependency) and
+`markdown.processor: unified()`
+([v7 upgrade guide](https://docs.astro.build/en/guides/upgrade-to/v7/),
+[Markdown guide](https://docs.astro.build/en/guides/markdown-content/)).
+The spike used the default and needed no remark plugins; revisit only if a
+diagram or table feature demands a rehype plugin.
+
+**Co-located layout works.** A `services` collection defined as
+`glob({ pattern: ['*/content/**/*.mdx', '!_*/**'], base: './services' })`
+loaded `services/cloudflare/content/index.mdx` and
+`services/cloudflare/content/local-dev/index.mdx` with `base` pointing at a
+top-level directory outside `src/`, and the build produced
+`/cloudflare/index.html` and `/cloudflare/local-dev/index.html`. The working
+docs (`services/cloudflare/AGENTS.md`, `services/cloudflare/docs/*.md`) never
+reached `dist/` because the pattern only matches under `content/`. Two
+details the docs do not spell out
+([loader reference](https://docs.astro.build/en/reference/content-loader-reference/)):
+the default entry id includes the `content/` segment (`cloudflare/content`),
+so the collection needs a `generateId` that maps
+`<slug>/content/<path>/index.mdx` to `<slug>/<path>`; and an
+underscore-prefixed directory such as `services/_template/` is **not**
+skipped automatically (the spike rendered `/_template/` until the `!_*/**`
+negative pattern was added; the loader passes negative patterns through as
+ignores).
+
+**Diagram components in MDX ship no framework.** The MDX body imported an
+Astro component (`import Diagram from '../../../src/components/Diagram.astro'`)
+that emits inline SVG plus a vanilla `<script>`; the output was three HTML
+files and zero `.js` files, with the script inlined as a `<script
+type="module">` in the page. This answers the "framework runtime" half of
+open question 3: the vanilla-script path adds no framework runtime, but the
+interaction script still contributes HTML bytes and browser execution work.
+Zero external `.js` files is a result of this small spike, not a guarantee:
+[Astro automatically inlines sufficiently small scripts](https://docs.astro.build/en/guides/client-side-scripts/#script-processing),
+and larger scripts can produce separate assets. The
+relative import path is the authoring wart; a tsconfig `paths` alias
+(`@components/*` → `src/components/*`) was verified to work inside MDX with
+both `astro build` and `astro check`, so contributors write
+`import Diagram from '@components/Diagram.astro'`.
+
+**Toolchain findings that will bite in M1** (details in
+[rough-edges.md](rough-edges.md)): `typescript@latest` now resolves to
+7.0.2, whose native compiler lacks the API `astro check` needs, so
+TypeScript must be pinned to 6.x (6.0.3 passed `astro check` with 0 errors;
+5.9.3 also works). pnpm 12.3.4 (via corepack 0.35.0) refuses to install
+esbuild's postinstall script unless `allowBuilds` in `pnpm-workspace.yaml`
+approves it; `strictDepBuilds` defaults to true, and the old
+`onlyBuiltDependencies` key was removed in pnpm 11
+([pnpm build settings](https://pnpm.io/settings/build)).
+
 ## Open architecture questions
 
 See the question list in [features.md](features.md#open-questions);
-questions 2, 3, and 5 are the architecture-blocking ones still open
-(question 1 was answered by D-010). Purely technical
-additions:
-
-- Does Astro's MDX pipeline let a diagram component be used inside service
-  MDX without shipping a framework runtime, and what is the authoring
-  ergonomics for contributors? (Answer alongside the open question 2 spike.)
-- How are per-service working docs kept out of the build while living beside
-  the content? (Loader glob patterns versus a separate top-level directory.)
+questions 3 and 5 are the architecture-blocking ones still open (question 1
+was answered by D-010, question 2 by the content-layer spike above). The two
+purely technical questions that rode along with the spike (diagram components
+in MDX without a framework runtime; keeping working docs out of the build)
+are answered in that section.
