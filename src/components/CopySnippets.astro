@@ -1,0 +1,32 @@
+<script>
+  document.querySelectorAll<HTMLPreElement>('main pre').forEach((pre) => {
+    const code = pre.querySelector('code');
+    if (!code) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'snippet';
+    pre.before(wrapper);
+    const bar = document.createElement('div');
+    bar.className = 'snippet-bar';
+    const label = document.createElement('span');
+    label.textContent =
+      code.className.match(/language-([\w-]+)/)?.[1] ?? 'Code';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = 'Copy code';
+    const status = document.createElement('span');
+    status.setAttribute('role', 'status');
+    status.className = 'copy-status';
+    bar.append(label, status, button);
+    wrapper.append(bar, pre);
+    pre.tabIndex = 0;
+    pre.setAttribute('aria-label', `${label.textContent} snippet`);
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(code.textContent ?? '');
+        status.textContent = 'Copied!';
+      } catch {
+        status.textContent = 'Copy unavailable. Select the code to copy.';
+      }
+    });
+  });
+</script>

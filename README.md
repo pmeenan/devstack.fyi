@@ -33,8 +33,7 @@ M1.1 is complete: the static Astro foundation, a clearly marked Cloudflare
 draft, and passing local install/check/build and fixture tests. The first
 hosted PR check remains pending an actual PR.
 M1.2 is complete: the owner approved both themes and the
-[style guide](docs/style-guide.md) on 2026-09-08. M1.3, implementing the full
-shell in both themes, is next. Product research is M2; the deploy
+[style guide](docs/style-guide.md) on 2026-09-08. M1.3 is complete: the responsive catalog/service shell, product/limits rendering, theme and copy interactions, accessibility, and metadata pass local checks. M1.4 is next. Product research is M2; the deploy
 script and reference nginx configuration arrive in M1.4.
 
 ## Local development
@@ -54,9 +53,10 @@ pnpm build
 
 `pnpm dev` starts the local development server and prints its URL.
 `pnpm preview` serves the static `dist/` build locally. It does not send the
-production CSP/header policy; full browser/header validation is M1.3/M1.4.
-The current catalog and service pages remain a minimal foundation. For M1.2
-visual review, run `pnpm dev` and open `/design/compare/` (both themes),
+production CSP/header policy. M1.3 browser checks passed under the approved
+header on a temporary local server; nginx validation remains M1.4.
+The catalog and service pages use the accepted Field notes design. For the
+original M1.2 visual specimens, run `pnpm dev` and open `/design/compare/` (both themes),
 `/design/light/`, or `/design/dark/`. Narrow comparison views stack the themes;
 use the individual views for full-width review. These fictional specimens
 are development-only: `pnpm build` emits no design routes or sitemap entries.

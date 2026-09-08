@@ -1,0 +1,79 @@
+/* M1.2 accepted design. M1.3 applies these rules to the published shell. */
+@font-face {
+  font-family: Inter;
+  src: url('../assets/fonts/inter/inter-latin-wght-normal.woff2')
+    format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../assets/fonts/jetbrains-mono/jetbrains-mono-latin-wght-normal.woff2')
+    format('woff2');
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+}
+:root {
+  --bg: #f7f9fc;
+  --surface: #ffffff;
+  --soft: #edf1f7;
+  --text: #172033;
+  --muted: #526079;
+  --border: #bdc8d8;
+  --accent: #1855cc;
+  --accent-soft: #e6efff;
+  --neon: #b5f542;
+  --green: #17633d;
+  --green-soft: #e3f5e9;
+  --amber: #754600;
+  --amber-soft: #fff0ce;
+  --purple: #743bb5;
+  --purple-soft: #f1e8ff;
+  --motion: 140ms;
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  --bg: #10141e;
+  --surface: #191f2c;
+  --soft: #212a3b;
+  --text: #eef2fa;
+  --muted: #a7b4cb;
+  --border: #53627a;
+  --accent: #96baff;
+  --accent-soft: #243451;
+  --neon: #b5f542;
+  --green: #b5f542;
+  --green-soft: #283719;
+  --amber: #ffd080;
+  --amber-soft: #3e2e16;
+  --purple: #d4b0ff;
+  --purple-soft: #352747;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #10141e;
+    --surface: #191f2c;
+    --soft: #212a3b;
+    --text: #eef2fa;
+    --muted: #a7b4cb;
+    --border: #53627a;
+    --accent: #96baff;
+    --accent-soft: #243451;
+    --neon: #b5f542;
+    --green: #b5f542;
+    --green-soft: #283719;
+    --amber: #ffd080;
+    --amber-soft: #3e2e16;
+    --purple: #d4b0ff;
+    --purple-soft: #352747;
+    color-scheme: dark;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion: 0ms;
+  }
+}

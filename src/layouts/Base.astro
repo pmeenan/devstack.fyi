@@ -1,34 +1,64 @@
 ---
 import '../styles/base.css';
+import themeUrl from '../scripts/theme.js?url';
+import ThemeToggle from '@components/ThemeToggle.astro';
+import CopySnippets from '@components/CopySnippets.astro';
+import social from '../assets/social.png';
 import { editUrl, repository } from '@lib/urls';
 interface Props {
   title: string;
   summary: string;
   sourcePath?: string;
+  noindex?: boolean;
 }
-const { title, summary, sourcePath } = Astro.props;
+const { title, summary, sourcePath, noindex = false } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script is:inline src={themeUrl}></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title} · devstack.fyi</title>
     <meta name="description" content={summary} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="devstack.fyi" />
+    <meta property="og:title" content={`${title} · devstack.fyi`} />
+    <meta property="og:description" content={summary} />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)} />
+    <meta property="og:image" content={new URL(social.src, Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="devstack.fyi — Developer-to-developer implementation notes"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
   </head>
   <body>
-    <a href="#main">Skip to content</a>
-    <header>
-      <a href="/">devstack.fyi</a>
-      <a href={repository}>GitHub</a>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="wordmark" href="/"
+        ><span aria-hidden="true">[ ds ]</span> devstack<span class="domain"
+          >.fyi</span
+        ></a
+      >
+      <nav aria-label="Site">
+        <ThemeToggle />
+        <a href={repository}>GitHub</a>
+      </nav>
     </header>
-    <main id="main"><slot /></main>
-    <footer>
+    <main id="main" tabindex="-1"><slot /></main>
+    <footer class="site-footer">
       <p>Developer-to-developer implementation notes.</p>
       {sourcePath && <a href={editUrl(sourcePath)}>Edit this page</a>}
       <a href={`${repository}/blob/main/LICENSE`}>Apache-2.0</a>
     </footer>
+    <CopySnippets />
   </body>
 </html>

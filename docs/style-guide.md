@@ -1,7 +1,7 @@
 # Style guide — Field notes
 
 **Accepted, round 1 · 2026-09-08.** The owner approved both light and dark
-themes and this style guide ("Both approved"). M1.2 is complete. M1.3 applies
+themes and this style guide ("Both approved"). M1.2 is complete. M1.3 has applied
 this direction to the real shell; later design changes update the guide and
 implementation together.
 
@@ -21,7 +21,7 @@ The review source is `src/pages/design/[view].astro`, the shared specimen is
 are in `src/styles/prototype.css`. The route returns paths only in development;
 no specimen HTML or sitemap URLs enter the production build. Fictional Nimbus
 content is separate from the content collections. Dates and quotas are explicitly
-illustrative. The existing catalog and Cloudflare foundation keep their styling.
+illustrative. The catalog and Cloudflare shell now use the same accepted direction.
 
 Review the overall density, typography, neon balance, tables, and diagram in
 both themes when revising the accepted direction. Use the navigation links to inspect
@@ -37,8 +37,9 @@ with a prominent rule. Tables and code belong close to the explanations.
 
 ## Color tokens
 
-All values below match the scoped `.specimen` tokens. The production shell
-will adopt accepted tokens in M1.3; the review toolbar is separate chrome.
+All values below match the scoped `.specimen` tokens and production
+`src/styles/tokens.css`; production rules live in `src/styles/base.css`.
+The review toolbar is separate chrome.
 
 | Token           | Light     | Dark      | Use                                |
 | --------------- | --------- | --------- | ---------------------------------- |
@@ -90,8 +91,8 @@ decorative and must not be used alone to communicate interactive state.
   Numbers use tabular figures; unknown limits say “Not published.”
 - Code uses a surface-colored block, separate filename header, horizontal
   scrolling, and green strings/purple keywords/blue functions. The specimen
-  uses authored spans to review colors; production Prism and copy behavior
-  remain M1.3 work.
+  uses authored spans to review colors; production Prism uses these token colors. Copy controls show success or
+  selection instructions on failure; code stays scrollable without JavaScript.
 - Callouts use an accent left rule, tinted surface, concise heading and prose.
 - Diagrams use hand-authored SVG, surface nodes, 1.5px borders, 2px connectors,
   and real text. Hover/focus emphasizes node outlines; each node links to its
@@ -131,3 +132,15 @@ These measured pairs exceed 4.5:1. This is a prototype legibility check, not
 full shell accessibility acceptance. Persistent theme switching, real-header
 CSP tests, copy feedback, metadata, and comprehensive keyboard/storage checks
 belong to M1.3. The owner accepted both themes on 2026-09-08.
+
+## M1.3 shell verification
+
+The real shell uses these tokens with CSS system-theme fallback and a saved
+light/dark preference. The 2026-09-08 browser pass covered narrow/wide catalog,
+service, 404 and rich temporary fixtures in both themes under the approved
+CSP. Product tables preserve readable columns with a 46rem minimum; their
+labeled regions scroll independently on phones. Theme/copy controls, keyboard
+focus, blocked storage, reduced motion and JavaScript-disabled reading passed.
+The shared 1200×630 social card uses the approved typography, colors and
+wordmark; its PNG is a browser-rendered typographic asset using the existing
+licensed Inter font. Per-service generated cards remain M3.

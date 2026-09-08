@@ -1,0 +1,77 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Base from './Base.astro';
+import { CATEGORIES } from '@lib/taxonomy';
+import Sources from '@components/Sources.astro';
+import { contentPath, entryPath } from '@lib/urls';
+interface Props {
+  service: CollectionEntry<'services'>;
+  page?: CollectionEntry<'pages'>;
+  pages: CollectionEntry<'pages'>[];
+}
+const { service, page, pages } = Astro.props;
+const entry = page ?? service;
+---
+
+<Base
+  title={page
+    ? `${page.data.title} · ${service.data.title}`
+    : service.data.title}
+  summary={entry.data.summary}
+  sourcePath={contentPath(entry.id)}
+>
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <a href="/">Catalog</a> / {
+      page ? (
+        <a href={entryPath(service.id)}>{service.data.title}</a>
+      ) : (
+        <span>{service.data.title}</span>
+      )
+    }
+  </nav>
+  <div class="service-heading">
+    <p class="eyebrow">{CATEGORIES[service.data.category].name}</p>
+    <h1>{entry.data.title}</h1>
+    <span class:list={['badge', service.data.status]}
+      >{
+        service.data.status === 'draft'
+          ? 'Draft — coverage in progress'
+          : 'Reviewed'
+      }</span
+    >
+    <p class="intro">{entry.data.summary}</p>
+    <p class="metadata">
+      <span
+        >Last verified: <time
+          datetime={entry.data.lastVerified.toISOString().slice(0, 10)}
+          >{entry.data.lastVerified.toISOString().slice(0, 10)}</time
+        ></span
+      ><span aria-hidden="true">·</span><a href={service.data.website}
+        >Vendor website</a
+      >
+    </p>
+  </div>
+  <nav class="section-nav" aria-label="More on this service">
+    <a href={entryPath(service.id)} aria-current={!page ? 'page' : undefined}
+      >Overview</a
+    >
+    {
+      pages.map((item) => (
+        <a
+          href={entryPath(item.id)}
+          aria-current={item.id === page?.id ? 'page' : undefined}
+        >
+          {item.data.title}
+        </a>
+      ))
+    }
+    <a href="#page-sources">Sources</a>
+  </nav>
+  <article class="prose"><slot /></article>
+  <section id="page-sources">
+    <h2>Sources and verification</h2><Sources
+      sources={entry.data.sources}
+      lastVerified={entry.data.lastVerified}
+    />
+  </section>
+</Base>

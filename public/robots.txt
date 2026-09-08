@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://devstack.fyi/sitemap-index.xml

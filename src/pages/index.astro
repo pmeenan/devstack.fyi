@@ -16,8 +16,9 @@ const categories = (
   summary="Practical notes on cloud services: product capabilities, local development, plan limits, and configuration."
   sourcePath="src/pages/index.astro"
 >
-  <h1>Service catalog</h1>
-  <p>
+  <p class="eyebrow">DEVELOPER-TO-DEVELOPER FIELD NOTES</p>
+  <h1>Know your <span class="highlight">stack.</span></h1>
+  <p class="intro">
     What the product names mean, what to run locally, and what to configure.
   </p>
   {
@@ -27,19 +28,31 @@ const categories = (
       );
       return (
         services.length > 0 && (
-          <section>
+          <section class="catalog-category">
             <>
               <h2>{category.name}</h2>
-              <ul>
+              <ul class="catalog-grid">
                 {services.map((service) => (
                   <li>
-                    <h3>
-                      <a href={entryPath(service.id)}>{service.data.title}</a>
-                    </h3>
-                    <p>
-                      {service.data.status === 'draft' ? 'Draft' : 'Reviewed'}
-                    </p>
-                    <p>{service.data.summary}</p>
+                    <a class="catalog-card" href={entryPath(service.id)}>
+                      <span class="service-mark" aria-hidden="true">
+                        {service.data.title.slice(0, 2).toUpperCase()}
+                      </span>
+                      <div>
+                        <div class="card-heading">
+                          <h3>{service.data.title}</h3>
+                          <span class:list={['badge', service.data.status]}>
+                            {service.data.status === 'draft'
+                              ? 'Draft'
+                              : 'Reviewed'}
+                          </span>
+                        </div>
+                        <p>{service.data.summary}</p>
+                      </div>
+                      <span class="card-arrow" aria-hidden="true">
+                        ↗
+                      </span>
+                    </a>
                   </li>
                 ))}
               </ul>

@@ -1,0 +1,33 @@
+<button class="theme-toggle" type="button" hidden aria-pressed="false"
+  >Dark theme</button
+>
+<script>
+  const button = document.querySelector<HTMLButtonElement>('.theme-toggle');
+  const system = matchMedia('(prefers-color-scheme: dark)');
+  const dark = () =>
+    (document.documentElement.dataset.theme ??
+      (system.matches ? 'dark' : 'light')) === 'dark';
+  const sync = () => button?.setAttribute('aria-pressed', String(dark()));
+  if (button) {
+    button.hidden = false;
+    sync();
+    button.addEventListener('click', () => {
+      const theme = dark() ? 'light' : 'dark';
+      document.documentElement.dataset.theme = theme;
+      try {
+        localStorage.setItem('theme', theme);
+      } catch {
+        /* Keep this page's selection. */
+      }
+      sync();
+    });
+    system.addEventListener('change', sync);
+    window.addEventListener('storage', (event) => {
+      if (event.key !== 'theme' && event.key !== null) return;
+      if (event.newValue === 'light' || event.newValue === 'dark')
+        document.documentElement.dataset.theme = event.newValue;
+      else delete document.documentElement.dataset.theme;
+      sync();
+    });
+  }
+</script>

@@ -1,15 +1,18 @@
 ---
 import { render, type CollectionEntry } from 'astro:content';
-import Base from '../../layouts/Base.astro';
-import Sources from '@components/Sources.astro';
+import CodeBlock from '@components/CodeBlock.astro';
+import Service from '../../layouts/Service.astro';
+import Products from '@components/Products.astro';
 import { loadContent } from '@lib/content';
-import { contentPath, entryPath } from '@lib/urls';
 export async function getStaticPaths() {
-  const { services, pages } = await loadContent();
+  const { services, pages, products } = await loadContent();
   return services.map((service) => ({
     params: { service: service.id },
     props: {
       service,
+      products: products.filter((product) =>
+        product.id.startsWith(`${service.id}/`),
+      ),
       pages: pages.filter((page) => page.id.startsWith(`${service.id}/`)),
     },
   }));
@@ -17,42 +20,13 @@ export async function getStaticPaths() {
 interface Props {
   service: CollectionEntry<'services'>;
   pages: CollectionEntry<'pages'>[];
+  products: CollectionEntry<'products'>[];
 }
-const { service, pages } = Astro.props;
+const { service, pages, products } = Astro.props;
 const { Content } = await render(service);
 ---
 
-<Base
-  title={service.data.title}
-  summary={service.data.summary}
-  sourcePath={contentPath(service.id)}
->
-  <h1>{service.data.title}</h1>
-  <p>
-    {
-      service.data.status === 'draft'
-        ? 'Draft — coverage in progress'
-        : 'Reviewed'
-    }
-  </p>
-  <p>{service.data.summary}</p>
-  <p><a href={service.data.website}>Vendor website</a></p>
-  {
-    pages.length > 0 && (
-      <nav aria-label="More on this service">
-        <ul>
-          {pages.map((page) => (
-            <li>
-              <a href={entryPath(page.id)}>{page.data.title}</a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    )
-  }
-  <Content />
-  <Sources
-    sources={service.data.sources}
-    lastVerified={service.data.lastVerified}
-  />
-</Base>
+<Service service={service} pages={pages}>
+  <Content components={{ pre: CodeBlock }} />
+  <Products service={service} products={products} />
+</Service>

@@ -1,30 +1,31 @@
 ---
 import { render, type CollectionEntry } from 'astro:content';
-import Base from '../../layouts/Base.astro';
-import Sources from '@components/Sources.astro';
+import CodeBlock from '@components/CodeBlock.astro';
+import Service from '../../layouts/Service.astro';
 import { loadContent } from '@lib/content';
-import { contentPath, entryPath } from '@lib/urls';
 export async function getStaticPaths() {
-  const { pages } = await loadContent();
+  const { services, pages } = await loadContent();
   return pages.map((page) => {
     const [service, ...segments] = page.id.split('/');
-    return { params: { service, page: segments.join('/') }, props: { page } };
+    return {
+      params: { service, page: segments.join('/') },
+      props: {
+        page,
+        service: services.find((entry) => entry.id === service)!,
+        pages: pages.filter((entry) => entry.id.startsWith(`${service}/`)),
+      },
+    };
   });
 }
 interface Props {
   page: CollectionEntry<'pages'>;
+  service: CollectionEntry<'services'>;
+  pages: CollectionEntry<'pages'>[];
 }
-const { page } = Astro.props;
+const { page, service, pages } = Astro.props;
 const { Content } = await render(page);
 ---
 
-<Base
-  title={page.data.title}
-  summary={page.data.summary}
-  sourcePath={contentPath(page.id)}
->
-  <a href={entryPath(page.id.split('/')[0]!)}>Back to service</a>
-  <h1>{page.data.title}</h1>
-  <Content />
-  <Sources sources={page.data.sources} lastVerified={page.data.lastVerified} />
-</Base>
+<Service service={service} page={page} pages={pages}>
+  <Content components={{ pre: CodeBlock }} />
+</Service>

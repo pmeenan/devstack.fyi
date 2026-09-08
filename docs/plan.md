@@ -107,7 +107,7 @@ contracts; the scopes and exit criteria here determine the work order.
 No load-bearing choices change in this rewrite.
 
 Work in order, one implementation step or content pass per task unless the
-owner asks for a larger unit. M0 is approved and M1.1–M1.2 are complete; **next is M1.3**. Each
+owner asks for a larger unit. M0 is approved and M1.1–M1.3 are complete; **next is M1.4**. Each
 handoff includes the working-tree changes and relevant verification; the
 human commits. All implementation steps require `pnpm check` and
 `pnpm build` once available. Temporary fixtures and browser output stay
@@ -191,17 +191,17 @@ consistently. If feedback is pending, hand off the concrete prototype and
 keep this step in progress. M1.3 follows the accepted guide; later design
 changes update it alongside the implementation.
 
-### M1.3 — Usable shell in both themes
+### M1.3 — Usable shell in both themes `done`
 
-- [ ] Build the base and service layouts, grouped catalog, draft/reviewed
+- [x] Build the base and service layouts, grouped catalog, draft/reviewed
       badges, product/local-dev/limits rendering, source lists, verification
       dates, and sub-page navigation. Empty categories stay hidden.
-- [ ] Apply the accepted style guide to design tokens and responsive styles;
+- [x] Apply the accepted style guide to design tokens and responsive styles;
       add self-hosted Inter and JetBrains Mono, favicon, and theme-aware
       Prism code styling. Implement
       the external blocking theme initializer, persistent toggle with storage
       failure fallback, reduced-motion tokens, and snippet copy feedback.
-- [ ] Add skip navigation, visible keyboard focus, semantic headings and
+- [x] Add skip navigation, visible keyboard focus, semantic headings and
       tables, repository/edit links, a custom 404, sitemap, robots.txt,
       canonical URLs, OpenGraph metadata and an initial shared social image.
 
@@ -212,6 +212,20 @@ blocked storage, snippet copying, font loading, keyboard use, reduced motion,
 and readable content with JavaScript disabled. Check source/edit links,
 canonical/sitemap paths, 404 exclusion from the sitemap, and absence of
 third-party asset requests. Stale UI gets its full content acceptance in M2.1.
+
+**Verified 2026-09-08:** `pnpm check` and `pnpm build` pass (zero Astro
+diagnostics, formatting/license checks, five fixture tests, external-asset
+output guard). Headless Chrome exercised catalog, Cloudflare draft, custom
+404, and temporary product/sub-page fixtures at 390px and 1280px in both
+themes under the approved CSP HTTP header. Verified fonts, section anchors,
+early saved-theme resolution before body rendering, reload persistence,
+blocked storage and page-local toggling, clipboard success/failure feedback,
+keyboard skip navigation and focus, reduced motion, no-JavaScript code/table
+scrolling, and a 200% layout equivalent. All asset requests were same-origin;
+canonical, social, edit/source and sitemap paths were checked, with 404 and
+design routes excluded from the sitemap. Phone captures prompted wider
+product-table columns inside the scroll region. Fictional fixtures remain
+outside the repository. nginx behavior and owner publication remain M1.4.
 
 ### M1.4 — Delivery contract and owner launch
 

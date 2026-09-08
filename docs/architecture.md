@@ -1,8 +1,8 @@
 # Architecture
 
-> **Status: M0 approved; M1.1 foundation implemented (2026-09-08).** The
-> routes, collections and checks exist; the full shell, accepted visual guide,
-> browser/header validation and delivery remain M1.2–M1.4. The evidence below
+> **Status: M1.1–M1.3 implemented (2026-09-08).** The routes, collections,
+> accepted Field notes shell and CSP browser checks are complete. Delivery
+> tooling and owner launch remain M1.4. The evidence below
 > records earlier spikes, not completion of those later implementation steps.
 
 The tested version pins, check commands, license exceptions, and delivery
@@ -153,32 +153,31 @@ no color (D-009).
 
 - `Base.astro` owns the document: `<html lang="en" data-theme>`, `<head>`
   (charset, viewport, title, description, canonical, OpenGraph and Twitter
-  card meta, `<link rel="sitemap">`, font preloads from the fonts API, the
+  card meta, `<link rel="sitemap">`, self-hosted font CSS, the
   theme no-flash snippet, `tokens.css` and `base.css`), a skip link, the
   header (wordmark, theme toggle, GitHub repository link), a `<main>` slot,
   and the footer (license, GitHub link, "edit this page" when the page passes
   a source path).
 - `Service.astro` wraps `Base` for `/<slug>/` and its sub-pages: title block
-  with status/stale badge, category chip, the vendor website link, the
+  with status badge (stale UI lands in M2.1), category label, the vendor website link, the
   last-verified line, a sub-page list when `pages` has entries for the
   service, the slot for MDX prose, the grouped product sections, and the
   sources list.
 
-**Catalog components** (`index.astro`): `CategorySection` (one per
-`CATEGORIES` entry in `order`, skipped when empty), `ServiceCard` (title,
-summary, `StatusBadge`, vendor link).
+**Catalog** (`index.astro`): categories in taxonomy order, skipped when empty;
+each card is one service link with title, summary and draft/reviewed status.
 
-**Service-page components:** `ProductGroup` (heading and summary from the
-service's `groups`), `ProductRow` (name linked to `docs`, aliases,
-capability, `LocalDevList`, `LimitsTable`, notes, `Sources`, per-product
-stale marker), `LimitsTable` (tiers as columns, metrics as rows, `note`
-underneath, its own sources and date), `Sources` (the cited list every
-entry carries), `StatusBadge` (draft / reviewed / stale; stale wins), and
-`LastVerified` (date plus the derived stale state in words).
+**Service-page components:** `Products.astro` renders declared nonempty groups
+in order, then ungrouped products. Capability/local-development tables link to
+per-product limits and sources below; tier columns, notes, aliases and each
+independent verification date remain visible. `Sources.astro` renders cited
+lists and dates. Product edit links point to YAML; page links point to MDX.
+Visible stale badges remain M2.1 work.
 
-**Shared UI:** `ThemeToggle`, `CodeBlock` (Astro's built-in fenced-code
-rendering wrapped with a `CopyButton`), `ExternalLink` (adds `rel="noopener"`
-and the outbound marker), and `SkipLink`.
+**Shared UI:** `ThemeToggle.astro` enhances a hidden button, `CodeBlock.astro`
+keeps fenced code keyboard-scrollable without JavaScript, and
+`CopySnippets.astro` adds copy controls and live success/failure feedback.
+Skip navigation and source/repository links are native HTML in the layouts.
 
 **Diagrams** live in `src/components/diagrams/` and follow the rules in the
 next-but-one section.
@@ -194,8 +193,9 @@ owner until the look and feel is accepted. `docs/style-guide.md` lands in that
 step and governs the M1.3 shell and later component work; update it when the
 implemented design changes. See [plan.md](plan.md) for the acceptance gate.
 
-- **Tokens.** Every color, radius, shadow, motion duration, and font stack is
-  a CSS custom property in `src/styles/tokens.css`. The light palette is
+- **Tokens.** Theme colors and motion duration are CSS custom properties in
+  `src/styles/tokens.css`, alongside the self-hosted font declarations.
+  Component geometry follows the accepted style guide in `base.css`. The light palette is
   defined on `:root`; the dark palette is defined twice with identical
   values: under `:root[data-theme="dark"]` and under
   `@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) }`.

@@ -21,6 +21,7 @@ test('content build validates records, routes, working-doc exclusion, and stale 
   try {
     for (const name of [
       'src',
+      'public',
       'services',
       'astro.config.ts',
       'tsconfig.json',
@@ -87,6 +88,22 @@ Sub-page fixture is rendered.
       await readFile(join(root, 'dist/example/index.html'), 'utf8'),
       /href="\/example\/local-dev\/"/,
     );
+    const serviceHtml = await readFile(
+      join(root, 'dist/example/index.html'),
+      'utf8',
+    );
+    assert.match(serviceHtml, /capabilities and local development/);
+    assert.match(serviceHtml, /100,000 \/ day/);
+    assert.match(serviceHtml, /Configurable up to the cap/);
+    assert.match(serviceHtml, /Widgets pricing/);
+    assert.match(serviceHtml, /Product and local-development sources/);
+    assert.match(
+      serviceHtml,
+      /services\/example\/content\/products\/widgets.yaml/,
+    );
+    const sitemap = await readFile(join(root, 'dist/sitemap-0.xml'), 'utf8');
+    assert.match(sitemap, /https:\/\/devstack.fyi\/example\/local-dev\//);
+    assert.doesNotMatch(sitemap, /404|\/design\//);
     const paths = await readdir(join(root, 'dist'), { recursive: true });
     assert.ok(
       !paths.some(
