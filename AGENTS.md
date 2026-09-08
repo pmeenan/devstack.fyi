@@ -73,6 +73,7 @@ build → commit loop, on-demand reviews, and the human commit gate.
 | [docs/features.md](docs/features.md)             | The feature matrix: confirmed scope, proposed additions, open questions                      |
 | [docs/architecture.md](docs/architecture.md)     | Site structure, content model, theming and deploy shape                                      |
 | [docs/toolchain.md](docs/toolchain.md)           | Version pins, checks, licenses, CSP/cache and deploy cleanup contract                        |
+| [docs/hosting.md](docs/hosting.md)               | Maintainer hosting, nginx installation/recovery, deployment and live verification            |
 | [docs/decisions.md](docs/decisions.md)           | Settled choices (D-NNN). Scan headings; read only the entries your task touches              |
 | [docs/rough-edges.md](docs/rough-edges.md)       | Findings log (RE-NNN). Grep before adding a finding or debugging weirdness                   |
 | [docs/content-schema.md](docs/content-schema.md) | Adding or changing service pages, product records, limits, or the collections that load them |

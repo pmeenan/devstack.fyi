@@ -244,6 +244,9 @@ outputs, scratch dependencies, or browser profiles were added to this repo.
 
 ## M1.4 implementation evidence (2026-09-08)
 
+Owner setup, installation, recovery, and deployment commands are in
+[hosting.md](hosting.md).
+
 `scripts/deploy.sh` is the human-run package-script entry; `deploy.py` handles
 local checks, a frozen build snapshot, rsync ordering and confirmation.
 `deploy_remote.py` uses only Python's standard library and is sent over SSH

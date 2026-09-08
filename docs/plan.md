@@ -239,7 +239,7 @@ outside the repository. nginx behavior and owner publication remain M1.4.
 - [x] Add `pnpm run deploy` as the package-script wrapper for `scripts/deploy.sh`,
       forwarding arguments so `pnpm run deploy --dry-run` previews the operation
       and `pnpm run deploy --yes` uses the script's confirmation bypass. Document
-      these human-run commands in the README and verify argument forwarding
+      these human-run commands in [hosting.md](hosting.md) and verify argument forwarding
       through the local fixture harness. Add the wrapper with the tested
       script, not as a placeholder before M1.4. Use the explicit `run` form:
       bare `pnpm deploy` is pnpm's built-in workspace packaging command.
@@ -256,7 +256,7 @@ outside the repository. nginx behavior and owner publication remain M1.4.
       local nginx for successful pages/assets, slash and host redirects,
       missing pages/assets, security-header inheritance, and `no-store` errors.
       Supply exact owner installation, `nginx -t`, reload, and deployment
-      instructions in the README.
+      instructions in [hosting.md](hosting.md).
 - [x] **Owner:** review and commit the shell, install/test/reload the vhost on
       plex, inspect the deploy dry-run, and deploy. Check the public routes,
       redirects, headers, theme and copy interactions; record the outcome.
@@ -272,7 +272,7 @@ contact plex. A locally extracted nginx 1.24.0 validates the actual reference
 with temporary paths/ports/certificate: 200/304 pages and assets, trailing-slash
 and HTTP/HTTPS host redirects, custom 404 bodies, CSP inheritance, single cache
 headers, and `no-store` on 403/404/405. The reference uses directives supported
-by both this local nginx and plex's 1.31.5. README has exact owner commands.
+by both this local nginx and plex's 1.31.5. [hosting.md](hosting.md) has exact owner commands.
 No server files were changed; no deploy script was run. **Implementation ready;
 owner launch pending.** M2 starts after the owner launch gate above.
 
@@ -287,7 +287,7 @@ At this initial check, launch acceptance remained pending:
   assets return the catalog with 200; HTML has `no-cache`, actual hashed assets
   have no explicit cache policy, HTTPS www serves 200 and HTTP www redirects
   to HTTPS www. CSP is still the old policy. The owner must install/test/reload
-  the committed nginx reference using the README instructions.
+  the committed nginx reference using the [hosting instructions](hosting.md).
 - Cloudflare injects a `static.cloudflareinsights.com` beacon (blocked by CSP)
   and sends `NEL`/`Report-To` network-error reporting headers. Disable beacon
   injection to meet D-005, then recheck public responses. The owner subsequently
