@@ -1,0 +1,34 @@
+/* Minimal foundation only; M1.2 establishes the owner-approved style guide. */
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+}
+body {
+  max-width: 72rem;
+  margin: auto;
+  padding: 1.5rem;
+}
+header,
+footer {
+  padding-block: 1rem;
+}
+header a,
+footer a {
+  margin-inline-end: 1rem;
+}
+main {
+  min-height: 60vh;
+}
+a {
+  text-underline-offset: 0.2em;
+}
+:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 4px;
+}
+pre {
+  overflow-x: auto;
+  padding: 1rem;
+  border: 1px solid;
+}

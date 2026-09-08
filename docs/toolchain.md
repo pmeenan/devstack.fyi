@@ -3,7 +3,10 @@
 **M0 contract, verified 2026-09-08; D-016.** The build and browser spike
 passes. The owner approved the named build-tool license exceptions; the full
 nginx CSP was approved by the owner on 2026-09-08 (question 10 answered).
-This document supplies the concrete M1 implementation contract; no application files or server changes land in this planning step.
+M1.1 implements the toolchain and content foundation. The remaining shell,
+real-header browser checks and delivery work follow in M1.2–M1.4; no server
+changes have been made. Exact license evidence is in
+[dependency-licenses.md](dependency-licenses.md).
 
 ## Versions and local setup
 
@@ -11,17 +14,17 @@ Pin direct dependencies exactly (no caret or tilde), commit `pnpm-lock.yaml`,
 and use `pnpm install --frozen-lockfile` in CI and deploy. Upgrades are deliberate
 working-tree changes followed by both checks and a dependency-license review.
 
-| Tool/package | Pin | Package metadata license |
-| --- | --- | --- |
-| Node | 24.18.1 in `.node-version` | Check upstream distribution notices in M1 |
-| pnpm | 12.3.4 in `packageManager` | MIT |
-| astro | 7.3.2 | MIT |
-| @astrojs/mdx | 8.0.1 | MIT |
-| @astrojs/sitemap | 3.7.4 | MIT |
-| @astrojs/check | 0.9.10 | MIT |
-| typescript | 6.0.3 | Apache-2.0 |
-| prettier | 3.9.6 | MIT |
-| prettier-plugin-astro | 0.14.1 | MIT |
+| Tool/package          | Pin                        | Package metadata license                  |
+| --------------------- | -------------------------- | ----------------------------------------- |
+| Node                  | 24.18.1 in `.node-version` | Check upstream distribution notices in M1 |
+| pnpm                  | 12.3.4 in `packageManager` | MIT                                       |
+| astro                 | 7.3.2                      | MIT                                       |
+| @astrojs/mdx          | 8.0.1                      | MIT                                       |
+| @astrojs/sitemap      | 3.7.4                      | MIT                                       |
+| @astrojs/check        | 0.9.10                     | MIT                                       |
+| typescript            | 6.0.3                      | Apache-2.0                                |
+| prettier              | 3.9.6                      | MIT                                       |
+| prettier-plugin-astro | 0.14.1                     | MIT                                       |
 
 These are tested pins, not a promise to track `latest`. Metadata was read from
 `https://registry.npmjs.org/<package>/<version>` and the installed packages.
@@ -40,6 +43,8 @@ turn off that policy globally. This spike added Astro, MDX, and
 
 `tsconfig.json` extends `astro/tsconfigs/strict`, includes `.astro/types.d.ts`
 and project source, excludes `dist`, and defines the architecture's aliases.
+Astro's `cacheDir` is `./.astro/cache` so temporary fixture projects sharing
+node_modules cannot contaminate the checkout's content store (RE-008).
 Keep typed logic in `.ts` and `.astro`; MDX compilation is not a component-prop
 type check. No `any` without the explanatory comment required by AGENTS.md.
 
@@ -48,6 +53,8 @@ type check. No `any` without the explanatory comment required by AGENTS.md.
 - `pnpm check`: `astro check` followed by `prettier --check .` and a license
   check over the installed dependency tree. The latter is an M1 script that
   consumes `pnpm licenses list --json`; include dev and optional packages.
+  M1.1 also runs regression tests for the license/output gates and real
+  Astro content builds with temporary fixtures (`pnpm test`).
 - `pnpm build`: `astro build` followed by an output check for the CSP contract
   below. Collection validation and the stale warning pass run in the build.
 - `pnpm format`: `prettier --write .`. Load `prettier-plugin-astro` explicitly

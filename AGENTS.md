@@ -50,30 +50,33 @@ affected docs. Until then, these govern.
 
 ## Repository layout
 
-| Path       | What lives there |
-| ---------- | ---------------- |
-| `docs/`    | Vision, plan, architecture, decisions, features, rough edges, workflow |
-| `LICENSE`  | Apache-2.0 |
+| Path                 | What lives there                                                                |
+| -------------------- | ------------------------------------------------------------------------------- |
+| `src/`               | Astro routes/layout, content collections, typed helpers, styles and font assets |
+| `services/`          | Cloudflare draft and working docs; excluded authoring template                  |
+| `scripts/`, `tests/` | Output/license checks and temporary-fixture tests                               |
+| `.github/workflows/` | PR install/check/build gate                                                     |
+| `docs/`              | Vision, plan, architecture, decisions, features, toolchain and license evidence |
+| `LICENSE`            | Apache-2.0 (font notices retained separately)                                   |
 
-The Astro project, `services/` working docs, and `scripts/deploy.sh` land in M1
-— update this table when they do.
+The deploy script and reference nginx configuration land in M1.4.
 
 ## Doc map — pull what the task needs, not everything
 
 Always read (it's short): [docs/workflow.md](docs/workflow.md) — the
 build → commit loop, on-demand reviews, and the human commit gate.
 
-| Doc | Read when the task needs |
-| --- | --- |
-| [docs/plan.md](docs/plan.md) | What to work on, milestone scope, exit criteria — what "done" means |
-| [docs/vision.md](docs/vision.md) | Why the project exists, who it's for, success criteria, non-goals |
-| [docs/features.md](docs/features.md) | The feature matrix: confirmed scope, proposed additions, open questions |
-| [docs/architecture.md](docs/architecture.md) | Site structure, content model, theming and deploy shape |
-| [docs/toolchain.md](docs/toolchain.md) | Version pins, checks, licenses, CSP/cache and deploy cleanup contract |
-| [docs/decisions.md](docs/decisions.md) | Settled choices (D-NNN). Scan headings; read only the entries your task touches |
-| [docs/rough-edges.md](docs/rough-edges.md) | Findings log (RE-NNN). Grep before adding a finding or debugging weirdness |
+| Doc                                              | Read when the task needs                                                                     |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| [docs/plan.md](docs/plan.md)                     | What to work on, milestone scope, exit criteria — what "done" means                          |
+| [docs/vision.md](docs/vision.md)                 | Why the project exists, who it's for, success criteria, non-goals                            |
+| [docs/features.md](docs/features.md)             | The feature matrix: confirmed scope, proposed additions, open questions                      |
+| [docs/architecture.md](docs/architecture.md)     | Site structure, content model, theming and deploy shape                                      |
+| [docs/toolchain.md](docs/toolchain.md)           | Version pins, checks, licenses, CSP/cache and deploy cleanup contract                        |
+| [docs/decisions.md](docs/decisions.md)           | Settled choices (D-NNN). Scan headings; read only the entries your task touches              |
+| [docs/rough-edges.md](docs/rough-edges.md)       | Findings log (RE-NNN). Grep before adding a finding or debugging weirdness                   |
 | [docs/content-schema.md](docs/content-schema.md) | Adding or changing service pages, product records, limits, or the collections that load them |
-| `services/<slug>/AGENTS.md` | Working in a specific service's content — read it first (lands in M1/M2) |
+| `services/<slug>/AGENTS.md`                      | Working in a specific service's content — read it first (lands in M1/M2)                     |
 
 ## Rules for all agents
 
@@ -112,12 +115,9 @@ build → commit loop, on-demand reviews, and the human commit gate.
 
 ## Current status
 
-Milestone **M0 (plan the plan)** — feature triage, content/schema spikes,
-diagram mechanism, plex read-only check, and architecture draft are done
-(2026-09-08). The toolchain is verified and recorded in D-016 and
-[docs/toolchain.md](docs/toolchain.md), including owner-approved build-tool
-license exceptions and the approved full nginx CSP. Toolchain decisions are
-done; the milestone ladder now has scoped steps and exit criteria. M0 awaits
-the owner's call that the plan is ready to build from; then M1.1 starts the
-Astro/content foundation. No application code exists yet; server fixes and
-launch remain owner-run M1 work. See [docs/plan.md](docs/plan.md).
+**M0 complete** — the owner approved the plan on 2026-09-08. **M1 in progress:**
+M1.1 is complete: Astro/content foundation, frozen toolchain, license/output
+checks and PR workflow; local install/check/build and fixture tests pass. M1.2 is next: iterate light/dark prototypes with the
+owner until a style guide is accepted. Cloudflare remains an introductory
+draft; research is M2. Deploy/server work is M1.4 and remains human-run. See
+[docs/plan.md](docs/plan.md) and the README for commands and verification.

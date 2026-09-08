@@ -1,0 +1,34 @@
+name: Widgets
+aliases: [Widget Functions]
+group: compute
+order: 1
+docs: https://example.com/docs/widgets/
+capability: Serverless functions that run at the edge.
+localDev:
+  - kind: vendor
+    name: example dev
+    summary: The vendor CLI runs Widgets locally.
+    url: https://example.com/docs/widgets/local/
+  - kind: mock
+    summary: Stub the handler in tests.
+limits:
+  tiers:
+    - id: free
+      name: Free
+    - id: paid
+      name: Paid
+  metrics:
+    - name: Requests
+      values: { free: '100,000 / day', paid: 'Unlimited' }
+    - name: CPU time per request
+      values: { free: '10 ms', paid: '30 s' }
+      note: Configurable up to the cap.
+  note: Enterprise limits are custom.
+  sources:
+    - url: https://example.com/pricing/widgets/
+      title: Widgets pricing
+  lastVerified: 2026-09-08
+sources:
+  - url: https://example.com/docs/widgets/
+    title: Widgets docs
+lastVerified: 2026-09-08

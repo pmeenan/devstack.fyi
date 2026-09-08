@@ -1,0 +1,23 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props {
+  sources: CollectionEntry<'services'>['data']['sources'];
+  lastVerified: Date;
+}
+const { sources, lastVerified } = Astro.props;
+const date = lastVerified.toISOString().slice(0, 10);
+---
+
+<section aria-label="Sources and verification">
+  <p>Last verified: <time datetime={date}>{date}</time></p>
+  <ul>
+    {
+      sources.map((source) => (
+        <li>
+          <a href={source.url}>{source.title}</a>
+          {source.note && <> — {source.note}</>}
+        </li>
+      ))
+    }
+  </ul>
+</section>

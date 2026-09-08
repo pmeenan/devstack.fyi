@@ -1,0 +1,52 @@
+---
+import Base from '../layouts/Base.astro';
+import { loadContent } from '@lib/content';
+import { CATEGORIES, type CategoryId } from '@lib/taxonomy';
+import { entryPath } from '@lib/urls';
+import { warnStale } from '@lib/stale';
+const content = await loadContent();
+warnStale(content);
+const categories = (
+  Object.entries(CATEGORIES) as [CategoryId, { name: string; order: number }][]
+).sort((a, b) => a[1].order - b[1].order);
+---
+
+<Base
+  title="Service catalog"
+  summary="Practical notes on cloud services: product capabilities, local development, plan limits, and configuration."
+  sourcePath="src/pages/index.astro"
+>
+  <h1>Service catalog</h1>
+  <p>
+    What the product names mean, what to run locally, and what to configure.
+  </p>
+  {
+    categories.map(([id, category]) => {
+      const services = content.services.filter(
+        (service) => service.data.category === id,
+      );
+      return (
+        services.length > 0 && (
+          <section>
+            <>
+              <h2>{category.name}</h2>
+              <ul>
+                {services.map((service) => (
+                  <li>
+                    <h3>
+                      <a href={entryPath(service.id)}>{service.data.title}</a>
+                    </h3>
+                    <p>
+                      {service.data.status === 'draft' ? 'Draft' : 'Reviewed'}
+                    </p>
+                    <p>{service.data.summary}</p>
+                  </li>
+                ))}
+              </ul>
+            </>
+          </section>
+        )
+      );
+    })
+  }
+</Base>

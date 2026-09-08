@@ -1,0 +1,30 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Sources from '@components/Sources.astro';
+import { loadContent } from '@lib/content';
+import { contentPath, entryPath } from '@lib/urls';
+export async function getStaticPaths() {
+  const { pages } = await loadContent();
+  return pages.map((page) => {
+    const [service, ...segments] = page.id.split('/');
+    return { params: { service, page: segments.join('/') }, props: { page } };
+  });
+}
+interface Props {
+  page: CollectionEntry<'pages'>;
+}
+const { page } = Astro.props;
+const { Content } = await render(page);
+---
+
+<Base
+  title={page.data.title}
+  summary={page.data.summary}
+  sourcePath={contentPath(page.id)}
+>
+  <a href={entryPath(page.id.split('/')[0]!)}>Back to service</a>
+  <h1>{page.data.title}</h1>
+  <Content />
+  <Sources sources={page.data.sources} lastVerified={page.data.lastVerified} />
+</Base>

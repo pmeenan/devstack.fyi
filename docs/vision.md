@@ -3,7 +3,7 @@
 ## What this is
 
 Official service documentation tells you what a product is called and what
-its knobs are. It rarely tells you what the product *is* in terms you already
+its knobs are. It rarely tells you what the product _is_ in terms you already
 understand, what to run on your laptop to stand in for it, or which
 service-wide settings you must flip before the thing behaves the way a
 standards-literate developer expects. That knowledge lives in the heads of
@@ -71,7 +71,7 @@ themes, neon-accented interactive diagrams, and a lighthearted tone.
   instantly and add nothing.
 - **Not a pricing or vendor comparison site.** Prices change too often to
   maintain and invite marketing disputes; the site links to official pricing
-  pages instead. Usage *limits* per plan tier are in scope (D-013) because
+  pages instead. Usage _limits_ per plan tier are in scope (D-013) because
   they decide whether a design works at all. Capability equivalence across
   vendors may come later (see the cross-service index, planned for M4 or
   later, in [features.md](features.md)), pricing will not.

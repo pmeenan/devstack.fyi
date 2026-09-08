@@ -1,0 +1,58 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Sources from '@components/Sources.astro';
+import { loadContent } from '@lib/content';
+import { contentPath, entryPath } from '@lib/urls';
+export async function getStaticPaths() {
+  const { services, pages } = await loadContent();
+  return services.map((service) => ({
+    params: { service: service.id },
+    props: {
+      service,
+      pages: pages.filter((page) => page.id.startsWith(`${service.id}/`)),
+    },
+  }));
+}
+interface Props {
+  service: CollectionEntry<'services'>;
+  pages: CollectionEntry<'pages'>[];
+}
+const { service, pages } = Astro.props;
+const { Content } = await render(service);
+---
+
+<Base
+  title={service.data.title}
+  summary={service.data.summary}
+  sourcePath={contentPath(service.id)}
+>
+  <h1>{service.data.title}</h1>
+  <p>
+    {
+      service.data.status === 'draft'
+        ? 'Draft — coverage in progress'
+        : 'Reviewed'
+    }
+  </p>
+  <p>{service.data.summary}</p>
+  <p><a href={service.data.website}>Vendor website</a></p>
+  {
+    pages.length > 0 && (
+      <nav aria-label="More on this service">
+        <ul>
+          {pages.map((page) => (
+            <li>
+              <a href={entryPath(page.id)}>{page.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )
+  }
+  <Content />
+  <Sources
+    sources={service.data.sources}
+    lastVerified={service.data.lastVerified}
+  />
+</Base>

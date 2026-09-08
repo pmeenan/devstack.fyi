@@ -1,10 +1,9 @@
 # Architecture
 
-> **Status: full draft with toolchain contract (2026-09-08), M0.** Everything below the "Evidence"
-> line is a dated record of a check that was actually run; everything above it
-> is the shape the M1 scaffold builds to. Shape claims that no check has covered
-> yet say "verify in M1". The owner points at the end are the items this draft
-> asks the owner to confirm or veto before M1 starts.
+> **Status: M0 approved; M1.1 foundation implemented (2026-09-08).** The
+> routes, collections and checks exist; the full shell, accepted visual guide,
+> browser/header validation and delivery remain M1.2–M1.4. The evidence below
+> records earlier spikes, not completion of those later implementation steps.
 
 The tested version pins, check commands, license exceptions, and delivery
 contract are in [toolchain.md](toolchain.md) (D-016). The owner-approved CSP
@@ -74,23 +73,23 @@ nginx vhost is part of the architecture even though agents never touch it.
 
 ## Repository layout
 
-| Path | Purpose | Lands |
-| --- | --- | --- |
-| `astro.config.ts` | `site: 'https://devstack.fyi'`, `trailingSlash: 'always'`, default `build.format: 'directory'`, MDX and sitemap integrations, `fonts`, external scripts/CSS, no CSP meta policy (D-016) | M1 |
-| `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json` | Toolchain; `pnpm-workspace.yaml` carries the `allowBuilds` map (RE-002); `tsconfig.json` extends `astro/tsconfigs/strict` and defines the `@components/*` and `@lib/*` aliases | M1 |
-| `src/content.config.ts` | The three collections from [content-schema.md](content-schema.md) | M1 |
-| `src/lib/` | Framework-free TypeScript: `taxonomy.ts` (categories, stale threshold, `isStale`), `urls.ts` (entry id → path, GitHub edit URL), `stale.ts` (the build-time stale pass) | M1 |
-| `src/pages/` | Routes: `index.astro` (catalog), `[service]/index.astro`, `[service]/[...page].astro`, `404.astro` | M1 |
-| `src/layouts/` | `Base.astro` (document shell) and `Service.astro` (service page frame) | M1 |
-| `src/components/` | Catalog, service-page, and shared UI components; `diagrams/` for the SVG component library | M1, M3 |
-| `src/styles/` | `tokens.css` (theme tokens, neon palette, motion tokens) and `base.css` | M1 |
-| `src/assets/` | Font files and any image Astro processes | M1 |
-| `public/` | Copied verbatim: `favicon.svg`, `robots.txt`, and nothing content-hashed | M1 |
-| `services/<slug>/` | Working docs beside `content/` (see "Content model"); `services/_template/` is the contributor copy source, never built (RE-003) | M1 template and Cloudflare skeleton; M2 research/content |
-| `scripts/deploy.sh` | Install, build, dry-run rsync, confirm, rsync, retire hashed assets | M1 |
-| `deploy/nginx/devstack.fyi.conf` | Reference vhost the owner applies on plex by hand | M1 |
-| `.github/workflows/check.yml` | `pnpm check` and `pnpm build` on pull requests; no deploy | M1 |
-| `docs/` | Project memory (this file and its siblings) | M0 |
+| Path                                                                     | Purpose                                                                                                                                                                                 | Lands                                                    |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `astro.config.ts`                                                        | `site: 'https://devstack.fyi'`, `trailingSlash: 'always'`, default `build.format: 'directory'`, MDX and sitemap integrations, `fonts`, external scripts/CSS, no CSP meta policy (D-016) | M1                                                       |
+| `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json` | Toolchain; `pnpm-workspace.yaml` carries the `allowBuilds` map (RE-002); `tsconfig.json` extends `astro/tsconfigs/strict` and defines the `@components/*` and `@lib/*` aliases          | M1                                                       |
+| `src/content.config.ts`                                                  | The three collections from [content-schema.md](content-schema.md)                                                                                                                       | M1                                                       |
+| `src/lib/`                                                               | Framework-free TypeScript: `taxonomy.ts` (categories, stale threshold, `isStale`), `urls.ts` (entry id → path, GitHub edit URL), `stale.ts` (the build-time stale pass)                 | M1                                                       |
+| `src/pages/`                                                             | Routes: `index.astro` (catalog), `[service]/index.astro`, `[service]/[...page].astro`, `404.astro`                                                                                      | M1                                                       |
+| `src/layouts/`                                                           | `Base.astro` (document shell) and `Service.astro` (service page frame)                                                                                                                  | M1                                                       |
+| `src/components/`                                                        | Catalog, service-page, and shared UI components; `diagrams/` for the SVG component library                                                                                              | M1, M3                                                   |
+| `src/styles/`                                                            | `tokens.css` (theme tokens, neon palette, motion tokens) and `base.css`                                                                                                                 | M1                                                       |
+| `src/assets/`                                                            | Font files and any image Astro processes                                                                                                                                                | M1                                                       |
+| `public/`                                                                | Copied verbatim: `favicon.svg`, `robots.txt`, and nothing content-hashed                                                                                                                | M1                                                       |
+| `services/<slug>/`                                                       | Working docs beside `content/` (see "Content model"); `services/_template/` is the contributor copy source, never built (RE-003)                                                        | M1 template and Cloudflare skeleton; M2 research/content |
+| `scripts/deploy.sh`                                                      | Install, build, dry-run rsync, confirm, rsync, retire hashed assets                                                                                                                     | M1                                                       |
+| `deploy/nginx/devstack.fyi.conf`                                         | Reference vhost the owner applies on plex by hand                                                                                                                                       | M1                                                       |
+| `.github/workflows/check.yml`                                            | `pnpm check` and `pnpm build` on pull requests; no deploy                                                                                                                               | M1                                                       |
+| `docs/`                                                                  | Project memory (this file and its siblings)                                                                                                                                             | M0                                                       |
 
 Update the layout table in AGENTS.md when these land (rule 4).
 
@@ -224,13 +223,13 @@ implemented design changes. See [plan.md](plan.md) for the acceptance gate.
 
 The whole inventory, so a future agent can see when it grows:
 
-| Script | Role | Runs | Ships as |
-| --- | --- | --- | --- |
-| Theme snippet | Set `data-theme` from storage before paint | Every page | External hashed classic blocking script (D-016) |
-| Theme toggle | Flip and store the preference | Every page | Astro component `<script>`, bundled once |
-| Copy button | Copy a snippet's text; confirm in the button | Pages with code | Astro component `<script>`, bundled once |
+| Script           | Role                                                    | Runs                        | Ships as                                                |
+| ---------------- | ------------------------------------------------------- | --------------------------- | ------------------------------------------------------- |
+| Theme snippet    | Set `data-theme` from storage before paint              | Every page                  | External hashed classic blocking script (D-016)         |
+| Theme toggle     | Flip and store the preference                           | Every page                  | Astro component `<script>`, bundled once                |
+| Copy button      | Copy a snippet's text; confirm in the button            | Pages with code             | Astro component `<script>`, bundled once                |
 | Diagram elements | Hover/pin/caption/keyboard for `<ds-…>` custom elements | Pages that import a diagram | Per-component `<script>`, bundled once per page (D-015) |
-| Search (M4) | Static-index client search | Catalog and service pages | Pagefind or similar, self-hosted from the build |
+| Search (M4)      | Static-index client search                              | Catalog and service pages   | Pagefind or similar, self-hosted from the build         |
 
 Rules: no framework runtime, no `client:*` islands (D-015); no script fetches
 anything at runtime except the M4 search index from the same origin; every
@@ -334,7 +333,7 @@ props; they never fetch.
   1. `try_files $uri $uri/ =404;` and `error_page 404 /404.html;` instead of
      the SPA fallback to `/index.html`.
   2. `location ^~ /_astro/ { expires off; add_header Cache-Control "public,
-     max-age=31536000, immutable"; … }`, re-adding the CSP header inside the
+max-age=31536000, immutable"; … }`, re-adding the CSP header inside the
      block because a nested `add_header` drops inherited ones.
   3. An explicit short TTL for HTML and for the unhashed `public/` files
      (today HTML gets `no-cache`; D-012 says a short `max-age`; the toolchain
@@ -353,12 +352,12 @@ props; they never fetch.
 
 **Cache policy (D-012).** Three classes of response, set by the vhost:
 
-| Response | `Cache-Control` | Why |
-| --- | --- | --- |
-| `/_astro/**` (hashed scripts, styles, images, fonts) | `public, max-age=31536000, immutable` | The URL changes when the content does |
-| Successful HTML and directory indexes | `public, max-age=300, must-revalidate` | Bounds cached-page freshness |
-| 404 responses, including missing assets | `no-store` | Avoids caching missing content |
-| Everything else (`robots.txt`, `favicon.svg`, sitemaps) | same short TTL as HTML | Unhashed URLs that change in place |
+| Response                                                | `Cache-Control`                        | Why                                   |
+| ------------------------------------------------------- | -------------------------------------- | ------------------------------------- |
+| `/_astro/**` (hashed scripts, styles, images, fonts)    | `public, max-age=31536000, immutable`  | The URL changes when the content does |
+| Successful HTML and directory indexes                   | `public, max-age=300, must-revalidate` | Bounds cached-page freshness          |
+| 404 responses, including missing assets                 | `no-store`                             | Avoids caching missing content        |
+| Everything else (`robots.txt`, `favicon.svg`, sitemaps) | same short TTL as HTML                 | Unhashed URLs that change in place    |
 
 Apply immutable caching only to successful asset responses; missing assets
 use the custom 404 policy. D-016 and toolchain.md define the full reference
@@ -455,16 +454,16 @@ themes; M1 ships the structure that makes the pass tractable.
 What a change costs, so future work can tell shell changes from content
 changes:
 
-| Change | Touches | Shell change? |
-| --- | --- | --- |
-| Add a product | one YAML file, maybe one `groups` line | no |
-| Add a sub-page | one `index.mdx` under the service | no |
-| Add a service | one directory under `services/` | no |
-| Add a category | `CATEGORIES` in `src/lib/taxonomy.ts` | yes, one line (D-010) |
-| Add a diagram | one `.astro` file in `components/diagrams/` | yes, component only |
-| Change a required schema field | `content.config.ts` and every service | yes, load-bearing (workflow.md) |
-| Change a URL rule or the deploy script | `astro.config.ts`, `deploy.sh`, the reference vhost | yes, load-bearing |
-| Add a UI framework | `package.json`, an island | no: needs a new decision (D-015) |
+| Change                                 | Touches                                             | Shell change?                    |
+| -------------------------------------- | --------------------------------------------------- | -------------------------------- |
+| Add a product                          | one YAML file, maybe one `groups` line              | no                               |
+| Add a sub-page                         | one `index.mdx` under the service                   | no                               |
+| Add a service                          | one directory under `services/`                     | no                               |
+| Add a category                         | `CATEGORIES` in `src/lib/taxonomy.ts`               | yes, one line (D-010)            |
+| Add a diagram                          | one `.astro` file in `components/diagrams/`         | yes, component only              |
+| Change a required schema field         | `content.config.ts` and every service               | yes, load-bearing (workflow.md)  |
+| Change a URL rule or the deploy script | `astro.config.ts`, `deploy.sh`, the reference vhost | yes, load-bearing                |
+| Add a UI framework                     | `package.json`, an island                           | no: needs a new decision (D-015) |
 
 ## Deferred by design
 
@@ -510,7 +509,7 @@ lives in `src/content.config.ts`, and MDX is rendered with `render(entry)`
 imported from `astro:content`
 ([content collections guide](https://docs.astro.build/en/guides/content-collections/)).
 Astro 7.0 (2026-06-22) switched the default Markdown processor for `.md`
-*and* `.mdx` to Sätteri; the remark/rehype pipeline is opt-in via
+_and_ `.mdx` to Sätteri; the remark/rehype pipeline is opt-in via
 `@astrojs/markdown-remark` (an optional peer dependency) and
 `markdown.processor: unified()`
 ([v7 upgrade guide](https://docs.astro.build/en/guides/upgrade-to/v7/),
@@ -591,11 +590,11 @@ its verbatim contents drive the findings here.
   (preserving host) and otherwise returns 404. **www is not redirected to the
   apex** — both hosts serve the same content. Recommend adding an apex
   canonical redirect (nginx `if ($host = www.devstack.fyi) { return 301
-  https://devstack.fyi$request_uri; }` or a Cloudflare rule); M1 canonical URLs
+https://devstack.fyi$request_uri; }` or a Cloudflare rule); M1 canonical URLs
   use the apex regardless.
 - **Routing is currently an SPA fallback — must change for a static
   multipage site.** The vhost has `location / { try_files $uri $uri/
-  /index.html; }`. With Astro's per-directory output this serves the home
+/index.html; }`. With Astro's per-directory output this serves the home
   page with a 200 for every unknown URL once `index.html` exists, which
   defeats a real 404. For an existing directory, `/cloudflare` (no slash)
   still gets nginx’s **301 redirect** to `/cloudflare/`: the trailing slash
@@ -628,7 +627,7 @@ its verbatim contents drive the findings here.
   and non-HTML `public/` files (robots.txt, favicons, OG images) get no
   explicit header either. **Owner change for M1:** add
   `location ^~ /_astro/ { expires off; add_header Cache-Control "public,
-  max-age=31536000, immutable"; }` and a short-TTL rule for the other static
+max-age=31536000, immutable"; }` and a short-TTL rule for the other static
   files. Use `expires off` so only the explicit header sets the TTL:
   [`expires max`](https://nginx.org/en/docs/http/ngx_http_headers_module.html#expires)
   would add a second `Cache-Control` with a ten-year `max-age`, conflicting
@@ -728,11 +727,11 @@ Escape to clear, keyboard focus on every node, `aria-pressed` state, and a
 - **CSP, measured against real headers** (feeds open question 10; RE-004,
   RE-005). With `security: { csp: true }` Astro hashed the processed
   component script and its own island hydration scripts, but **not** the
-  `is:inline` theme snippet, which also sits *before* the emitted `<meta>`
+  `is:inline` theme snippet, which also sits _before_ the emitted `<meta>`
   policy and therefore runs unchallenged in every local check. A 15-line
   Node static server then replayed each build under a header:
   - plex's current header (`script-src 'self' 'wasm-unsafe-eval'`) blocked
-    the inlined vanilla script *and* the island hydration scripts (the
+    the inlined vanilla script _and_ the island hydration scripts (the
     islands never hydrated); only the external-script build kept working.
   - Astro's own policy sent as a header let both the inlined vanilla script
     and the islands work; only the theme snippet was blocked.
@@ -746,6 +745,7 @@ Escape to clear, keyboard focus on every node, `aria-pressed` state, and a
   attributes conflict with a hashed `style-src`; the code-snippet
   highlighter choice therefore belongs with the CSP decision in the
   toolchain item.
+
 - **Authoring notes for the M3 component guide.** SVG `<marker>` and
   gradient ids are page-global, so shared definitions must be namespaced or
   hoisted once per page; SVG elements have no `.click()` method, which

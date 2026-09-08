@@ -4,7 +4,7 @@ Newest first. Every entry: what was decided, why, and what would reopen it.
 Entries are for choices that are expensive to reverse or that a future agent
 might silently undo — not routine implementation calls; a few per milestone is
 the target. Existing entries are never edited into a different decision —
-reversing or amending one gets a *new* entry that supersedes it (a status-line
+reversing or amending one gets a _new_ entry that supersedes it (a status-line
 annotation on the old entry is fine). When an entry hangs on a claim about
 current technology state, check a current source or run a local experiment —
 training knowledge is stale.
@@ -25,7 +25,7 @@ Decision / Context / Consequences / Reopen if
 
 ---
 
-## D-016: Pinned build toolchain, build-only license exceptions, and static delivery contract  (2026-09-08, status: accepted)
+## D-016: Pinned build toolchain, build-only license exceptions, and static delivery contract (2026-09-08, status: accepted)
 
 **Decision.** Use the tested Node 24.18.1 / pnpm 12.3.4 / Astro 7.3.2 /
 TypeScript 6.0.3 toolchain, exact direct-package pins and a frozen lockfile.
@@ -74,7 +74,7 @@ beyond that authorization. RE-006 records the finding.
 requires an excluded license, concrete defects justify a linter, or seven-day
 asset retention causes either broken readers or excessive disk use.
 
-## D-015: Diagram interactivity is vanilla custom-element scripts; no island framework ships with the site  (2026-09-08, status: accepted)
+## D-015: Diagram interactivity is vanilla custom-element scripts; no island framework ships with the site (2026-09-08, status: accepted)
 
 **Decision.** Interactive diagrams (D-007) are Astro components whose SVG is
 wrapped in a custom element (`<ds-…>`) defined by the component's own
@@ -114,7 +114,7 @@ element makes painful, and the extra 11 kB per diagram page is judged worth
 it for that diagram; or Astro's own script handling changes so that inline
 component scripts stop working under the site's CSP.
 
-## D-014: Products are one YAML record each in a co-located data collection; limits are a tier-by-metric table; the directory name is the slug  (2026-09-08, status: accepted)
+## D-014: Products are one YAML record each in a co-located data collection; limits are a tier-by-metric table; the directory name is the slug (2026-09-08, status: accepted)
 
 **Decision.** Each documented product is its own YAML file at
 `services/<slug>/content/products/<product>.yaml`, loaded as a `products`
@@ -152,7 +152,7 @@ are the contract with the shell.
 vendor publishes limits in a shape that a tier-by-metric table cannot
 express (for example limits that depend on two plan axes).
 
-## D-013: Plan-tier usage limits are core content; prices are not  (2026-09-08, status: accepted)
+## D-013: Plan-tier usage limits are core content; prices are not (2026-09-08, status: accepted)
 
 **Decision.** Every documented product carries its usage limits per plan
 tier using the product's actual plan set (Free, Pro, Business where zone
@@ -186,7 +186,7 @@ its capability source.
 **Reopen if.** Limits churn so fast that they are stale more often than
 not, or a vendor stops publishing limits per tier.
 
-## D-012: Cache freshness by TTL, not purge: short HTML TTL, immutable hashed assets, no purge step  (2026-09-08, status: accepted)
+## D-012: Cache freshness by TTL, not purge: short HTML TTL, immutable hashed assets, no purge step (2026-09-08, status: accepted)
 
 **Decision.** After a deploy, freshness comes from cache headers rather than
 a purge. The origin on plex sends an explicit `Cache-Control` for everything
@@ -238,7 +238,7 @@ the origin `max-age` for HTML still bounds staleness.
 **Reopen if.** Instant visibility after deploy becomes a requirement, or the
 plex server cannot express per-path cache headers.
 
-## D-011: Stale-content policy: 180 days, warn and badge, never fail the build  (2026-09-08, status: accepted)
+## D-011: Stale-content policy: 180 days, warn and badge, never fail the build (2026-09-08, status: accepted)
 
 **Decision.** A service page or product entry counts as stale when its
 `lastVerified` date is more than 180 days old at build time. The build prints
@@ -263,7 +263,7 @@ carry their own dates rather than inheriting the page's.
 months (then consider failing the build), or vendors in a category churn
 much faster or slower than 180 days.
 
-## D-010: Hybrid content model: structured product entries plus MDX prose; categories are a fixed enum  (2026-09-08, status: accepted)
+## D-010: Hybrid content model: structured product entries plus MDX prose; categories are a fixed enum (2026-09-08, status: accepted)
 
 **Decision.** Each service is a content-collection entry with typed
 frontmatter (title, slug, category, summary, status, sources, lastVerified)
@@ -293,7 +293,7 @@ cross-service index. The schema draft is an M0 plan item.
 **Reopen if.** Contributors consistently fight the record format, or a
 service's products resist a single capability field.
 
-## D-009: Light and dark themes with a lighthearted, neon-accented tech look  (2026-09-08, status: accepted)
+## D-009: Light and dark themes with a lighthearted, neon-accented tech look (2026-09-08, status: accepted)
 
 **Decision.** The site supports light and dark themes as equals from the
 first page. The visual identity is modern-tech but deliberately not serious:
@@ -309,7 +309,7 @@ claims (D-006) is not relaxed by the tone.
 **Reopen if.** The owner wants a single theme, or the audience turns out to
 find the tone undermines trust in the content.
 
-## D-008: Catalog by category, one path per service, working docs separate from content  (2026-09-08, status: accepted)
+## D-008: Catalog by category, one path per service, working docs separate from content (2026-09-08, status: accepted)
 
 **Decision.** The landing page is a catalog of services grouped by offering
 category (for example "Cloud Providers (and CDN)", "Databases", "Event
@@ -319,7 +319,7 @@ that agents use to research and map the service; it is never rendered into
 the site.
 
 **Context.** Stated by the project owner at kickoff; the owner clarified that
-"grouped by offering" means offering *category*, not provider.
+"grouped by offering" means offering _category_, not provider.
 
 **Consequences.** The content schema needs a category field (enum or
 collection) and a slug that doubles as the URL segment. The build must
@@ -331,7 +331,7 @@ split) is open question 2 in features.md.
 also a database vendor) and readers cannot find them, or a capability-first
 navigation proves more useful than category-first.
 
-## D-007: Diagrams are hand-authored SVG/Astro components  (2026-09-08, status: accepted)
+## D-007: Diagrams are hand-authored SVG/Astro components (2026-09-08, status: accepted)
 
 **Decision.** Primary diagrams are built as Astro components emitting SVG,
 theme-aware via the shared tokens, with hover and click interaction where it
@@ -350,7 +350,7 @@ an enhancement. Contributors need a short guide to the diagram components.
 **Reopen if.** Per-diagram authoring cost blocks content work, or contributors
 consistently need quick sketches that a text-to-diagram tool would serve.
 
-## D-006: Service claims are researched from official sources, cited, and dated  (2026-09-08, status: accepted)
+## D-006: Service claims are researched from official sources, cited, and dated (2026-09-08, status: accepted)
 
 **Decision.** Agents research and draft service content from current official
 vendor documentation. Every service page names its sources (URLs) and carries
@@ -371,7 +371,7 @@ dated field.
 **Reopen if.** The owner decides to hand-write content directly, or a vendor's
 documentation becomes unavailable to fetch.
 
-## D-005: No analytics, telemetry, or cookies  (2026-09-08, status: accepted)
+## D-005: No analytics, telemetry, or cookies (2026-09-08, status: accepted)
 
 **Decision.** The published site includes no analytics beacon, no telemetry,
 no cookies, and no tracking of any kind.
@@ -388,7 +388,7 @@ assets so that no third-party request happens at all is a related
 **Reopen if.** The owner wants readership data to prioritize which services
 to document.
 
-## D-004: Astro + MDX with a custom layout, pnpm, TypeScript strict  (2026-09-08, status: accepted)
+## D-004: Astro + MDX with a custom layout, pnpm, TypeScript strict (2026-09-08, status: accepted)
 
 **Decision.** The site is built with Astro, using content collections and MDX
 for pages, with a custom layout rather than the Starlight docs theme or
@@ -411,7 +411,7 @@ every machine that builds; deploy builds locally, so plex does not need it.
 blocks the content model, or the custom shell proves too costly to maintain
 relative to a theme.
 
-## D-003: AI-developed, human-gated lean workflow with GitHub contributions  (2026-09-08, status: accepted)
+## D-003: AI-developed, human-gated lean workflow with GitHub contributions (2026-09-08, status: accepted)
 
 **Decision.** AI agents implement from the project documentation; the human
 maintainer directs, reviews, commits, and deploys. The process is lean: one
@@ -433,7 +433,7 @@ The 2026-09-08 triage confirmed a PR build check (M1) and CONTRIBUTING.md
 single-human gate a bottleneck, or a bad deploy shows the manual gate is not
 enough.
 
-## D-002: Apache-2.0 license; permissive dependencies only  (2026-09-08, status: amended by D-016 for named build tools)
+## D-002: Apache-2.0 license; permissive dependencies only (2026-09-08, status: amended by D-016 for named build tools)
 
 **Decision.** The repository is licensed under Apache-2.0 (the LICENSE file
 was committed by the owner before scaffolding). Dependencies must carry a
@@ -452,7 +452,7 @@ length.
 **Reopen if.** The owner wants a different license for content versus code, or
 a needed dependency has no permissive alternative.
 
-## D-001: Static site, rsync-deployed to plex, behind Cloudflare  (2026-09-08, status: accepted)
+## D-001: Static site, rsync-deployed to plex, behind Cloudflare (2026-09-08, status: accepted)
 
 **Decision.** devstack.fyi is a statically generated site with no running
 server component; in-page JavaScript is allowed. It is deployed by a script

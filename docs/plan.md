@@ -2,7 +2,7 @@
 
 **This is a living document.** Milestones will be re-scoped, re-ordered, split,
 or added as planning conversations and findings come in. That churn is
-expected; what is *not* allowed is silent change. Update the affected docs
+expected; what is _not_ allowed is silent change. Update the affected docs
 when scope changes; only changes to load-bearing choices need a decision-log
 entry (see AGENTS.md rule 1). Progress is reflected here by checking boxes
 and updating status lines as work lands.
@@ -12,7 +12,7 @@ unchecked, optionally with a note.
 
 **Status legend:** `pending` · `in progress` · `done` · `parked`
 
-## M0 — Plan the plan  `in progress`
+## M0 — Plan the plan `done`
 
 Goal: turn the initial feature list into a settled vision, feature matrix,
 content model, architecture, and milestone ladder — through planning
@@ -96,6 +96,8 @@ are decided (the rest may ride along as open questions); toolchain decided;
 M1+ milestones have scopes. M0 is a conversation, not a phase — it exits on the
 owner's call, not on a checklist reaching zero.
 
+**Owner exit:** plan approved and M0 completed on 2026-09-08. M1 is authorized.
+
 ## Milestone ladder
 
 Rewritten 2026-09-08 against the confirmed [feature matrix](features.md),
@@ -105,38 +107,38 @@ contracts; the scopes and exit criteria here determine the work order.
 No load-bearing choices change in this rewrite.
 
 Work in order, one implementation step or content pass per task unless the
-owner asks for a larger unit. After M0 approval, **start with M1.1**. Each
+owner asks for a larger unit. M0 is approved and M1.1 is complete; **next is M1.2**. Each
 handoff includes the working-tree changes and relevant verification; the
 human commits. All implementation steps require `pnpm check` and
 `pnpm build` once available. Temporary fixtures and browser output stay
 outside the repository. Owner review, server changes, and publication are
 explicit exit items; implementation readiness alone does not complete them.
 
-## M1 — Scaffolding and first launch  `pending`
+## M1 — Scaffolding and first launch `in progress`
 
 Goal: a working static shell, validated content pipeline, and a tested manual
 deploy path. Depends on the owner's M0 exit call. Cloudflare is visibly a
 draft until M2 supplies the researched product coverage.
 
-### M1.1 — Toolchain and content foundation
+### M1.1 — Toolchain and content foundation `done`
 
-- [ ] Scaffold Astro + MDX with the exact pins, pnpm lockfile, strict
+- [x] Scaffold Astro + MDX with the exact pins, pnpm lockfile, strict
       TypeScript, aliases, build-script approvals, and formatting policy in
       toolchain.md. Document local setup, including the pnpm installation
       alternative, and format the existing docs.
-- [ ] Implement `pnpm check`, `pnpm build`, and `pnpm format`, including the
+- [x] Implement `pnpm check`, `pnpm build`, and `pnpm format`, including the
       dependency-license audit and built-output CSP check. Record package,
       optional-platform, Node distribution, and font license evidence in
       `docs/dependency-licenses.md`; retain redistributed font licenses.
-- [ ] Implement the three collections, taxonomy, URL helpers, group
+- [x] Implement the three collections, taxonomy, URL helpers, group
       validation, and stale-date helpers/build pass from content-schema.md.
       Create the excluded `services/_template/` authoring example and the
       Cloudflare working-doc skeleton (`AGENTS.md`, `README.md`, `docs/`).
-- [ ] Add the minimal catalog and collection-driven service/sub-page routes,
+- [x] Add the minimal catalog and collection-driven service/sub-page routes,
       with a clearly marked Cloudflare draft, official sources and an honest
       verification date for any introductory claim. No invented product rows
       or dates standing in for unfinished research.
-- [ ] Add the PR check/build workflow with pinned, license-verified actions,
+- [x] Add the PR check/build workflow with pinned, license-verified actions,
       read-only permissions, no secrets, and cancellation of superseded runs.
       Update the root layout table and setup/status docs as files land.
 
@@ -146,6 +148,15 @@ unknown-group rejection, and exclusion of working docs and `_template` from
 published output. The license/output checks reject representative invalid
 fixtures. The PR workflow uses the same passing commands locally; record its
 first hosted result when an actual PR runs it.
+
+**Verified 2026-09-08:** frozen install, `pnpm check` (0 Astro diagnostics,
+formatting, 381-package license inventory, five passing tests), and
+`pnpm build` pass in sequence. The real Astro fixture builds cover nested
+routes, working-doc/template exclusion, stale warnings and invalid records;
+output/license fixtures reject representative failures. Cache isolation is
+recorded in RE-008; multi-document lockfile handling is RE-009. Empty product
+and sub-page collections emit expected warnings until real content lands.
+The first hosted PR workflow run remains pending an actual PR. M1.2 is next.
 
 ### M1.2 — Look, feel, and accepted style guide
 
@@ -204,6 +215,13 @@ third-party asset requests. Stale UI gets its full content acceptance in M2.1.
       seven-day retirement tracked atomically outside the docroot. Confirm
       remote runtime availability with read-only checks before selecting a
       helper dependency.
+- [ ] Add `pnpm run deploy` as the package-script wrapper for `scripts/deploy.sh`,
+      forwarding arguments so `pnpm run deploy --dry-run` previews the operation
+      and `pnpm run deploy --yes` uses the script's confirmation bypass. Document
+      these human-run commands in the README and verify argument forwarding
+      through the local fixture harness. Add the wrapper with the tested
+      script, not as a placeholder before M1.4. Use the explicit `run` form:
+      bare `pnpm deploy` is pnpm's built-in workspace packaging command.
 - [ ] Verify deployment and cleanup using temporary local fixtures covering
       first retirement, unexpired/expired assets, rollback/reactivation and
       second retirement, transfer failure, missing/corrupt state, unsafe paths
@@ -226,7 +244,7 @@ third-party asset requests. Stale UI gets its full content acceptance in M2.1.
 implementation checks pass and the owner has launched and checked the shell at `https://devstack.fyi/`. Until the owner performs
 that last item, report “implementation ready; owner launch pending.”
 
-## M2 — Cloudflare end to end  `pending`
+## M2 — Cloudflare end to end `pending`
 
 Goal: the first service answers all four reader questions in vision.md.
 Depends on M1. The four passes below preserve the entire owner-selected
@@ -297,7 +315,7 @@ limits and rendering requirements, with unresolved research recorded.
 for with current sources, and the owner-reviewed `/cloudflare/` is published.
 A partial draft may be published earlier by the owner; it does not complete M2.
 
-## M3 — Diagram library and identity polish  `pending`
+## M3 — Diagram library and identity polish `pending`
 
 Goal: turn the proven Cloudflare visuals into reusable components and polish
 sharing/accessibility, extending the accepted M1 style guide. Depends on M2;
@@ -320,7 +338,7 @@ interaction or static meaning; generated social images exist and match page
 metadata; the accessibility pass has no unresolved blocking defects, and
 check/build plus browser interaction checks under the CSP pass.
 
-## M4 — Three services, search, and capability index  `pending`
+## M4 — Three services, search, and capability index `pending`
 
 Goal: prove the model across categories and make the growing catalog easy to
 navigate. Depends on M3. Service selection is the remaining scope input;
@@ -352,7 +370,7 @@ code. Search finds representative product names, aliases, and capabilities;
 the index maps comparable records accurately; both work in both themes under
 the CSP, all checks pass, and the owner has published the result.
 
-## M5 — Contribution and maintenance  `pending`
+## M5 — Contribution and maintenance `pending`
 
 Goal: make outside updates and periodic source checks repeatable. Depends on
 M4; minimal contribution instructions may land earlier if outside PRs arrive.

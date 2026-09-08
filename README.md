@@ -28,10 +28,55 @@ are in [docs/plan.md](docs/plan.md).
 
 ## Status
 
-**Pre-code (milestone M0, planning).** The repository currently contains only
-the project documentation. The Astro project, deploy script, and first service
-content land in M1 and M2. Planning checks and the milestone ladder are
-complete; M0 awaits the maintainer's go-ahead to build, starting with M1.1.
+**M0 complete; M1 in progress.** The owner approved the plan on 2026-09-08.
+M1.1 is complete: the static Astro foundation, a clearly marked Cloudflare
+draft, and passing local install/check/build and fixture tests. The first
+hosted PR check remains pending an actual PR.
+The next step is M1.2: iterate on light/dark prototypes and agree on a style
+guide before implementing the full shell. Product research is M2; the deploy
+script and reference nginx configuration arrive in M1.4.
+
+## Local development
+
+Install Node **24.18.1** (see `.node-version`). Use pnpm **12.3.4**:
+
+- With Corepack available: `corepack enable pnpm`, or prefix commands below
+  with `corepack` if the shim is not enabled.
+- Without Corepack: `npm install --global pnpm@12.3.4` after installing Node.
+
+```sh
+pnpm install --frozen-lockfile
+pnpm dev
+pnpm check
+pnpm build
+```
+
+`pnpm dev` starts the local development server and prints its URL.
+`pnpm preview` serves the static `dist/` build locally. It does not send the
+production CSP/header policy; full browser/header validation is M1.3/M1.4.
+The current pages are a minimal foundation, not the accepted visual design.
+
+`pnpm check` runs Astro/TypeScript diagnostics, formatting, the installed and
+all-platform lockfile license audit, and fixture tests. `pnpm build` generates
+static routes, validates content relationships, warns about stale dates, and
+checks output for inline scripts/styles and non-self/missing assets.
+`pnpm format` applies formatting; `pnpm test` runs the checks' regression tests
+and real Astro builds in temporary directories outside the checkout.
+
+The empty `products` and `pages` collections currently produce Astro warnings:
+no Cloudflare product research or sub-pages have landed yet. The excluded
+fictional `_template` exercises those shapes in temporary build tests.
+
+Dependencies use exact pins and the lockfile. On an upgrade, review package
+metadata and reconcile [license evidence](docs/dependency-licenses.md), including
+optional packages absent from your platform. The three exact release-age
+exceptions in `pnpm-workspace.yaml` match the approved M0 spike; do not disable
+the age or build-script approval policies globally. Astro telemetry is disabled
+in all project scripts and CI.
+
+Deployment remains manual and human-run; no deployment command exists yet.
+M1.4 will add `pnpm run deploy` and `pnpm run deploy --dry-run` alongside the tested
+deployment script.
 
 ## License
 
