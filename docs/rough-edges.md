@@ -24,6 +24,18 @@ Newest first. RE-numbers are never reused.
 
 ---
 
+## RE-007: Prettier Astro formatting can need a second pass for compact custom-element markup  (2026-09-08, status: worked-around)
+Environment: Prettier 3.9.6, prettier-plugin-astro 0.14.1, Astro 7.3.2.
+Observed: formatting a compact document containing two adjacent `<ds-test>` elements succeeded, but an immediate `--check` failed. The second write moved the closing `body` tag's final `>` onto a new line; the next check passed.
+Impact: after a first formatting pass, run the check before assuming the result is stable. A second write resolved this fixture; do not introduce a loop that silently retries forever.
+Links: https://github.com/withastro/prettier-plugin-astro
+
+## RE-006: Astro's permissively licensed direct packages pull in copyleft build dependencies  (2026-09-08, status: worked-around)
+Environment: Astro 7.3.2, MDX 8.0.1, pnpm 12.3.4, Node 24.18.1, Linux x64.
+Observed: `pnpm licenses list --json` found `lightningcss@1.33.0` and `lightningcss-linux-x64-gnu@1.33.0` under MPL-2.0 through `vite@8.2.2`, plus `@img/sharp-libvips-linux-x64@1.3.3` under LGPL-3.0-or-later through optional `sharp@0.35.4`. Confirmed in installed package metadata and Lightning CSS's LICENSE. Lightning CSS is a regular Vite dependency, so disabling a transform does not remove the licensing issue; omitting Sharp alone does not fix it.
+Impact: checking only Astro's MIT metadata misses a conflict with D-002. The owner approved named build-only exceptions (D-016); the installed tree and newly locked platform packages still need an audit in M1. Published site assets retain the existing policy.
+Links: https://registry.npmjs.org/lightningcss/1.33.0 ; https://registry.npmjs.org/@img/sharp-libvips-linux-x64/1.3.3 ; https://pnpm.io/cli/licenses
+
 ## RE-005: Astro's `security.csp` does not hash `is:inline` scripts, and its meta tag lands after them  (2026-09-08, status: worked-around)
 Environment: Astro 7.3.2, `security: { csp: true }`, static build; headless Chrome 152 driven over the DevTools protocol.
 Repro: a page with an `is:inline` theme script as the first child of `<head>` plus a processed component `<script>`; build; hash every inline script body and compare with the emitted `<meta http-equiv="content-security-policy">`; then serve the same HTML with that policy copied into a `Content-Security-Policy` header.

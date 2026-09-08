@@ -25,6 +25,55 @@ Decision / Context / Consequences / Reopen if
 
 ---
 
+## D-016: Pinned build toolchain, build-only license exceptions, and static delivery contract  (2026-09-08, status: accepted)
+
+**Decision.** Use the tested Node 24.18.1 / pnpm 12.3.4 / Astro 7.3.2 /
+TypeScript 6.0.3 toolchain, exact direct-package pins and a frozen lockfile.
+Prettier with its Astro plugin handles formatting; no separate ESLint stack
+initially. `pnpm check` covers types, formatting, and dependency licenses;
+`pnpm build` compiles content and checks output. GitHub Actions runs both on
+PRs with read-only permissions and no deploy. The full pins, audit rules, and
+M1 implementation checks are in [toolchain.md](toolchain.md).
+
+**D-002 amendment.** The owner authorized the discovered MPL Lightning CSS
+and LGPL libvips dependencies as build tools on 2026-09-08. Permit the named
+packages and their reviewed platform distributions solely as unmodified
+local/CI build dependencies; retain the permissive-only rule for shipped
+site code and assets and all other dependencies. MPL is file-level copyleft,
+not a permissive license; this allowance does not silently reclassify it or
+permit arbitrary copyleft runtime code. See the
+[Mozilla MPL FAQ](https://www.mozilla.org/en-US/MPL/2.0/FAQ/) and the package
+metadata evidence in toolchain.md. Record exact admitted packages in the M1
+license inventory; an unrelated build dependency still needs review.
+
+**Delivery.** Complete D-012 with a five-minute TTL for successful HTML and
+unhashed files, one-year immutable hashed assets, no-store 404s, and seven
+full days of retention starting at asset retirement. Deploy uploads assets
+before HTML, protects the old asset tree from rsync deletion, then reconciles
+an atomic retirement ledger under a remote lock. Reactivation resets the
+retirement clock; interrupted transfers never trigger cleanup. This bounds
+cache freshness and supports rollback without claiming atomic deployment or
+support for indefinitely open tabs.
+
+**CSP, approved by the owner on 2026-09-08.** Full static nginx CSP,
+external hashed scripts and CSS, blocking external theme initializer, and
+Prism token classes. This replaces the architecture draft's earlier meta-CSP
+recommendation. No nginx changes occur in M0; the reference vhost
+and deploy code land in M1. The owner performs the sudo installation, nginx
+configuration test, and reload, and runs the deploy script.
+
+**Context.** The toolchain spike passed frozen install, type check, static
+build, formatting, and browser script execution under the proposed header.
+Its transitive-license audit exposed a conflict missed by direct-package
+checks: Vite requires MPL Lightning CSS, while optional Sharp brings LGPL
+libvips. The owner accepted build-only use; hiding these packages from the
+audit or calling all development dependencies exempt would weaken D-002
+beyond that authorization. RE-006 records the finding.
+
+**Reopen if.** A tool upgrade breaks the tested checks, a published asset
+requires an excluded license, concrete defects justify a linter, or seven-day
+asset retention causes either broken readers or excessive disk use.
+
 ## D-015: Diagram interactivity is vanilla custom-element scripts; no island framework ships with the site  (2026-09-08, status: accepted)
 
 **Decision.** Interactive diagrams (D-007) are Astro components whose SVG is
@@ -384,7 +433,7 @@ The 2026-09-08 triage confirmed a PR build check (M1) and CONTRIBUTING.md
 single-human gate a bottleneck, or a bad deploy shows the manual gate is not
 enough.
 
-## D-002: Apache-2.0 license; permissive dependencies only  (2026-09-08, status: accepted)
+## D-002: Apache-2.0 license; permissive dependencies only  (2026-09-08, status: amended by D-016 for named build tools)
 
 **Decision.** The repository is licensed under Apache-2.0 (the LICENSE file
 was committed by the owner before scaffolding). Dependencies must carry a

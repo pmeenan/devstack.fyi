@@ -75,14 +75,16 @@ needs evidence.
       deploy-script ergonomics, the five vhost changes). Open question 10
       and the values it leaves (HTML TTL, grace duration, highlighter,
       script inlining) roll into the toolchain item.
-- [ ] Toolchain decisions: Astro version, pnpm, TypeScript strict config,
-      formatter/linter, `pnpm check` and `pnpm build` as the standard checks,
-      GitHub Actions on PRs, license audit approach, the nginx reference
-      config the owner applies on plex (D-012 `/_astro/` immutable rule,
-      `try_files … =404` + custom 404, apex canonical redirect; all found
-      missing/wrong in the 2026-09-08 vhost read), the CSP approach (open
-      question 10), and the grace duration and safe cleanup of retired hashed
-      assets. Record in decisions.md.
+- [x] Toolchain decisions: tested pins, strict config, formatter/checks, PR
+      workflow, transitive-license audit and owner-approved build-tool
+      exceptions, five-minute HTML TTL, seven-day asset retention and safe
+      cleanup are recorded in D-016 and [toolchain.md](toolchain.md)
+      (2026-09-08). Frozen install, check, build, formatting, and real-header
+      browser script execution passed in a throwaway project. The owner
+      approved full nginx CSP with external scripts and CSS on 2026-09-08
+      (question 10 answered). M1 implements the contract and reference vhost;
+      the owner performs the sudo install, nginx test, and reload on plex.
+      No server changes in M0.
 - [ ] Rewrite the provisional ladder below into real milestones with exit
       criteria.
 

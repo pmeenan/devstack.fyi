@@ -72,22 +72,17 @@ Numbering is stable because plan.md and architecture.md refer to it.
 
 ### Still open (answer during M0)
 
-- **10. Content-Security-Policy on plex.** The devstack.fyi vhost already
-   sends a strict CSP header whose `script-src` has no `'unsafe-inline'`,
-   nonce, or hash, so Astro's inlined scripts (theme no-flash snippet, small
-   diagram scripts) would be blocked in production while working in
-   `pnpm preview`. Options and a recommendation (trim the header, let
-   Astro's `security.csp` emit hashes) are in the plex server check section
-   of architecture.md; RE-004. The 2026-09-08 diagram mechanism spike
-   replayed real builds under the current header and under Astro's own
-   policy as a header: the recommendation works for the chosen diagram
-   mechanism, but Astro never hashes the `is:inline` theme snippet (its hash
-   must be added by hand or the snippet made external; RE-005), and Shiki's
-   inline styles conflict with a hashed `style-src`, so the highlighter
-   choice belongs with this decision. → M0 toolchain decisions; needs the
-   owner because the header lives in nginx config.
+None; questions 1–10 are answered. M0 still requires the milestone ladder
+rewrite and the owner's call that the plan is ready to build from.
 
-### Answered (2026-09-08 triage)
+### Answered (2026-09-08)
+
+- **10. Content-Security-Policy on plex.** The owner approved a full nginx
+  header with external hashed scripts/CSS, a blocking external theme
+  initializer, and Prism token classes, replacing the earlier meta-policy
+  recommendation. [toolchain.md](toolchain.md) contains the exact contract
+  and browser evidence (D-016). M1 prepares the reference vhost; the owner
+  performs its sudo installation, nginx configuration test, and reload.
 
 - **5. URL and trailing-slash policy** → `/cloudflare/` with the trailing
    slash: default `build.format: 'directory'` plus `trailingSlash: 'always'`.

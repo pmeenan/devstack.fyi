@@ -1,10 +1,15 @@
 # Architecture
 
-> **Status: first full draft (2026-09-08), M0.** Everything below the "Evidence"
+> **Status: full draft with toolchain contract (2026-09-08), M0.** Everything below the "Evidence"
 > line is a dated record of a check that was actually run; everything above it
 > is the shape the M1 scaffold builds to. Shape claims that no check has covered
 > yet say "verify in M1". The owner points at the end are the items this draft
 > asks the owner to confirm or veto before M1 starts.
+
+The tested version pins, check commands, license exceptions, and delivery
+contract are in [toolchain.md](toolchain.md) (D-016). The owner-approved CSP
+there supersedes the earlier recommendation in this draft's dated evidence.
+Implementation and nginx validation are M1.
 
 ## What the system is
 
@@ -71,7 +76,7 @@ nginx vhost is part of the architecture even though agents never touch it.
 
 | Path | Purpose | Lands |
 | --- | --- | --- |
-| `astro.config.ts` | `site: 'https://devstack.fyi'`, `trailingSlash: 'always'`, default `build.format: 'directory'`, MDX and sitemap integrations, `fonts`, `security.csp` (pending open question 10) | M1 |
+| `astro.config.ts` | `site: 'https://devstack.fyi'`, `trailingSlash: 'always'`, default `build.format: 'directory'`, MDX and sitemap integrations, `fonts`, external scripts/CSS, no CSP meta policy (D-016) | M1 |
 | `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `tsconfig.json` | Toolchain; `pnpm-workspace.yaml` carries the `allowBuilds` map (RE-002); `tsconfig.json` extends `astro/tsconfigs/strict` and defines the `@components/*` and `@lib/*` aliases | M1 |
 | `src/content.config.ts` | The three collections from [content-schema.md](content-schema.md) | M1 |
 | `src/lib/` | Framework-free TypeScript: `taxonomy.ts` (categories, stale threshold, `isStale`), `urls.ts` (entry id → path, GitHub edit URL), `stale.ts` (the build-time stale pass) | M1 |
@@ -200,10 +205,9 @@ fail the build; staleness only warns (D-011).
   never leaves the browser (D-005).
 - **No flash.** A tiny script as the first child of `<head>` reads the
   stored value and sets `data-theme` before the first paint. It is the only
-  script that must run before render, and it is the one script Astro's CSP
-  support does not hash (RE-005); its delivery (hashed inline via
-  `security.csp.scriptDirective.hashes`, or an external blocking script) is
-  settled with open question 10 in the toolchain item.
+  script that must run before render. Import it with `?url` and emit an
+  external classic blocking script before styles (D-016); this avoids the
+  unhashed inline-script trap in RE-005.
 - **Motion.** Durations are tokens; `@media (prefers-reduced-motion: reduce)`
   zeroes them at the token level, so components and diagrams inherit the
   behavior without each checking the media query (triage 2026-09-08,
@@ -217,7 +221,7 @@ The whole inventory, so a future agent can see when it grows:
 
 | Script | Role | Runs | Ships as |
 | --- | --- | --- | --- |
-| Theme snippet | Set `data-theme` from storage before paint | Every page | Inline (hashed) or external blocking; open question 10 |
+| Theme snippet | Set `data-theme` from storage before paint | Every page | External hashed classic blocking script (D-016) |
 | Theme toggle | Flip and store the preference | Every page | Astro component `<script>`, bundled once |
 | Copy button | Copy a snippet's text; confirm in the button | Pages with code | Astro component `<script>`, bundled once |
 | Diagram elements | Hover/pin/caption/keyboard for `<ds-…>` custom elements | Pages that import a diagram | Per-component `<script>`, bundled once per page (D-015) |
@@ -227,10 +231,10 @@ Rules: no framework runtime, no `client:*` islands (D-015); no script fetches
 anything at runtime except the M4 search index from the same origin; every
 feature works without its script, degraded (the toggle disappears, the copy
 button is absent, the diagram is a static SVG with its captions in the HTML).
-Astro inlines a component script below Vite's `assetsInlineLimit` and emits
-it as a `/_astro/*.js` module above it; the toolchain item decides whether
-to force external scripts (`assetsInlineLimit: 0`) as part of the CSP
-answer (diagram mechanism spike below).
+Force external scripts with `vite.build.assetsInlineLimit: 0` and external
+CSS with `build.inlineStylesheets: 'never'` (D-016). Component scripts ship
+as hashed `/_astro/*.js` modules; the theme initializer is the classic
+blocking exception.
 
 ## Diagrams
 
@@ -272,26 +276,28 @@ props; they never fetch.
   `<Font />` component emits preloads (verified 2026-09-08 against the
   [fonts guide](https://docs.astro.build/en/guides/fonts/); pin the Astro
   version and confirm the output path in M1). Font files must carry a
-  permissive license (D-002); the face choice is a toolchain-item call.
+  license admitted under D-002; Inter and JetBrains Mono are the candidates
+  with OFL-1.1 metadata (toolchain.md). Verify and retain the font licenses in M1.
 - **Images** that pages need go through `src/assets/` so Astro hashes and
   optimizes them; `public/` holds only files whose URL must be stable
   (`favicon.svg`, `robots.txt`). Anything in `public/` gets the short TTL,
   so nothing large or frequently changed belongs there (D-012).
-- **Code snippets** are fenced blocks in MDX rendered by Astro's built-in
-  highlighter. Its default emits inline `style` attributes, which a hashed
-  `style-src` rejects (RE-005); the highlighter choice (CSS-class themes
-  versus inline styles) belongs to the open question 10 decision.
+- **Code snippets** use `markdown.syntaxHighlight: 'prism'` for fenced MDX
+  blocks and theme-aware CSS for token classes (D-016). Avoid Shiki's default
+  inline style attributes, which the chosen CSP rejects (RE-005).
 
 ## Build, checks, and CI
 
 - `pnpm check` runs `astro check` (TypeScript strict across `.astro` and
-  `.ts`) plus the formatter and linter the toolchain item picks. Do not
+  `.ts`) plus Prettier and the dependency-license audit (D-016); no separate
+  ESLint stack initially. Do not
   count MDX bodies or their component props as type-checked: the current
   [checker implementation](https://github.com/withastro/language-tools/blob/main/packages/language-server/src/check.ts)
   registers no MDX language plugin (reviewed 2026-09-08). Keep typed logic in
   imported `.ts` or `.astro` files; verify any additional MDX checking in M1
   with an intentional type error. `pnpm build` runs `astro build`, compiling
-  MDX and validating collection schemas. These two commands are the gate for
+  MDX and validating collection schemas, followed by a CSP output check.
+  These two commands are the gate for
   every change (workflow.md) and the checks GitHub Actions runs on pull requests.
 - **The stale pass** runs inside the build: the catalog page walks every
   entry and `limits` block once, prints one `[stale] <kind> <id>` line per
@@ -327,11 +333,11 @@ props; they never fetch.
      block because a nested `add_header` drops inherited ones.
   3. An explicit short TTL for HTML and for the unhashed `public/` files
      (today HTML gets `no-cache`; D-012 says a short `max-age`; the toolchain
-     item picks the value or amends D-012).
+     contract sets five minutes with `must-revalidate`, D-016).
   4. A 301 from `www.devstack.fyi` to the apex.
-  5. The CSP header trimmed to what a meta policy cannot carry
-     (`frame-ancestors`, optionally `base-uri`, `form-action`, `object-src`),
-     if option (a) of open question 10 is chosen.
+  5. The full static CSP from toolchain.md, including `frame-ancestors`;
+     scripts and styles are external and no Astro CSP meta policy is used
+     (question 10 answered, D-016).
 - **Cloudflare** proxies the zone, honors origin cache headers, and uses
   strict origin TLS (owner, 2026-09-08). The origin's `Cache-Control` is
   therefore the edge policy too; nothing in the deploy talks to the
@@ -345,8 +351,13 @@ props; they never fetch.
 | Response | `Cache-Control` | Why |
 | --- | --- | --- |
 | `/_astro/**` (hashed scripts, styles, images, fonts) | `public, max-age=31536000, immutable` | The URL changes when the content does |
-| HTML (`*.html`, directory indexes, `404.html`) | short `max-age` (minutes; value in the toolchain item) | Bounds how long a deploy takes to become visible |
+| Successful HTML and directory indexes | `public, max-age=300, must-revalidate` | Bounds cached-page freshness |
+| 404 responses, including missing assets | `no-store` | Avoids caching missing content |
 | Everything else (`robots.txt`, `favicon.svg`, sitemaps) | same short TTL as HTML | Unhashed URLs that change in place |
+
+Apply immutable caching only to successful asset responses; missing assets
+use the custom 404 policy. D-016 and toolchain.md define the full reference
+vhost and the M1 routing/header checks.
 
 Cloudflare does not cache HTML by default and would apply a two-hour default
 edge TTL to un-headed CSS, JS, and fonts, which is why every class gets an
@@ -366,13 +377,16 @@ on failure:
    from step 5, computed without mutating the server. `--dry-run` as a script
    flag stops here. A connection failure
    fails loudly with a pointer to the `Host plex` requirement (see below).
-4. Prompt for confirmation (`--yes` skips it), then run the same rsync
-   without `--dry-run`.
+4. Prompt for confirmation (`--yes` skips it), then upload the new asset set
+   before running the rest of the rsync without `--dry-run`. Hold a remote
+   site-specific lock across inventory, transfers, and cleanup; recheck the
+   preview snapshot before mutation (D-016).
 5. Retire hashed assets only after rsync succeeds. First drop from the ledger
    every path present in the new `dist/`, so a rollback cannot delete an
    active asset using its old retirement date. List `_astro/**` files on the
    server that the new `dist/` no longer contains; record each newly retired
-   path with today's date, retaining existing retirement dates. Delete only
+   path with the remote UTC epoch timestamp, retaining existing retirement
+   times. Delete only
    expired paths that are still absent from the new `dist/`, then drop those
    paths from the ledger after successful deletion. The ledger lives in the deploy
    user's home on plex, outside the docroot, so it is neither served nor in
@@ -381,9 +395,10 @@ on failure:
    itself; only step 5 does, by date.
 
 The grace period starts at retirement, not at the file's mtime, which is why
-a ledger is needed (D-012). Its duration is a toolchain-item decision: at
-least the HTML `max-age` plus a margin for pages already open in a browser
-tab, and long enough to cover several deploys in one day.
+a ledger is needed (D-012). D-016 sets seven full days (604800 seconds).
+Save ledger updates atomically, reject unsafe paths and symlinks, and stop
+cleanup on a malformed ledger. Missing state restarts the grace clock. See
+toolchain.md for failure, rollback, dry-run, and local-fixture requirements.
 
 **ssh dependency.** The script uses the bare `plex` alias, which depends on a
 `Host plex` entry in the maintainer's `~/.ssh/config` (host
@@ -393,19 +408,14 @@ before building, so a fresh machine fails in seconds, not after a build.
 
 ## Security headers
 
-plex already sends a strict CSP whose `script-src` allows no inline script
-(RE-004). Astro can emit a hashed policy for the scripts it processes as a
-`<meta>` tag, but a meta policy cannot loosen a header, cannot carry
-`frame-ancestors`, and misses the `is:inline` theme snippet (RE-005). The
-recommended shape, measured against real headers in the diagram mechanism
-spike below, is option (a): the header keeps only `frame-ancestors` and the
-other directives meta cannot or should not carry; Astro's `security.csp`
-supplies `script-src` and `style-src` with per-build hashes plus the
-remaining fetch directives; the theme snippet's hash is added by hand or the
-snippet becomes external; the code highlighter emits classes rather than
-inline styles. Option (b), keeping the header and shipping every script
-external, is the fallback. This is open question 10 and is decided in the
-toolchain item because the header lives in the owner's nginx config.
+The owner-approved policy is a full static nginx header with external
+hashed scripts and CSS, a parser-blocking external theme initializer, and
+Prism class-based highlighting; no Astro CSP meta policy. This avoids
+RE-005's unhashed inline snippet and meta-order trap while preserving strict
+script/style policy. The header text, Astro settings, and output checks are
+in [toolchain.md](toolchain.md). Question 10 was answered on 2026-09-08.
+M1 writes and tests the reference vhost; the owner performs the sudo install,
+configuration test, and reload on plex.
 
 ## Contribution surface
 
@@ -470,7 +480,8 @@ changing it: each is a build-time step or a component, none needs a server.
   symlinked docroot) need write access to `/var/www` and an nginx change, so
   the ledger is proposed.
 - **The five vhost changes** listed under "Hosting" are the owner's to
-  apply; the toolchain item produces the reference file for review.
+  apply; toolchain.md defines the contract and M1 produces the reference
+  file for review.
 
 ---
 
@@ -736,12 +747,12 @@ Escape to clear, keyboard focus on every node, `aria-pressed` state, and a
   matters for tests; the custom element updates the DOM synchronously on a
   click, whereas a framework island renders asynchronously.
 
-## Open architecture questions
+## Architecture question status
 
-Question 10 (CSP) is the only architecture-blocking question still open; it
-is decided in the M0 toolchain item together with the highlighter choice and
-the script-inlining switch, with the owner because the header lives in nginx
-config. Questions 1 to 9 are answered (features.md, "Answered"); the two
-technical questions that rode along with the content-layer spike (diagram
-components in MDX without a framework runtime; keeping working docs out of
-the build) are answered in that section above.
+Questions 1–10 are answered (features.md). The owner approved the full nginx
+CSP with external scripts/CSS and Prism highlighting on 2026-09-08 (D-016).
+The dated evidence above preserves the earlier alternatives; toolchain.md is
+the implementation contract. The two technical questions from the
+content-layer spike (diagrams in MDX without a framework runtime; excluding
+working docs) are also answered. M1 still implements and validates the shell
+and reference vhost; only the owner changes plex.

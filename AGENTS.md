@@ -24,9 +24,9 @@ affected docs. Until then, these govern.
   plain files; no server process, no serverless functions, no runtime API.
   In-page JavaScript is fine. Deploy is an rsync over ssh to
   `plex:/var/www/devstack.fyi/` run by the human — agents never deploy. (D-001)
-- **Apache-2.0, permissive dependencies only.** Every dependency must be under
-  a permissive license (MIT, BSD, Apache-2.0, ISC, 0BSD or similar), verified
-  from the package's own metadata, not from memory. (D-002)
+- **Apache-2.0, permissive dependencies; named build-tool exceptions.** Verify
+  licenses from package metadata. D-016 allows MPL Lightning CSS and LGPL
+  libvips solely as build tools; shipped assets remain permissively licensed. (D-002)
 - **Lean workflow, human commit gate.** One agent, one pass, human commits.
   Outside contributions arrive as GitHub pull requests through the same gate.
   (D-003)
@@ -69,6 +69,7 @@ build → commit loop, on-demand reviews, and the human commit gate.
 | [docs/vision.md](docs/vision.md) | Why the project exists, who it's for, success criteria, non-goals |
 | [docs/features.md](docs/features.md) | The feature matrix: confirmed scope, proposed additions, open questions |
 | [docs/architecture.md](docs/architecture.md) | Site structure, content model, theming and deploy shape |
+| [docs/toolchain.md](docs/toolchain.md) | Version pins, checks, licenses, CSP/cache and deploy cleanup contract |
 | [docs/decisions.md](docs/decisions.md) | Settled choices (D-NNN). Scan headings; read only the entries your task touches |
 | [docs/rough-edges.md](docs/rough-edges.md) | Findings log (RE-NNN). Grep before adding a finding or debugging weirdness |
 | [docs/content-schema.md](docs/content-schema.md) | Adding or changing service pages, product records, limits, or the collections that load them |
@@ -111,16 +112,11 @@ build → commit loop, on-demand reviews, and the human commit gate.
 
 ## Current status
 
-Milestone **M0 (plan the plan)** — feature triage is done (2026-09-08; all
-proposed rows settled, content model D-010, stale policy D-011, cache policy
-D-012). The Astro content-layer spike is done (2026-09-08; co-located
-`services/<slug>/content/` layout confirmed, Astro 7.3). The plex server check is done (2026-09-08; nginx vhost read over ssh:
-docroot empty, questions 5 and 9 answered, new CSP question 10 plus two M1
-owner-side vhost fixes). The content schema draft is done (2026-09-08;
-D-014, docs/content-schema.md). The diagram mechanism is decided (2026-09-08;
-D-015, vanilla custom-element scripts, no island framework; RE-005 on CSP
-hashing). The architecture first full draft is done (2026-09-08;
-docs/architecture.md, three owner points at its end). Remaining M0 items:
-toolchain decisions, ladder rewrite. See [docs/plan.md](docs/plan.md). No application code exists
-yet; the Astro scaffolding is M1. Keep this paragraph short and current when
-plan.md milestone status changes (rule 4).
+Milestone **M0 (plan the plan)** — feature triage, content/schema spikes,
+diagram mechanism, plex read-only check, and architecture draft are done
+(2026-09-08). The toolchain is verified and recorded in D-016 and
+[docs/toolchain.md](docs/toolchain.md), including owner-approved build-tool
+license exceptions and the approved full nginx CSP. Toolchain decisions are
+done; next is the milestone ladder rewrite. No application code exists yet;
+Astro scaffolding and owner-applied server fixes are M1. See
+[docs/plan.md](docs/plan.md); M0 exits on the owner's call.
