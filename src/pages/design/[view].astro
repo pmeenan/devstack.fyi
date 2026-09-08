@@ -1,0 +1,60 @@
+---
+import Specimen from '../../components/prototype/Specimen.astro';
+import '../../styles/prototype.css';
+
+// Review fixtures are available in dev only, never in dist or the sitemap.
+export function getStaticPaths() {
+  return import.meta.env.DEV
+    ? ['compare', 'light', 'dark'].map((view) => ({ params: { view } }))
+    : [];
+}
+const view = Astro.params.view;
+const themes = view === 'compare' ? ['light', 'dark'] : [view];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Design review · devstack.fyi</title>
+  </head>
+  <body class="design-review">
+    <a class="skip-link" href="#specimens">Skip to prototypes</a>
+    <header class="review-toolbar">
+      <div>
+        <strong>M1.2 / Field notes</strong><span>Round 1 · approved design</span
+        >
+      </div>
+      <nav aria-label="Prototype views">
+        <a
+          href="/design/compare/"
+          aria-current={view === 'compare' ? 'page' : undefined}>Compare</a
+        >
+        <a
+          href="/design/light/"
+          aria-current={view === 'light' ? 'page' : undefined}>Light</a
+        >
+        <a
+          href="/design/dark/"
+          aria-current={view === 'dark' ? 'page' : undefined}>Dark</a
+        >
+      </nav>
+    </header>
+    <p class="review-notice">
+      Fictional services, limits, and dates for visual review only. These views
+      are excluded from the production build.
+    </p>
+    <main
+      id="specimens"
+      class:list={['specimens', { paired: view === 'compare' }]}
+    >
+      {
+        themes.map((theme) => (
+          <Specimen theme={theme === 'dark' ? 'dark' : 'light'} />
+        ))
+      }
+    </main>
+  </body>
+</html>

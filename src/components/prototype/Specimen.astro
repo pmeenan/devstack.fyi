@@ -1,0 +1,274 @@
+---
+interface Props {
+  theme: 'light' | 'dark';
+}
+const { theme } = Astro.props;
+const id = (name: string) => `${theme}-${name}`;
+---
+
+<section
+  class="specimen"
+  data-theme={theme}
+  aria-label={`${theme} theme prototype`}
+>
+  <div class="theme-label">{theme} / specimen 01</div>
+  <header class="site-header">
+    <a class="wordmark" href={'#' + id('catalog')}
+      ><span aria-hidden="true">[ ds ]</span> devstack<span class="domain"
+        >.fyi</span
+      ></a
+    >
+    <span class="small mono">developer field notes</span>
+  </header>
+  <div class="specimen-content">
+    <section id={id('catalog')} class="catalog-section">
+      <p class="eyebrow">THE SERVICE CATALOG</p>
+      <h1>
+        Cloud names.<br /><span class="highlight">Concrete answers.</span>
+      </h1>
+      <p class="intro">
+        What you get, what to run locally, and the limits you’ll hit. Notes from
+        one developer to another.
+      </p>
+      <div class="section-title">
+        <h2>Cloud providers &amp; CDNs</h2><span class="count mono">01</span>
+      </div>
+      <a class="catalog-card" href={'#' + id('service')}>
+        <span class="service-mark mono" aria-hidden="true">N/</span>
+        <div>
+          <div class="card-heading">
+            <h3>Nimbus</h3><span class="badge draft">Draft</span>
+          </div><p>
+            Compute, storage, and a few configuration traps worth knowing.
+          </p><span class="small muted">3 products · sample service</span>
+        </div>
+        <span class="card-arrow" aria-hidden="true">↗</span>
+      </a>
+    </section>
+
+    <article id={id('service')} class="service-section">
+      <p class="eyebrow">SERVICE NOTES / 01</p>
+      <div class="service-title">
+        <h2>Nimbus</h2><span class="badge draft">Draft</span>
+      </div>
+      <p class="intro">
+        A cloud toolkit, translated into the pieces you actually build with.
+      </p>
+      <p class="metadata">
+        Sample verification date <time datetime="2026-09-08">08 Sep 2026</time
+        ><span>·</span><a href={'#' + id('sources')}>Sources &amp; notes ↗</a>
+      </p>
+      <nav class="section-nav" aria-label={`${theme} service sections`}>
+        <a href={'#' + id('products')}>01 Products</a><a
+          href={'#' + id('limits')}>02 Limits</a
+        ><a href={'#' + id('local')}>03 Local dev</a><a href={'#' + id('flow')}
+          >04 Request flow</a
+        >
+      </nav>
+
+      <section id={id('products')}>
+        <div class="section-title">
+          <h3>What the names mean</h3><span class="mono small"
+            >01 / PRODUCTS</span
+          >
+        </div>
+        <div
+          class="table-scroll"
+          tabindex="0"
+          role="region"
+          aria-label={`${theme} product table, scroll horizontally on small screens`}
+        >
+          <table>
+            <caption class="sr-only"
+              >Fictional product capabilities and local equivalents</caption
+            ><thead
+              ><tr
+                ><th scope="col">Product</th><th scope="col">What you get</th
+                ><th scope="col">Run it locally</th></tr
+              ></thead
+            ><tbody>
+              <tr
+                ><th scope="row"
+                  ><code>Spark</code><span class="cell-note">Compute</span></th
+                ><td>Run a request handler</td><td>Local dev server</td></tr
+              >
+              <tr
+                ><th scope="row"
+                  ><code>Pocket</code><span class="cell-note">Key–value</span
+                  ></th
+                ><td>Store small values by key</td><td>In-memory adapter</td
+                ></tr
+              >
+              <tr
+                ><th scope="row"
+                  ><code>Crate</code><span class="cell-note">Objects</span></th
+                ><td>Store files and blobs</td><td>Filesystem adapter</td></tr
+              >
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id={id('limits')}>
+        <div class="section-title">
+          <h3>The limits you’ll hit</h3><span class="mono small"
+            >02 / LIMITS</span
+          >
+        </div>
+        <p class="muted">
+          Example quotas for Spark. Real entries cite each limit separately.
+        </p>
+        <div
+          class="table-scroll"
+          tabindex="0"
+          role="region"
+          aria-label={`${theme} limits table, scroll horizontally on small screens`}
+        >
+          <table class="limits-table">
+            <caption class="sr-only">Fictional Spark plan limits</caption><thead
+              ><tr
+                ><th scope="col">Metric</th><th scope="col">Sandbox</th><th
+                  scope="col">Team</th
+                ></tr
+              ></thead
+            ><tbody>
+              <tr
+                ><th scope="row">Requests / day</th><td>10,000</td><td
+                  >1,000,000</td
+                ></tr
+              >
+              <tr
+                ><th scope="row">Payload size</th><td>1 MB</td><td>10 MB</td
+                ></tr
+              >
+              <tr
+                ><th scope="row">Retention</th><td>24 hours</td><td
+                  ><span class="muted">Not published</span></td
+                ></tr
+              >
+            </tbody>
+          </table>
+        </div>
+        <p class="small muted">
+          Illustrative values only · <a href={'#' + id('sources')}
+            >Sample source note ↗</a
+          >
+        </p>
+      </section>
+
+      <section id={id('local')}>
+        <div class="section-title">
+          <h3>Start on localhost</h3><span class="mono small"
+            >03 / LOCAL DEV</span
+          >
+        </div>
+        <p>
+          Keep the handler small. Swap the storage adapter when you run locally.
+        </p>
+        <div class="code-block">
+          <div class="code-header">
+            <span class="mono small">handler.ts</span><span class="small muted"
+              >TypeScript</span
+            >
+          </div><pre><code><span class="syntax-keyword">export default</span> {'{'}
+  <span class="syntax-function">fetch</span>() {'{'}
+    <span class="syntax-keyword">return new</span> Response(<span class="syntax-string">"Hello, localhost."</span>);
+  {'}'}
+{'}'};</code></pre>
+        </div>
+        <aside class="callout">
+          <strong
+            ><span aria-hidden="true">↳</span> Local isn’t production</strong
+          ><p>
+            A local adapter helps test your code. Check deployed behavior before
+            relying on timing or persistence.
+          </p>
+        </aside>
+      </section>
+
+      <section id={id('flow')}>
+        <div class="section-title">
+          <h3>Follow a request</h3><span class="mono small">04 / THE SHAPE</span
+          >
+        </div>
+        <figure
+          class="flow-diagram"
+          tabindex="0"
+          aria-label="Request diagram, scroll horizontally on small screens"
+        >
+          <svg
+            viewBox="0 0 560 150"
+            role="group"
+            aria-labelledby={id('flow-title')}
+          >
+            <title id={id('flow-title')}>
+              Example request flows from client to Spark handler to Pocket
+              storage. Select a node for its note.
+            </title>
+            <path
+              class="connection"
+              d="M156 72H202m-8-6 8 6-8 6M358 72h46m-8-6 8 6-8 6"></path>
+            <a
+              href={'#' + id('client-note')}
+              aria-label="Client: read request note"
+              ><rect x="2" y="34" width="154" height="76" rx="8"></rect><text
+                x="79"
+                y="67">Client</text
+              ><text class="svg-subtitle" x="79" y="90">HTTP request</text></a
+            >
+            <a
+              class="compute-node"
+              href={'#' + id('spark-note')}
+              aria-label="Spark: read handler note"
+              ><rect x="202" y="34" width="156" height="76" rx="8"></rect><text
+                x="280"
+                y="67">Spark</text
+              ><text class="svg-subtitle" x="280" y="90">Request handler</text
+              ></a
+            >
+            <a
+              href={'#' + id('pocket-note')}
+              aria-label="Pocket: read storage note"
+              ><rect x="404" y="34" width="154" height="76" rx="8"></rect><text
+                x="481"
+                y="67">Pocket</text
+              ><text class="svg-subtitle" x="481" y="90">Key–value store</text
+              ></a
+            >
+          </svg>
+          <figcaption class="small muted">
+            Select a node to jump to its note. Fictional architecture.
+          </figcaption>
+          <dl class="flow-notes">
+            <div id={id('client-note')}>
+              <dt>01 Client</dt><dd>Sends an HTTP request to the handler.</dd>
+            </div><div id={id('spark-note')}>
+              <dt>02 Spark</dt><dd>Runs application code and reads a value.</dd>
+            </div><div id={id('pocket-note')}>
+              <dt>03 Pocket</dt><dd>
+                Returns the stored value to the handler.
+              </dd>
+            </div>
+          </dl>
+        </figure>
+      </section>
+      <section id={id('sources')} class="source-note">
+        <h3>Sources &amp; verification</h3><p>
+          This specimen uses invented products and quotas. Published service
+          notes will link to dated official sources here.
+        </p><div class="badge-samples">
+          <span class="badge reviewed">Reviewed</span><span class="badge draft"
+            >Draft</span
+          ><span class="badge stale">Needs recheck</span><span
+            class="small muted">Status treatments</span
+          >
+        </div>
+      </section>
+    </article>
+    <footer class="specimen-footer">
+      <span class="wordmark">[ ds ] <span>devstack.fyi</span></span><span
+        class="small muted">Read the docs. Keep the notes.</span
+      >
+    </footer>
+  </div>
+</section>

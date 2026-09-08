@@ -107,7 +107,7 @@ contracts; the scopes and exit criteria here determine the work order.
 No load-bearing choices change in this rewrite.
 
 Work in order, one implementation step or content pass per task unless the
-owner asks for a larger unit. M0 is approved and M1.1 is complete; **next is M1.2**. Each
+owner asks for a larger unit. M0 is approved and M1.1–M1.2 are complete; **next is M1.3**. Each
 handoff includes the working-tree changes and relevant verification; the
 human commits. All implementation steps require `pnpm check` and
 `pnpm build` once available. Temporary fixtures and browser output stay
@@ -156,27 +156,34 @@ routes, working-doc/template exclusion, stale warnings and invalid records;
 output/license fixtures reject representative failures. Cache isolation is
 recorded in RE-008; multi-document lockfile handling is RE-009. Empty product
 and sub-page collections emit expected warnings until real content lands.
-The first hosted PR workflow run remains pending an actual PR. M1.2 is next.
+The first hosted PR workflow run remains pending an actual PR.
 
-### M1.2 — Look, feel, and accepted style guide
+### M1.2 — Look, feel, and accepted style guide `done`
 
-- [ ] Build a representative visual prototype using the M1.1 scaffold:
+- [x] Build a representative visual prototype using the M1.1 scaffold:
       catalog cards, service headings, product/limits tables, code snippets,
       badges, and a sample diagram treatment at narrow and wide sizes in
       both light and dark themes. Fictional sample content is enough to
       judge the design; keep it out of published service claims.
-- [ ] Iterate with the owner on typography, spacing, page density, neon
+- [x] Iterate with the owner on typography, spacing, page density, neon
       palette, surfaces, borders, diagram styling, and interaction states.
       Show both themes together in each feedback round and revise until the
       owner is happy with the look and feel; one agent-selected design does
       not complete this step.
-- [ ] Capture the accepted direction in `docs/style-guide.md`, with visual
+- [x] Capture the accepted direction in `docs/style-guide.md`, with visual
       examples and concrete tokens/rules for colors, typography, spacing,
       responsive layout, components, focus/hover states, and reduced motion.
       Check contrast and legibility in both themes before acceptance; keep
       the prototype's implemented tokens aligned with the guide.
-- [ ] **Owner:** accept the style guide and representative light/dark views
+- [x] **Owner:** accept the style guide and representative light/dark views
       before the full shell is built to that direction.
+
+**Round 1, 2026-09-08:** development-only `/design/compare/`,
+`/design/light/`, and `/design/dark/` views implement the accepted Field notes
+direction. [style-guide.md](style-guide.md) records accepted tokens, component
+rules, review links, and validation. Fictional specimens never enter the
+production build or sitemap. The owner approved both themes and the style guide on
+2026-09-08 ("Both approved"). M1.2 is complete; M1.3 is next.
 
 **Step exit:** the owner is happy with both themes and the style guide records
 that accepted direction with enough detail for later agents to implement it
