@@ -107,14 +107,14 @@ contracts; the scopes and exit criteria here determine the work order.
 No load-bearing choices change in this rewrite.
 
 Work in order, one implementation step or content pass per task unless the
-owner asks for a larger unit. M0 is approved and M1.1–M1.3 are complete; **M1.4 implementation is ready; owner launch is pending**. Each
+owner asks for a larger unit. M0 and M1 are complete; **next is M2.1, Cloudflare developer-platform research and content acceptance**. Each
 handoff includes the working-tree changes and relevant verification; the
 human commits. All implementation steps require `pnpm check` and
 `pnpm build` once available. Temporary fixtures and browser output stay
 outside the repository. Owner review, server changes, and publication are
 explicit exit items; implementation readiness alone does not complete them.
 
-## M1 — Scaffolding and first launch `in progress`
+## M1 — Scaffolding and first launch `done`
 
 Goal: a working static shell, validated content pipeline, and a tested manual
 deploy path. Depends on the owner's M0 exit call. Cloudflare is visibly a
@@ -227,7 +227,7 @@ design routes excluded from the sitemap. Phone captures prompted wider
 product-table columns inside the scroll region. Fictional fixtures remain
 outside the repository. nginx behavior and owner publication remain M1.4.
 
-### M1.4 — Delivery contract and owner launch `in progress`
+### M1.4 — Delivery contract and owner launch `done`
 
 - [x] Implement `scripts/deploy.sh` and its helper, following toolchain.md:
       frozen install/check/build before transfer, fixed target, default dirty
@@ -257,7 +257,7 @@ outside the repository. nginx behavior and owner publication remain M1.4.
       missing pages/assets, security-header inheritance, and `no-store` errors.
       Supply exact owner installation, `nginx -t`, reload, and deployment
       instructions in the README.
-- [ ] **Owner:** review and commit the shell, install/test/reload the vhost on
+- [x] **Owner:** review and commit the shell, install/test/reload the vhost on
       plex, inspect the deploy dry-run, and deploy. Check the public routes,
       redirects, headers, theme and copy interactions; record the outcome.
 
@@ -275,6 +275,47 @@ headers, and `no-store` on 403/404/405. The reference uses directives supported
 by both this local nginx and plex's 1.31.5. README has exact owner commands.
 No server files were changed; no deploy script was run. **Implementation ready;
 owner launch pending.** M2 starts after the owner launch gate above.
+
+**Owner deployment / live checks, 2026-09-08:** the owner ran deployment;
+public catalog and Cloudflare pages return 200. Live Chrome checks pass for
+both themes at 390px/1280px, font loading, section anchors, canonical URLs,
+theme toggling/persistence across pages, and no-JavaScript reading. robots.txt
+and the sitemap are correct. No live snippet exists to exercise copying.
+At this initial check, launch acceptance remained pending:
+
+- Read-only SSH confirmed the old vhost is still installed. Missing pages and
+  assets return the catalog with 200; HTML has `no-cache`, actual hashed assets
+  have no explicit cache policy, HTTPS www serves 200 and HTTP www redirects
+  to HTTPS www. CSP is still the old policy. The owner must install/test/reload
+  the committed nginx reference using the README instructions.
+- Cloudflare injects a `static.cloudflareinsights.com` beacon (blocked by CSP)
+  and sends `NEL`/`Report-To` network-error reporting headers. Disable beacon
+  injection to meet D-005, then recheck public responses. The owner subsequently
+  amended D-005 on 2026-09-08 to allow NEL telemetry; its headers and reports
+  are no longer launch blockers. CSP should remain strict. No server or Cloudflare settings were
+  changed by the checking agent.
+
+**Nginx installation recheck, 2026-09-08:** the owner installed/reloaded the
+reference. Public redirects now target the apex; missing pages/assets return
+404 with the custom body and `no-store`; pages/stable files carry the five-minute
+policy and hashed assets are immutable. Fresh query-string responses carry
+the approved CSP, and live browser theme/layout/persistence/no-JavaScript checks
+pass under it. Cloudflare cache HITs for the plain catalog and service URLs
+still retain the old CSP; fresh responses confirm the origin fix. Browser
+responses still inject the analytics beacon, which the new CSP blocks, even
+on fresh URLs. Disable that injection before final acceptance. NEL is allowed.
+
+**Owner launch accepted, 2026-09-08:** after the owner installed the nginx
+reference, disabled analytics and flushed Cloudflare caches, the final public
+checks pass. All 14 checked page, redirect, error and asset responses carry
+the approved CSP. Pages/stable files have five-minute caching; hashed assets
+are immutable; missing pages/assets return the custom 404 with `no-store`.
+HTTP/www/slash redirects are correct. Live Chrome checks of catalog and
+Cloudflare at 390px and 1280px in both themes pass, including fonts, anchors,
+canonical URLs, theme persistence and no-JavaScript reading. No analytics
+beacon, third-party asset requests or browser errors were observed. NEL
+remains permitted by amended D-005. Copy behavior retains its M1.3 fixture
+coverage because the live draft has no snippets. **M1 is complete; M2.1 is next.**
 
 **M1 exit:** the M1.2 style guide is owner-accepted, M1.1–M1.4
 implementation checks pass and the owner has launched and checked the shell at `https://devstack.fyi/`. Until the owner performs

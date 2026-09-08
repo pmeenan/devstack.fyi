@@ -60,7 +60,7 @@ themes, neon-accented interactive diagrams, and a lighthearted tone.
   readable with JavaScript disabled (interaction is an enhancement).
 - Adding a second service in a different category requires no changes to the
   site shell, only new content and, if needed, new diagram components.
-- No analytics, telemetry, cookies, or tracking (D-005), and no third-party
+- No analytics, cookies, or tracking; only Cloudflare NEL telemetry is allowed (D-005), and no third-party
   asset requests at all: fonts and scripts are self-hosted (triage
   2026-09-08).
 
@@ -78,7 +78,7 @@ themes, neon-accented interactive diagrams, and a lighthearted tone.
 - **No server-side runtime, ever.** No comments system, accounts, forms that
   post anywhere, or serverless functions. Reason: the "no running server"
   constraint is the point of the hosting model.
-- **No analytics or telemetry.** Reason: owner decision (D-005); it keeps the
-  privacy story trivially true.
+- **No analytics; only NEL telemetry.** The owner permits Cloudflare
+  network-error reporting, while other telemetry remains excluded (D-005).
 - **Not a general blog.** Content is organized by service; opinion pieces
   without a service home do not belong here.

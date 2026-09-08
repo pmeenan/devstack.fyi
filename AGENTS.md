@@ -32,8 +32,8 @@ affected docs. Until then, these govern.
   (D-003)
 - **Astro + MDX with a custom layout, pnpm, TypeScript strict.** Content lives
   in Astro content collections. No Starlight or other docs theme. (D-004)
-- **No analytics, no telemetry, no cookies.** Nothing in the published pages
-  phones home. (D-005)
+- **No analytics or cookies; NEL telemetry allowed.** Cloudflare network-error
+  reporting is the sole telemetry exception; site assets stay self-hosted. (D-005)
 - **Service claims are cited and dated.** Every service page names the official
   sources it was built from and carries a last-verified date. Agents never
   write a product-to-capability claim from training knowledge alone. (D-006)
@@ -115,9 +115,10 @@ build → commit loop, on-demand reviews, and the human commit gate.
 
 ## Current status
 
-**M0 complete** — the owner approved the plan on 2026-09-08. **M1 in progress:**
-M1.1 is complete: Astro/content foundation, frozen toolchain, license/output
-checks and PR workflow; local install/check/build and fixture tests pass. M1.2 is complete: the owner approved both themes and the
-[style guide](docs/style-guide.md) on 2026-09-08. M1.3 is complete: the responsive shell, theme/copy interactions, metadata, and CSP browser checks pass. M1.4 delivery tooling and local fixtures are complete; owner vhost installation and launch are pending. Cloudflare remains an introductory
-draft; research is M2. Deployment and server changes remain human-run. See
-[docs/plan.md](docs/plan.md) and the README for commands and verification.
+**M0 and M1 complete (2026-09-08).** The owner approved the plan and style
+guide, deployed the shell, installed the nginx reference, and disabled analytics.
+Local checks and final public route/header/browser checks pass. Cloudflare NEL
+is permitted under amended D-005. Cloudflare remains an introductory draft;
+**M2.1 (developer-platform research and content acceptance) is next.** Deployment
+and server changes remain human-run. See [docs/plan.md](docs/plan.md) and the
+README for commands and verification.

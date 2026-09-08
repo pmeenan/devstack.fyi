@@ -1,10 +1,8 @@
 # Architecture
 
-> **Status: M1.1–M1.3 implemented (2026-09-08).** The routes, collections,
-> accepted Field notes shell and CSP browser checks are complete. Delivery
-> tooling and local nginx/retirement tests are complete; owner launch remains
-> pending in M1.4. The evidence below
-> records earlier spikes, not completion of those later implementation steps.
+> **Status: M1 complete (2026-09-08).** The accepted shell, delivery tooling,
+> local checks and owner launch are complete. Final public header/routing/browser
+> checks pass. The dated evidence below preserves the earlier design spikes.
 
 The tested version pins, check commands, license exceptions, and delivery
 contract are in [toolchain.md](toolchain.md) (D-016). The owner-approved CSP
@@ -17,7 +15,8 @@ A build pipeline with no runtime. Content and code in this repository are
 turned into plain files by Astro on the maintainer's Linux machine; the files
 are copied to an nginx docroot on plex over ssh; Cloudflare fronts the origin
 and caches what the origin's headers allow; the browser gets HTML, CSS, a few
-small scripts, and self-hosted fonts, and never talks to a third party.
+small scripts, and self-hosted fonts. Cloudflare NEL reports are the sole
+permitted third-party telemetry (D-005).
 
 ```
 services/<slug>/content/  src/            (this repo)
@@ -53,8 +52,9 @@ nginx vhost is part of the architecture even though agents never touch it.
   The site is fronted by Cloudflare. (D-001)
 - **Astro + MDX, custom layout, pnpm, TypeScript strict.** Content lives in
   Astro content collections; no docs theme. (D-004)
-- **No third-party runtime behavior.** No analytics, telemetry, or cookies,
-  and no third-party asset requests: fonts and scripts are self-hosted
+- **Self-hosted assets; NEL exception.** No analytics or cookies; only
+  Cloudflare NEL telemetry is allowed,
+  with no third-party asset requests: fonts and scripts are self-hosted
   (triage 2026-09-08). (D-005)
 - **Every service page carries source citations and a last-verified date**
   as first-class fields, not prose. (D-006)

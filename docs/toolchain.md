@@ -3,8 +3,8 @@
 **M0 contract, verified 2026-09-08; D-016.** The build and browser spike
 passes. The owner approved the named build-tool license exceptions; the full
 nginx CSP was approved by the owner on 2026-09-08 (question 10 answered).
-M1.1–M1.4 implementation and local checks are complete. Owner nginx
-installation and launch remain pending; no server changes have been made. Exact license evidence is in
+M1.1–M1.4 implementation, local checks, owner nginx installation and launch
+are complete. Final public header/routing/browser checks pass (2026-09-08). Exact license evidence is in
 [dependency-licenses.md](dependency-licenses.md).
 
 ## Versions and local setup

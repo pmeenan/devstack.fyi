@@ -371,22 +371,30 @@ dated field.
 **Reopen if.** The owner decides to hand-write content directly, or a vendor's
 documentation becomes unavailable to fetch.
 
-## D-005: No analytics, telemetry, or cookies (2026-09-08, status: accepted)
+## D-005: No analytics or cookies; NEL telemetry allowed (2026-09-08, status: amended)
 
-**Decision.** The published site includes no analytics beacon, no telemetry,
-no cookies, and no tracking of any kind.
+**Decision.** The published site includes no analytics beacon, cookies, or
+user tracking. Cloudflare Network Error Logging (NEL), including its
+`NEL`/`Report-To` headers and browser reports to Cloudflare, is explicitly
+allowed. Other telemetry remains excluded. All site assets remain self-hosted.
 
-**Context.** Chosen by the project owner at kickoff from the options of none,
-Cloudflare Web Analytics, and server-logs-only.
+**Amendment, 2026-09-08.** After the first live deployment check found NEL
+headers, the owner explicitly requested allowing NEL telemetry. This is a
+narrow exception to the original no-telemetry policy, not authorization for
+Cloudflare Web Analytics, RUM beacon injection, or build-tool telemetry.
+NEL is no longer a launch blocker and does not require loosening the site's CSP.
 
-**Consequences.** Readership is unknown except through whatever the web server
-on plex logs; that is acceptable. `localStorage` for the theme preference is
-fine (it is not a cookie and never leaves the browser). Self-hosting all
-assets so that no third-party request happens at all is a related
-`proposed` row in features.md, not part of this decision.
+**Context.** The original kickoff choice excluded analytics and telemetry.
+The owner now accepts network-error reporting while retaining the restriction
+on readership analytics and tracking.
 
-**Reopen if.** The owner wants readership data to prioritize which services
-to document.
+**Consequences.** Readership remains unknown except through web-server logs.
+`localStorage` for the theme preference is allowed and stays in the browser.
+The self-hosted-asset rule still prohibits third-party scripts, fonts and
+images; NEL reports are the explicit exception to the broader no-third-party
+requests policy. Cloudflare's injected analytics beacon must still be disabled.
+
+**Reopen if.** The owner wants readership data or additional telemetry.
 
 ## D-004: Astro + MDX with a custom layout, pnpm, TypeScript strict (2026-09-08, status: accepted)
 
