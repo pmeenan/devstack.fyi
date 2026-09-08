@@ -86,7 +86,7 @@ nginx vhost is part of the architecture even though agents never touch it.
 | `src/styles/` | `tokens.css` (theme tokens, neon palette, motion tokens) and `base.css` | M1 |
 | `src/assets/` | Font files and any image Astro processes | M1 |
 | `public/` | Copied verbatim: `favicon.svg`, `robots.txt`, and nothing content-hashed | M1 |
-| `services/<slug>/` | Working docs beside `content/` (see "Content model"); `services/_template/` is the contributor copy source, never built (RE-003) | M1 template, M2 Cloudflare |
+| `services/<slug>/` | Working docs beside `content/` (see "Content model"); `services/_template/` is the contributor copy source, never built (RE-003) | M1 template and Cloudflare skeleton; M2 research/content |
 | `scripts/deploy.sh` | Install, build, dry-run rsync, confirm, rsync, retire hashed assets | M1 |
 | `deploy/nginx/devstack.fyi.conf` | Reference vhost the owner applies on plex by hand | M1 |
 | `.github/workflows/check.yml` | `pnpm check` and `pnpm build` on pull requests; no deploy | M1 |
@@ -189,6 +189,11 @@ declared, a service in an unknown category) throw from the page template and
 fail the build; staleness only warns (D-011).
 
 ## Theming and design tokens
+
+M1.2 prototypes representative pages in both themes and iterates with the
+owner until the look and feel is accepted. `docs/style-guide.md` lands in that
+step and governs the M1.3 shell and later component work; update it when the
+implemented design changes. See [plan.md](plan.md) for the acceptance gate.
 
 - **Tokens.** Every color, radius, shadow, motion duration, and font stack is
   a CSS custom property in `src/styles/tokens.css`. The light palette is

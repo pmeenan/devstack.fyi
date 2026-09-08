@@ -21,15 +21,17 @@ service being documented.
   commits, and deploys.
 
 Almost all code and first-draft content is written by AI agents working from
-the project documentation, directed and reviewed by a human. Candidate features
-still being triaged are listed in [docs/features.md](docs/features.md); nothing
-there is product until it is promoted.
+the project documentation, directed and reviewed by a human. The confirmed
+scope and rejected proposals are recorded in
+[docs/features.md](docs/features.md); implementation steps and exit criteria
+are in [docs/plan.md](docs/plan.md).
 
 ## Status
 
 **Pre-code (milestone M0, planning).** The repository currently contains only
 the project documentation. The Astro project, deploy script, and first service
-content land in M1 and M2.
+content land in M1 and M2. Planning checks and the milestone ladder are
+complete; M0 awaits the maintainer's go-ahead to build, starting with M1.1.
 
 ## License
 

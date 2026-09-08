@@ -3,8 +3,8 @@
 The scope ledger for the M0 planning conversations. Three tiers:
 
 - **Confirmed** — stated project scope. Milestone assignment happens in
-  [plan.md](plan.md) as the plan firms up; the milestone in a row's notes is
-  the triage-time target, not a commitment.
+  [plan.md](plan.md) as the plan firms up; the milestone in a row's notes records
+  the triage-time target; plan.md now supplies the scoped work and exit criteria.
 - **Proposed** — candidate additions awaiting a yes/no from the project owner.
 - **Open questions** — things that shape architecture and need an answer
   during M0.
@@ -22,7 +22,7 @@ Status legend: `confirmed` · `proposed` · `rejected (D-NNN or triage date)`
 | Static site generation, no server process; in-page JS allowed | confirmed | D-001. Output is plain files served from `/var/www/devstack.fyi/`. |
 | Astro + MDX with a custom layout (no docs theme) | confirmed | D-004. Content in Astro content collections. |
 | Light and dark themes | confirmed | D-009. Default follows `prefers-color-scheme`; toggle persisted in `localStorage`; no flash of wrong theme. |
-| Modern-tech, lighthearted visual identity with neon accents | confirmed | D-009. Applies to diagrams, catalog cards, and page chrome. |
+| Modern-tech, lighthearted visual identity with neon accents | confirmed | D-009. Applies to diagrams, catalog cards, and page chrome. M1.2 iterates representative light/dark views with the owner until an accepted style guide is recorded. |
 | Catalog landing page grouped by offering category | confirmed | D-008. Categories are a fixed enum (D-010); initial list under answered question 4 below. |
 | One dedicated path per service (`/cloudflare/` first) | confirmed | D-008. |
 | GitHub links on every page (repo home, edit this page) | confirmed | Stated with the "lean process + github links" contribution model. |
@@ -72,8 +72,8 @@ Numbering is stable because plan.md and architecture.md refer to it.
 
 ### Still open (answer during M0)
 
-None; questions 1–10 are answered. M0 still requires the milestone ladder
-rewrite and the owner's call that the plan is ready to build from.
+None; questions 1–10 are answered and the milestone ladder was rewritten
+2026-09-08. M0 awaits the owner's call that the plan is ready to build from.
 
 ### Answered (2026-09-08)
 
@@ -139,9 +139,9 @@ rewrite and the owner's call that the plan is ready to build from.
    link (D-013); use Free, Pro, and Business only where zone plans apply.
    Service-wide notes to include, from the owner's own zone
    setup: honoring origin cache headers and strict origin TLS.
-   This is a large research task; the M0 ladder rewrite may split M2 into
-   passes (developer platform and edge first, since the service-wide gotchas
-   live there) without changing the total scope. Product names are to be
+   The milestone ladder splits M2 into four passes: developer platform,
+   edge/network and service-wide notes, security/access, then media/AI and
+   complete-service review. The total scope is unchanged. Product names are to be
    re-verified against current Cloudflare docs when the research starts
    (D-006); this list is the owner's scope statement, not a claim about
    current product naming.

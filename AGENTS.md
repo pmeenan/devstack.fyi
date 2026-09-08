@@ -117,6 +117,7 @@ diagram mechanism, plex read-only check, and architecture draft are done
 (2026-09-08). The toolchain is verified and recorded in D-016 and
 [docs/toolchain.md](docs/toolchain.md), including owner-approved build-tool
 license exceptions and the approved full nginx CSP. Toolchain decisions are
-done; next is the milestone ladder rewrite. No application code exists yet;
-Astro scaffolding and owner-applied server fixes are M1. See
-[docs/plan.md](docs/plan.md); M0 exits on the owner's call.
+done; the milestone ladder now has scoped steps and exit criteria. M0 awaits
+the owner's call that the plan is ready to build from; then M1.1 starts the
+Astro/content foundation. No application code exists yet; server fixes and
+launch remain owner-run M1 work. See [docs/plan.md](docs/plan.md).
