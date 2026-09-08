@@ -24,6 +24,13 @@ Newest first. RE-numbers are never reused.
 
 ---
 
+## RE-004: The devstack.fyi vhost on plex sends a CSP that blocks inline scripts  (2026-09-08, status: open)
+Environment: nginx 1.31.5 on plex; confirmed by reading `/etc/nginx/sites-available/devstack.fyi` over ssh (first seen over HTTP).
+Observed: a server-level `add_header Content-Security-Policy "default-src 'self' data: blob:; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" always;` with no per-`location` override, so it is inherited by every response. No nonce, hash, or `'unsafe-inline'` in `script-src`.
+Expected: an origin with no site on it yet to send no CSP, or one the build controls.
+Impact: any inline `<script>` (the theme no-flash snippet, diagram scripts Astro inlines when small, `is:inline` scripts) works in `pnpm preview` and is silently blocked in production; `pnpm preview` does not send the header, so the gap is invisible until deploy. Two nginx facts matter for the fix: a nested block that sets its own `add_header` drops all inherited `add_header` directives (so a future `/_astro/` cache block must re-add CSP), and `frame-ancestors` is ignored in a `<meta>` CSP, so it must stay in the header even if Astro's `security.csp` takes over `script-src`/`style-src`. Resolution is open question 10; options in the plex server check section of architecture.md.
+Links: https://docs.astro.build/en/reference/configuration-reference/#securitycsp
+
 ## RE-003: Astro's glob() loader does not skip underscore-prefixed directories  (2026-09-08, status: worked-around)
 Environment: Astro 7.3.1, `glob({ pattern: '*/content/**/*.mdx', base: './services' })`.
 Observed: `services/_template/content/index.mdx` was loaded and rendered as `/_template/`.

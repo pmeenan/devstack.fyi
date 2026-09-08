@@ -31,9 +31,18 @@ needs evidence.
       `services/*/content/` while excluding the working docs; see the
       "Content-layer spike" section of architecture.md. Answered open
       question 2 (co-located layout) and logged RE-001 to RE-003.
-- [ ] Check on plex: web server type, directory-index and trailing-slash
+- [x] Check on plex: web server type, directory-index and trailing-slash
       behavior, and whether `/var/www/devstack.fyi/` holds anything the build
-      does not own (open questions 5 and 9). Output: notes in architecture.md.
+      does not own (open questions 5 and 9). Done 2026-09-08 by reading the
+      nginx vhost over ssh (host plex.meenan.us:10022). nginx 1.31.5; docroot
+      empty and owned by the deploy user (question 9 answered);
+      `build.format: 'directory'` + `trailingSlash: 'always'` (question 5
+      answered). Reading the vhost surfaced three owner-side follow-ups for
+      M1 (server changes wait until M1; the CSP and HTML-cache policy choices
+      remain M0 toolchain work): the missing
+      `/_astro/` immutable cache rule (D-012), the SPA `try_files` fallback
+      that must become `=404;` + `error_page` for a real 404 page, and the
+      strict CSP header (open question 10, RE-004).
 - [ ] Draft the content collection schema for the hybrid model (D-010):
       services entry with category enum, status, sources, last-verified;
       structured product entries with capability, local equivalent, sources,
@@ -43,10 +52,12 @@ needs evidence.
 - [ ] First full draft of [architecture.md](architecture.md).
 - [ ] Toolchain decisions: Astro version, pnpm, TypeScript strict config,
       formatter/linter, `pnpm check` and `pnpm build` as the standard checks,
-      GitHub Actions on PRs, license audit approach, and how the D-012
-      `Cache-Control` headers get set on plex (depends on open question 5),
-      including the grace duration and safe cleanup of retired hashed assets.
-      Record in decisions.md.
+      GitHub Actions on PRs, license audit approach, the nginx reference
+      config the owner applies on plex (D-012 `/_astro/` immutable rule,
+      `try_files … =404` + custom 404, apex canonical redirect; all found
+      missing/wrong in the 2026-09-08 vhost read), the CSP approach (open
+      question 10), and the grace duration and safe cleanup of retired hashed
+      assets. Record in decisions.md.
 - [ ] Rewrite the provisional ladder below into real milestones with exit
       criteria.
 

@@ -80,18 +80,30 @@ Numbering is stable because plan.md and architecture.md refer to it.
    inlined into HTML (see the content-layer spike section of
    architecture.md); what remains is whether richer diagram state justifies
    an island framework. → M0 architecture draft.
-- **5. URL and trailing-slash policy.** `/cloudflare/` versus `/cloudflare`,
-   and how the web server on plex resolves directory indexes. Decides Astro's
-   `build.format` and `trailingSlash` settings and affects every published
-   link. Also decides where the D-012 `Cache-Control` headers are configured
-   (`.htaccess` shipped from `public/` if Apache, server config if nginx).
-   → M0 toolchain decisions; verify against the plex server config.
-- **9. Does `/var/www/devstack.fyi/` contain anything the build does not own?**
-   `rsync --delete` assumes the build fully owns the directory. → verify on
-   plex before the first deploy (M1).
+- **10. Content-Security-Policy on plex.** The devstack.fyi vhost already
+   sends a strict CSP header whose `script-src` has no `'unsafe-inline'`,
+   nonce, or hash, so Astro's inlined scripts (theme no-flash snippet, small
+   diagram scripts) would be blocked in production while working in
+   `pnpm preview`. Options and a recommendation (trim the header, let
+   Astro's `security.csp` emit hashes) are in the plex server check section
+   of architecture.md; RE-004. → M0 toolchain decisions; needs the owner
+   because the header lives in nginx config.
 
 ### Answered (2026-09-08 triage)
 
+- **5. URL and trailing-slash policy** → `/cloudflare/` with the trailing
+   slash: default `build.format: 'directory'` plus `trailingSlash: 'always'`.
+   plex runs nginx 1.31.5 serving `index.html` per directory; the current
+   vhost uses an SPA `try_files … /index.html` fallback that must become
+   `try_files $uri $uri/ =404;` + `error_page 404 /404.html;` for a static
+   site. Existing directories already receive nginx’s trailing-slash 301. The D-012 cache headers
+   are `location` blocks in that vhost, applied by the owner (no `.htaccess`).
+   Verified 2026-09-08 by reading the vhost over ssh (plex server check
+   section of architecture.md).
+- **9. Does `/var/www/devstack.fyi/` contain anything the build does not
+   own?** → No. Verified 2026-09-08 over ssh: the docroot is empty and owned
+   by the deploy user (`pmeenan:pmeenan`, mode 775), so `rsync --delete`
+   fully owns it. (Plex server check section of architecture.md.)
 - **2. Where do per-service working docs and content live?** → co-located:
    `services/<slug>/{AGENTS.md,README.md,docs/,content/}`, with the content
    layer's `glob()` loader reading `services/*/content/**/*.mdx` and

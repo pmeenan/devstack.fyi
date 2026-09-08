@@ -87,9 +87,16 @@ and uses strict origin TLS, so the site is itself an instance of the
 service-wide Cloudflare notes it will publish.
 
 **Consequences.** The web server on plex needs a header rule keyed on
-`/_astro/` versus everything else; how that rule is expressed (an
-`.htaccess` shipped from `public/` if Apache, a server config block if
-nginx) waits on the open-question 5 server check and is a toolchain item.
+`/_astro/` versus everything else. The 2026-09-08 vhost read found nginx
+already revalidates HTML (`location ~* \.(html|htm)$ { expires -1; }`, i.e.
+`Cache-Control: no-cache` — different from the short `max-age` above; the
+M0 toolchain decision must implement that TTL or explicitly amend D-012) but sets
+**no** `/_astro/` immutable rule and no header on other static files, so the
+owner adds `location ^~ /_astro/ { expires off; add_header Cache-Control
+"public, max-age=31536000, immutable"; }` (re-adding the CSP header there,
+since a nested `add_header` drops inherited ones) plus a short-TTL rule for
+the rest, with a reference copy of the full vhost kept in the repo
+(toolchain item).
 The deploy script uses an rsync protect filter (or a fresh-directory swap)
 so `--delete` retains assets from all deploys still within the grace period.
 Cleanup must always preserve assets referenced by the current deploy; the
