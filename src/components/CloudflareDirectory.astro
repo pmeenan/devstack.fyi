@@ -1,0 +1,81 @@
+---
+import { getCollection } from 'astro:content';
+import '../styles/diagram-colors.css';
+import { cloudflareIcons } from '@lib/cloudflare-icons';
+import StatusBadge from './StatusBadge.astro';
+const products = (
+  await getCollection('products', (p) => p.id.startsWith('cloudflare/'))
+).sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
+---
+
+<section>
+  <h2>Explore a product</h2><ul class="product-directory">
+    {
+      products.map(({ id, data }) => (
+        <li
+          id={`product-${id.split('/')[1]}`}
+          data-product={id.split('/')[1]}
+          data-icon={
+            cloudflareIcons[id.split('/')[1] as keyof typeof cloudflareIcons]
+          }
+        >
+          <a href={`/${id}/`}>
+            <>
+              <div>
+                <>
+                  <h3>
+                    {data.name} <span aria-hidden="true">↗</span>
+                  </h3>
+                  <StatusBadge lastVerified={data.lastVerified} />
+                </>
+              </div>
+              <p>{data.capability}</p>
+            </>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+<style>
+  .product-directory {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 0;
+    list-style: none;
+  }
+  li a {
+    display: block;
+    height: 100%;
+    padding: 1.1rem;
+    border: 1px solid var(--icon-color);
+    border-radius: 8px;
+    text-decoration: none;
+    background: var(--surface);
+  }
+  li a:hover,
+  li a:focus-visible {
+    border-color: var(--icon-color);
+    outline-color: var(--icon-color);
+    background: var(--soft);
+  }
+  li h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--icon-color);
+  }
+  li h3 span {
+    float: right;
+  }
+  li p {
+    font-size: 0.875rem;
+    color: var(--muted);
+    margin: 0.5rem 0 0;
+  }
+  @media (max-width: 600px) {
+    .product-directory {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

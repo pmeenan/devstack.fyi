@@ -1,0 +1,71 @@
+name: Workers
+group: developer-platform
+order: 1
+docs: https://developers.cloudflare.com/workers/
+capability: Serverless application code running in Cloudflare’s workerd runtime,
+  with bindings to data and other services.
+notes: Workers can also serve static assets. Set explicit CPU limits for paid
+  HTTP handlers; other trigger types have their own limits.
+localDev:
+  - kind: open-source
+    name: workerd
+    summary:
+      Cloudflare’s Apache-2.0 JavaScript/Wasm runtime is available to run directly
+      on your own machine. It is based on the runtime powering Workers; configure
+      local services and HTTP sockets in a Cap’n Proto configuration file.
+    url: https://github.com/cloudflare/workerd
+  - kind: vendor
+    name: Miniflare
+    summary: A local simulator built on workerd, adding local implementations of
+      Cloudflare resource bindings. Running the compute runtime locally and
+      reproducing managed services are separate concerns.
+    url: https://developers.cloudflare.com/workers/local-development/
+limits:
+  tiers:
+    - id: free
+      name: Workers Free
+    - id: paid
+      name: Workers Paid
+  metrics:
+    - name: Dynamic requests
+      values:
+        free: 100,000 / day
+        paid: No request cap; 10 million / month included
+    - name: CPU per HTTP invocation
+      values:
+        free: 10 ms
+        paid: 30 seconds default; configurable to 5 minutes
+      note: CPU time is active compute, not elapsed time waiting on I/O.
+    - name: Memory per isolate
+      values:
+        free: 128 MB
+        paid: 128 MB
+    - name: Workers per account
+      values:
+        free: '100'
+        paid: '500'
+    - name: Static asset files per version
+      values:
+        free: 20,000
+        paid: 100,000
+    - name: Maximum static asset file size
+      values:
+        free: 25 MiB
+        paid: 25 MiB
+  note:
+    Paid allowances are included usage, not a spending cap. This table covers
+    current Workers plans and HTTP handlers, not legacy Bundled/Unbound plans.
+  sources:
+    - url: https://developers.cloudflare.com/workers/platform/limits/
+      title: Workers limits
+    - url: https://developers.cloudflare.com/workers/platform/pricing/
+      title: Workers pricing
+  lastVerified: 2026-09-08
+sources:
+  - url: https://github.com/cloudflare/workerd
+    title: Open-source workerd runtime and local configuration
+  - url: https://developers.cloudflare.com/workers/
+    title: Workers overview
+  - url: https://developers.cloudflare.com/workers/local-development/
+    title: Workers local development
+lastVerified: 2026-09-08

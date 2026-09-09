@@ -1,0 +1,16 @@
+/* Shared by diagrams and their corresponding cards/component descriptions. */
+[data-icon] {
+  --icon-color: var(--accent);
+}
+[data-icon='compute'],
+[data-icon='code'] {
+  --icon-color: var(--green);
+}
+[data-icon='queue'],
+[data-icon='workflow'],
+[data-icon='clock'] {
+  --icon-color: var(--purple);
+}
+[data-icon='object'] {
+  --icon-color: var(--amber);
+}

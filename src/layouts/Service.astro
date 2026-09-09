@@ -3,13 +3,15 @@ import type { CollectionEntry } from 'astro:content';
 import Base from './Base.astro';
 import { CATEGORIES } from '@lib/taxonomy';
 import Sources from '@components/Sources.astro';
+import StatusBadge from '@components/StatusBadge.astro';
 import { contentPath, entryPath } from '@lib/urls';
 interface Props {
+  productSlug?: string;
   service: CollectionEntry<'services'>;
   page?: CollectionEntry<'pages'>;
   pages: CollectionEntry<'pages'>[];
 }
-const { service, page, pages } = Astro.props;
+const { service, page, pages, productSlug } = Astro.props;
 const entry = page ?? service;
 ---
 
@@ -32,13 +34,10 @@ const entry = page ?? service;
   <div class="service-heading">
     <p class="eyebrow">{CATEGORIES[service.data.category].name}</p>
     <h1>{entry.data.title}</h1>
-    <span class:list={['badge', service.data.status]}
-      >{
-        service.data.status === 'draft'
-          ? 'Draft — coverage in progress'
-          : 'Reviewed'
-      }</span
-    >
+    <StatusBadge
+      lastVerified={entry.data.lastVerified}
+      status={service.data.status}
+    />
     <p class="intro">{entry.data.summary}</p>
     <p class="metadata">
       <span
@@ -51,22 +50,37 @@ const entry = page ?? service;
       >
     </p>
   </div>
-  <nav class="section-nav" aria-label="More on this service">
-    <a href={entryPath(service.id)} aria-current={!page ? 'page' : undefined}
-      >Overview</a
-    >
-    {
-      pages.map((item) => (
-        <a
-          href={entryPath(item.id)}
-          aria-current={item.id === page?.id ? 'page' : undefined}
-        >
-          {item.data.title}
-        </a>
-      ))
-    }
-    <a href="#page-sources">Sources</a>
-  </nav>
+  <div class="service-navigation">
+    <nav class="product-tabs" aria-label="More on this service">
+      <a href={entryPath(service.id)} aria-current={!page ? 'page' : undefined}
+        >Overview</a
+      >
+      {
+        pages.map((item) => (
+          <a
+            href={entryPath(item.id)}
+            aria-current={item.id === page?.id ? 'page' : undefined}
+          >
+            {item.data.title}
+          </a>
+        ))
+      }
+    </nav>
+    <nav class="page-sections" aria-label="On this page">
+      {
+        productSlug && (
+          <>
+            <a href="#architecture">Architecture</a>
+            <a href="#components">Components &amp; connections</a>
+            <a href="#local-development">Local development</a>
+            <a href="#deployment">Deployment</a>
+            <a href={`#product-${productSlug}`}>Usage limits</a>
+          </>
+        )
+      }
+      <a href="#page-sources">Sources</a>
+    </nav>
+  </div>
   <article class="prose"><slot /></article>
   <section id="page-sources">
     <h2>Sources and verification</h2><Sources
@@ -75,3 +89,74 @@ const entry = page ?? service;
     />
   </section>
 </Base>
+
+<style>
+  .service-navigation {
+    --navigation-surface: var(--soft);
+    margin: 1.5rem 0 2rem;
+  }
+  .product-tabs {
+    position: relative;
+    z-index: 1;
+    margin-bottom: -1px;
+    display: flex;
+    overflow-x: auto;
+    gap: 0.2rem;
+    padding: 0.25rem 0 0;
+    scrollbar-width: none;
+  }
+  .product-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .product-tabs a {
+    flex: 0 0 auto;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid transparent;
+    border-bottom: 0;
+    border-radius: 9px 9px 0 0;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .product-tabs a:hover {
+    color: var(--accent);
+  }
+  .product-tabs a[aria-current='page'] {
+    color: var(--accent);
+    background: var(--navigation-surface);
+    border-color: var(--border);
+    box-shadow: 0 1px 0 var(--navigation-surface);
+    position: relative;
+    z-index: 1;
+  }
+  .page-sections {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.3rem;
+    padding: 0.9rem 1.1rem;
+    background: var(--navigation-surface);
+    border: 1px solid var(--border);
+    border-radius: 0 0 9px 9px;
+    font-size: 0.8rem;
+  }
+  .page-sections a {
+    text-decoration: none;
+    padding-block: 0.2rem;
+  }
+  .page-sections a:hover {
+    text-decoration: underline;
+  }
+  .product-tabs a:focus-visible {
+    outline-offset: -4px;
+  }
+</style>
+<script>
+  // Reveal the selected product in the horizontal tab strip on narrow screens.
+  document.querySelectorAll<HTMLElement>('.product-tabs').forEach((nav) => {
+    const selected = nav.querySelector<HTMLElement>('[aria-current="page"]');
+    if (selected)
+      nav.scrollLeft =
+        selected.offsetLeft - (nav.firstElementChild as HTMLElement).offsetLeft;
+  });
+</script>

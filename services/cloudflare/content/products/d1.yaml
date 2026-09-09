@@ -1,0 +1,67 @@
+name: D1
+group: developer-platform
+order: 4
+docs: https://developers.cloudflare.com/d1/
+capability: Managed relational database with SQLite SQL semantics, queried
+  through Workers bindings or an HTTP API.
+notes: Usage counts rows read or written, not just SQL statements. Local and
+  deployed data are separate.
+localDev:
+  - kind: vendor
+    name: Local D1 database through Miniflare
+    summary: >-
+      Run a local D1 database alongside your Worker in workerd. Its schema and data are
+      separate from the hosted database, so initialize them locally. This checks SQL and
+      the D1 binding API without relying on production data.
+    url: https://developers.cloudflare.com/d1/best-practices/local-development/
+limits:
+  tiers:
+    - id: free
+      name: Workers Free
+    - id: paid
+      name: Workers Paid
+  metrics:
+    - name: Rows read
+      values:
+        free: 5 million / day
+        paid: 25 billion / month included; additional usage metered
+    - name: Rows written
+      values:
+        free: 100,000 / day
+        paid: 50 million / month included; additional usage metered
+    - name: Databases per account
+      values:
+        free: '10'
+        paid: 50,000
+    - name: Maximum database size
+      values:
+        free: 500 MB
+        paid: 10 GB
+    - name: Maximum account storage
+      values:
+        free: 5 GB
+        paid: 1 TB; first 5 GB included
+    - name: Time Travel recovery window
+      values:
+        free: 7 days
+        paid: 30 days
+    - name: Maximum query duration
+      values:
+        free: 30 seconds
+        paid: 30 seconds
+  note: Paid includes usage allowances and permits metered overages within
+    platform limits. Indexes affect rows scanned and writes.
+  sources:
+    - url: https://developers.cloudflare.com/d1/platform/limits/
+      title: D1 limits
+    - url: https://developers.cloudflare.com/d1/platform/pricing/
+      title: D1 pricing
+  lastVerified: 2026-09-08
+sources:
+  - url: https://developers.cloudflare.com/d1/best-practices/local-development/
+    title: Local runtime and simulation
+  - url: https://developers.cloudflare.com/d1/
+    title: D1 overview
+  - url: https://developers.cloudflare.com/d1/best-practices/local-development/
+    title: D1 local development
+lastVerified: 2026-09-08

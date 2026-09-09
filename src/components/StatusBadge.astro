@@ -1,0 +1,24 @@
+---
+import { isStale } from '@lib/taxonomy';
+interface Props {
+  lastVerified: Date;
+  status?: 'draft' | 'reviewed';
+}
+const { lastVerified, status } = Astro.props;
+const stale = isStale(lastVerified);
+---
+
+{
+  (stale || status) && (
+    <span
+      class:list={['badge', stale ? 'stale' : status]}
+      title={
+        stale
+          ? 'Verified more than 180 days ago; recheck the linked sources.'
+          : undefined
+      }
+    >
+      {stale ? 'Recheck — stale' : status === 'draft' ? 'Draft' : 'Reviewed'}
+    </span>
+  )
+}

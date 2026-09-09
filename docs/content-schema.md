@@ -22,11 +22,11 @@ services/
   _template/                   underscore-prefixed directories are never loaded (RE-003)
 ```
 
-| Collection | Loader pattern (base `./services`) | Entry id               | Rendered as                                   |
-| ---------- | ---------------------------------- | ---------------------- | --------------------------------------------- |
-| `services` | `*/content/index.mdx`              | `cloudflare`           | `/cloudflare/`                                |
-| `pages`    | `*/content/*/**/index.mdx`         | `cloudflare/local-dev` | `/cloudflare/local-dev/`                      |
-| `products` | `*/content/products/*.yaml`        | `cloudflare/workers`   | rows, tables and diagrams on the service page |
+| Collection | Loader pattern (base `./services`) | Entry id               | Rendered as                                        |
+| ---------- | ---------------------------------- | ---------------------- | -------------------------------------------------- |
+| `services` | `*/content/index.mdx`              | `cloudflare`           | `/cloudflare/`                                     |
+| `pages`    | `*/content/*/**/index.mdx`         | `cloudflare/local-dev` | `/cloudflare/local-dev/`                           |
+| `products` | `*/content/products/*.yaml`        | `cloudflare/workers`   | rows, tables and diagrams on service/product pages |
 
 Every pattern also carries `!_*/**`. There is no `slug` frontmatter field:
 the directory name is the slug and the URL, so the two cannot disagree. A
@@ -268,23 +268,27 @@ have to).
 
 `title`, `summary`, `sources`, `lastVerified` as above, plus optional
 `order` for the sub-page list. Sub-pages exist so a service can split off a
-long topic (`/cloudflare/local-dev/`); nothing in M1 or M2 requires one.
+long topic (`/cloudflare/local-dev/`); D-017 uses matching product sub-pages for Cloudflare. When a page id matches a
+product id (for example `cloudflare/kv`), its MDX explicitly renders that
+product’s details; the overview omits the duplicate inline product table.
+The YAML remains the single source for capability, local-dev and limits data.
+Sub-page sources/dates cover its additional prose and diagram claims.
 
 ### `products` (`content/products/<product>.yaml`)
 
-| Field          | Required | Meaning                                                                                                                                                                                                                                                                           |
-| -------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | yes      | The vendor's current product name, as the vendor writes it.                                                                                                                                                                                                                       |
-| `aliases`      | no       | Former or alternative names. Vendors rename products (D-006 context) and the decoder should still find them. Default empty.                                                                                                                                                       |
-| `group`        | no       | Id of one of the service's `groups`. An id the service did not declare fails the build. Ungrouped products render after the groups.                                                                                                                                               |
-| `order`        | no       | Sort key inside its group; ties and unset values sort by `name`.                                                                                                                                                                                                                  |
-| `docs`         | yes      | The product's official documentation landing page; the product name links here.                                                                                                                                                                                                   |
-| `capability`   | yes      | One line saying what the product _is_ in generic terms — the phrase someone would search for without knowing the brand (D-010, single field).                                                                                                                                     |
-| `notes`        | no       | A short plain-text gotcha or scope note for the row. Anything longer belongs in the service's MDX prose.                                                                                                                                                                          |
-| `localDev`     | yes      | At least one option, first is the recommendation. `kind` is `vendor` (a vendor CLI dev mode or emulator), `open-source` (a third-party stand-in), `mock` (stub it yourself), or `remote` (no local equivalent; use a dev account). `name` and `url` optional, `summary` required. |
-| `limits`       | yes      | The per-tier usage limits sub-record (D-013), below.                                                                                                                                                                                                                              |
-| `sources`      | yes      | Sources for the capability and local-dev claims.                                                                                                                                                                                                                                  |
-| `lastVerified` | yes      | Date those claims were last checked.                                                                                                                                                                                                                                              |
+| Field          | Required | Meaning                                                                                                                                                                                                                                                                                                                                     |
+| -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`         | yes      | The vendor's current product name, as the vendor writes it.                                                                                                                                                                                                                                                                                 |
+| `aliases`      | no       | Former or alternative names. Vendors rename products (D-006 context) and the decoder should still find them. Default empty.                                                                                                                                                                                                                 |
+| `group`        | no       | Id of one of the service's `groups`. An id the service did not declare fails the build. Ungrouped products render after the groups.                                                                                                                                                                                                         |
+| `order`        | no       | Sort key inside its group; ties and unset values sort by `name`.                                                                                                                                                                                                                                                                            |
+| `docs`         | yes      | The product's official documentation landing page; the product name links here.                                                                                                                                                                                                                                                             |
+| `capability`   | yes      | One line saying what the product _is_ in generic terms — the phrase someone would search for without knowing the brand (D-010, single field).                                                                                                                                                                                               |
+| `notes`        | no       | A short plain-text gotcha or scope note for the row. Anything longer belongs in the service's MDX prose.                                                                                                                                                                                                                                    |
+| `localDev`     | yes      | At least one option, first is the recommendation. `kind` is `vendor` (a vendor CLI dev mode or emulator), `open-source` (a runnable open-source runtime or stand-in, including vendor-maintained projects), `mock` (stub it yourself), or `remote` (no local equivalent; use a dev account). `name` and `url` optional, `summary` required. |
+| `limits`       | yes      | The per-tier usage limits sub-record (D-013), below.                                                                                                                                                                                                                                                                                        |
+| `sources`      | yes      | Sources for the capability and local-dev claims.                                                                                                                                                                                                                                                                                            |
+| `lastVerified` | yes      | Date those claims were last checked.                                                                                                                                                                                                                                                                                                        |
 
 ### `limits` sub-record
 
@@ -381,6 +385,10 @@ lastVerified: 2026-09-08
   runs one pass over every entry at build time and prints one warning per
   stale entry naming its id; badges read the same function. Never fails the
   build (D-011).
+- **Visible freshness**: `StatusBadge.astro` uses the same `isStale` helper
+  on catalog cards, service/sub-page headings, product rows, limits headings,
+  and source dates. Stale overrides draft/reviewed display; child dates do not
+  change their parent’s badge. Static badges refresh on the next site build.
 - **Catalog order**: categories by `CATEGORIES[*].order`, services by
   `title` within a category.
 

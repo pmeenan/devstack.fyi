@@ -1,0 +1,74 @@
+name: Pages
+group: developer-platform
+order: 2
+docs: https://developers.cloudflare.com/pages/
+capability: Web application hosting with static asset delivery, build/deployment
+  integration, and optional Pages Functions.
+notes: Pages Functions consume Workers quotas; upgrading a zone plan does not
+  replace the Workers plan.
+localDev:
+  - kind: vendor
+    name: Static files + workerd through Miniflare
+    summary: >-
+      Serve the built asset directory locally; Pages Functions execute in workerd
+      through Miniflare. A static file server alone does not run Functions or simulate
+      their resource bindings.
+    url: https://developers.cloudflare.com/pages/functions/local-development/
+limits:
+  tiers:
+    - id: free
+      name: Free
+    - id: pro
+      name: Pro
+    - id: business
+      name: Business
+  metrics:
+    - name: Builds per month
+      values:
+        free: '500'
+        pro: 5,000
+        business: 20,000
+    - name: Concurrent builds per account
+      values:
+        free: '1'
+        pro: '5'
+        business: '20'
+    - name: Build timeout
+      values:
+        free: 20 minutes
+        pro: 20 minutes
+        business: 20 minutes
+    - name: Files per site
+      values:
+        free: 20,000
+        pro: 100,000
+        business: 100,000
+    - name: Single asset size
+      values:
+        free: 25 MiB
+        pro: 25 MiB
+        business: 25 MiB
+    - name: Custom domains per project
+      values:
+        free: '100'
+        pro: '250'
+        business: '500'
+  note: Build and asset limits use Free/Pro/Business; Functions use the separate
+    Workers plan. Paid file limits require PAGES_WRANGLER_MAJOR_VERSION=4.
+    Enterprise arrangements are custom.
+  sources:
+    - url: https://developers.cloudflare.com/pages/platform/limits/
+      title: Pages limits
+    - url: https://developers.cloudflare.com/pages/functions/pricing/
+      title: Pages Functions pricing
+  lastVerified: 2026-09-08
+sources:
+  - url: https://developers.cloudflare.com/pages/functions/local-development/
+    title: Local runtime and simulation
+  - url: https://developers.cloudflare.com/pages/
+    title: Pages overview
+  - url: https://developers.cloudflare.com/pages/functions/local-development/
+    title: Pages local development
+  - url: https://developers.cloudflare.com/d1/best-practices/local-development/
+    title: D1 local development with Pages
+lastVerified: 2026-09-08

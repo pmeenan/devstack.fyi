@@ -51,6 +51,11 @@ lastVerified: 2020-01-01
 ---
 
 Sub-page fixture is rendered.
+
+import CloudflareBindings from '@components/CloudflareBindings.astro';
+
+<CloudflareBindings id="fixture-first" />
+<CloudflareBindings id="fixture-second" />
 `,
     );
     await writeFile(
@@ -97,10 +102,85 @@ Sub-page fixture is rendered.
     assert.match(serviceHtml, /Configurable up to the cap/);
     assert.match(serviceHtml, /Widgets pricing/);
     assert.match(serviceHtml, /Product and local-development sources/);
+    assert.match(serviceHtml, /Recheck — stale/);
+    assert.match(
+      await readFile(join(root, 'dist/example/local-dev/index.html'), 'utf8'),
+      /class="badge stale"/,
+    );
+    const diagramHtml = await readFile(
+      join(root, 'dist/example/local-dev/index.html'),
+      'utf8',
+    );
+    assert.equal((diagramHtml.match(/<architecture-map[ >]/g) ?? []).length, 2);
+    assert.match(diagramHtml, /id="fixture-first-svg-title"/);
+    assert.match(diagramHtml, /id="fixture-second-svg-title"/);
     assert.match(
       serviceHtml,
       /services\/example\/content\/products\/widgets.yaml/,
     );
+    const overview = await readFile(
+      join(root, 'dist/cloudflare/index.html'),
+      'utf8',
+    );
+    assert.doesNotMatch(overview, /<table[ >]/);
+    for (const slug of [
+      'workers',
+      'pages',
+      'kv',
+      'r2',
+      'd1',
+      'durable-objects',
+      'queues',
+      'workflows',
+    ]) {
+      assert.match(overview, new RegExp(`href="/cloudflare/${slug}/"`));
+      const detail = await readFile(
+        join(root, `dist/cloudflare/${slug}/index.html`),
+        'utf8',
+      );
+      assert.match(detail, /<architecture-map[ >]/);
+      const article = detail.slice(detail.indexOf('<article'));
+      const firstMap = article.indexOf('<architecture-map');
+      const introduction = article.indexOf('class="product-introduction"');
+      assert.ok(
+        introduction >= 0 && introduction < firstMap,
+        `${slug}: short introduction precedes diagram`,
+      );
+      assert.equal(
+        (article.slice(0, firstMap).match(/<p[ >]/g) ?? []).length,
+        1,
+        `${slug}: only the introduction precedes the diagram`,
+      );
+      assert.match(detail, /Components &amp; connections/);
+      assert.match(detail, /id="local-development"/);
+      assert.match(detail, /id="deployment"/);
+      assert.match(detail, /href="#deployment"/);
+      assert.match(detail, new RegExp(`id="product-${slug}"`));
+      assert.equal(
+        (detail.match(/<table[ >]/g) ?? []).length,
+        slug === 'workers' ? 3 : 1,
+      );
+      if (slug === 'workers') {
+        assert.equal((detail.match(/<architecture-map[ >]/g) ?? []).length, 2);
+        for (const anchor of [
+          'runtime-concurrency',
+          'runtime-globals',
+          'runtime-wasm',
+          'runtime-fetch-cache',
+        ]) {
+          assert.match(detail, new RegExp(`id="${anchor}"`));
+        }
+        const ids = [...detail.matchAll(/\bid="([^"]+)"/g)].map(
+          (match) => match[1],
+        );
+        assert.equal(
+          new Set(ids).size,
+          ids.length,
+          'runtime and request maps have independent IDs',
+        );
+      }
+      assert.match(detail, /Product and local-development sources/);
+    }
     const sitemap = await readFile(join(root, 'dist/sitemap-0.xml'), 'utf8');
     assert.match(sitemap, /https:\/\/devstack.fyi\/example\/local-dev\//);
     assert.doesNotMatch(sitemap, /404|\/design\//);
@@ -119,6 +199,63 @@ Sub-page fixture is rendered.
         /WORKING_DOC_MUST_NOT_SHIP/,
       );
     }
+    // Product and limits dates must not inherit freshness from one another,
+    // or contaminate the service/catalog date. Exercise actual rendered badges.
+    const dated = parse(original) as {
+      lastVerified: string;
+      limits: { lastVerified: string };
+    };
+    const serviceFile = join(root, 'services/example/content/index.mdx');
+    const serviceOriginal = await readFile(serviceFile, 'utf8');
+    await writeFile(
+      serviceFile,
+      serviceOriginal.replace(/lastVerified: .*/, 'lastVerified: 2099-01-01'),
+    );
+    for (const staleKind of ['product', 'limits'] as const) {
+      dated.lastVerified =
+        staleKind === 'product' ? '2020-01-01' : '2099-01-01';
+      dated.limits.lastVerified =
+        staleKind === 'limits' ? '2020-01-01' : '2099-01-01';
+      await writeFile(file, stringify(dated));
+      const mixed = build();
+      assert.equal(mixed.status, 0, mixed.output);
+      assert.match(
+        mixed.output,
+        new RegExp(`\\[stale\\] ${staleKind} example/widgets`),
+      );
+      assert.doesNotMatch(
+        mixed.output,
+        new RegExp(
+          `\\[stale\\] ${staleKind === 'product' ? 'limits' : 'product'} example/widgets`,
+        ),
+      );
+      const html = await readFile(
+        join(root, 'dist/example/index.html'),
+        'utf8',
+      );
+      assert.equal((html.match(/class="badge stale"/g) ?? []).length, 2);
+      assert.doesNotMatch(
+        await readFile(join(root, 'dist/index.html'), 'utf8'),
+        /class="badge stale"/,
+      );
+    }
+    await writeFile(
+      serviceFile,
+      serviceOriginal.replace(/lastVerified: .*/, 'lastVerified: 2020-01-01'),
+    );
+    dated.lastVerified = dated.limits.lastVerified = '2099-01-01';
+    await writeFile(file, stringify(dated));
+    const staleService = build();
+    assert.equal(staleService.status, 0, staleService.output);
+    assert.match(staleService.output, /\[stale\] service example/);
+    assert.doesNotMatch(
+      staleService.output,
+      /\[stale\] (product|limits) example\/widgets/,
+    );
+    assert.match(
+      await readFile(join(root, 'dist/index.html'), 'utf8'),
+      /class="badge stale"/,
+    );
     // Each invalid fixture is a real Astro build, not a copy of the schema's logic.
     const fixtures: [string, RegExp][] = [
       [original + '\nlastverified: 2026-09-08\n', /lastverified/],

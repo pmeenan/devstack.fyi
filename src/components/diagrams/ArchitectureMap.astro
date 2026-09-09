@@ -1,0 +1,443 @@
+---
+import Icon from './Icon.astro';
+import '../../styles/diagram-colors.css';
+import type { Diagram } from '@lib/diagram';
+interface Props {
+  id: string;
+  diagram: Diagram;
+}
+const { id, diagram } = Astro.props;
+function wrap(text: string): string[] {
+  const lines: string[] = [''];
+  for (const word of text.split(' ')) {
+    const last = lines.length - 1;
+    if (lines[last]!.length + word.length > 45) lines.push(word);
+    else lines[last] += `${lines[last] ? ' ' : ''}${word}`;
+  }
+  return lines;
+}
+---
+
+<architecture-map>
+  <figure aria-labelledby={`${id}-title`}>
+    <figcaption>
+      <span class="eyebrow">EXPLORE THE CONNECTIONS</span><h2
+        id={`${id}-title`}
+      >
+        {diagram.title}
+      </h2><p>{diagram.summary}</p>
+    </figcaption>
+    <div
+      class="map-scroll"
+      role="region"
+      aria-label={`${diagram.title}: scrollable diagram`}
+      tabindex="0"
+    >
+      <svg
+        viewBox={`0 0 ${diagram.width} ${diagram.height}`}
+        role="group"
+        aria-labelledby={`${id}-svg-title`}
+      >
+        <title id={`${id}-svg-title`}>{diagram.title}</title>
+        <defs
+          ><pattern
+            id={`${id}-dots`}
+            width="24"
+            height="24"
+            patternUnits="userSpaceOnUse"
+            ><circle cx="1" cy="1" r="1" class="grid-dot"></circle></pattern
+          ><marker
+            id={`${id}-arrow`}
+            viewBox="0 0 8 8"
+            refX="7"
+            refY="4"
+            markerWidth="7"
+            markerUnits="userSpaceOnUse"
+            markerHeight="7"
+            orient="auto-start-reverse"
+            ><path d="M0 0 8 4 0 8Z" fill="context-stroke"></path></marker
+          ></defs
+        >
+        <rect
+          width={diagram.width}
+          height={diagram.height}
+          fill={`url(#${id}-dots)`}></rect>
+        {
+          diagram.regions?.map((region) => (
+            <g class="map-region">
+              <rect
+                x={region.x}
+                y={region.y}
+                width={region.width}
+                height={region.height}
+                rx="18"
+              />
+              <text x={region.x + 18} y={region.y + 26}>
+                {region.label}
+              </text>
+              <text class="region-detail" x={region.x + 18} y={region.y + 46}>
+                {region.detail}
+              </text>
+            </g>
+          ))
+        }
+        {
+          diagram.nodes.map((node) => (
+            <g transform={`translate(${node.x} ${node.y})`}>
+              <a
+                href={node.href}
+                data-node={node.id}
+                aria-label={`${node.label}: ${node.subtitle}`}
+                aria-describedby={`${id}-detail-${node.id}`}
+                class="map-node"
+                data-icon={node.icon}
+              >
+                <rect
+                  class="hit-area"
+                  x="-88"
+                  y="-12"
+                  width="176"
+                  height="132"
+                  rx="16"
+                />
+                <ellipse class="plinth" cx="0" cy="65" rx="43" ry="9" />
+                <g transform="translate(-32 0)">
+                  <Icon kind={node.icon} />
+                </g>
+                <>
+                  <text y="93" class="node-name">
+                    {node.label}
+                  </text>
+                  <text y="112" class="node-subtitle">
+                    {node.subtitle}
+                  </text>
+                </>
+              </a>
+            </g>
+          ))
+        }
+        <!-- Paint connectors above node surfaces; hover notes stay above both. -->
+        {
+          diagram.edges.map((edge) => (
+            <g
+              data-edge={`${edge.from} ${edge.to}`}
+              class:list={['edge', edge.kind]}
+            >
+              <path d={edge.d} marker-end={`url(#${id}-arrow)`} />
+              {edge.label && (
+                <text x={edge.x} y={edge.y} class="edge-label">
+                  {edge.label}
+                </text>
+              )}
+            </g>
+          ))
+        }
+        {
+          diagram.nodes.map((node) => {
+            const lines = wrap(node.detail);
+            const height = lines.length * 18 + 48;
+            const x = Math.max(12, Math.min(node.x - 160, diagram.width - 332));
+            const y =
+              node.y > diagram.height / 2 ? node.y - height - 16 : node.y + 130;
+            return (
+              <g
+                class="map-tooltip"
+                data-tooltip={node.id}
+                transform={`translate(${x} ${y})`}
+                aria-hidden="true"
+              >
+                <rect width="320" height={height} rx="8" />
+                <text x="14" y="24" class="tooltip-title">
+                  {node.label}
+                </text>
+                {lines.map((line, index) => (
+                  <text x="14" y={46 + index * 18}>
+                    {line}
+                  </text>
+                ))}
+              </g>
+            );
+          })
+        }
+      </svg>
+    </div>
+    <div class="map-legend">
+      <span>→ Call / operation direction</span>
+      {
+        diagram.edges.some((edge) => edge.kind === 'return') && (
+          <span>⋯ Retry / failure path</span>
+        )
+      }
+    </div>
+    {
+      diagram.nodes.map((node) => (
+        <span class="sr-only" id={`${id}-detail-${node.id}`}>
+          {node.detail}
+        </span>
+      ))
+    }
+  </figure>
+</architecture-map>
+<script>
+  class ArchitectureMap extends HTMLElement {
+    connectedCallback() {
+      if (this.dataset.ready) return;
+      this.dataset.ready = 'true';
+      const show = (node: Element) => {
+        const key = node.getAttribute('data-node');
+        this.querySelectorAll('[data-node]').forEach((item) =>
+          item.classList.toggle(
+            'active',
+            item.getAttribute('data-node') === key,
+          ),
+        );
+        this.querySelectorAll('[data-edge]').forEach((edge) =>
+          edge.classList.toggle(
+            'active',
+            edge
+              .getAttribute('data-edge')
+              ?.split(' ')
+              .includes(key ?? '') ?? false,
+          ),
+        );
+        this.querySelectorAll('[data-tooltip]').forEach((tooltip) =>
+          tooltip.classList.toggle(
+            'active',
+            tooltip.getAttribute('data-tooltip') === key,
+          ),
+        );
+      };
+      let hovered: Element | null = null;
+      let focused: Element | null = null;
+      let leaveTimer: ReturnType<typeof setTimeout> | undefined;
+      const clear = () => {
+        this.querySelectorAll('.active').forEach((item) =>
+          item.classList.remove('active'),
+        );
+      };
+      const update = () => {
+        const target = hovered ?? focused;
+        if (target) show(target);
+        else clear();
+      };
+      const enter = (node: Element) => {
+        clearTimeout(leaveTimer);
+        hovered = node;
+        update();
+      };
+      const leave = () => {
+        // Allow the pointer to cross the small gap into the hoverable note.
+        clearTimeout(leaveTimer);
+        leaveTimer = setTimeout(() => {
+          hovered = null;
+          update();
+        }, 100);
+      };
+      this.querySelectorAll('[data-node]').forEach((node) => {
+        node.addEventListener('pointerenter', () => enter(node));
+        node.addEventListener('pointerleave', leave);
+        node.addEventListener('focus', () => {
+          focused = node;
+          update();
+        });
+        node.addEventListener('blur', () => {
+          focused = null;
+          update();
+        });
+      });
+      this.querySelectorAll<SVGElement>('[data-tooltip]').forEach((tooltip) => {
+        tooltip.addEventListener('pointerenter', () => {
+          const node = this.querySelector(
+            `[data-node="${tooltip.dataset.tooltip}"]`,
+          );
+          if (node) enter(node);
+        });
+        tooltip.addEventListener('pointerleave', leave);
+      });
+      this.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          clearTimeout(leaveTimer);
+          hovered = focused = null;
+          clear();
+        }
+      });
+    }
+  }
+  if (!customElements.get('architecture-map'))
+    customElements.define('architecture-map', ArchitectureMap);
+</script>
+<style>
+  .map-region {
+    pointer-events: none;
+  }
+  .map-region rect {
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 1.5;
+    stroke-dasharray: 6 5;
+  }
+  .map-region text {
+    fill: var(--green);
+    font:
+      600 14px Inter,
+      sans-serif;
+  }
+  .map-region .region-detail {
+    fill: var(--muted);
+    font:
+      12px Inter,
+      sans-serif;
+  }
+  .map-tooltip {
+    display: none;
+    pointer-events: auto;
+  }
+  .map-tooltip.active {
+    display: block;
+  }
+  .map-tooltip rect {
+    fill: var(--surface);
+    stroke: var(--accent);
+    stroke-width: 1.5;
+  }
+  .map-tooltip text {
+    fill: var(--text);
+    font:
+      12px Inter,
+      sans-serif;
+  }
+  .map-tooltip .tooltip-title {
+    font-weight: 700;
+    fill: var(--accent);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+  architecture-map {
+    display: block;
+  }
+  figure {
+    margin: 1.5rem 0 2rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  figcaption {
+    padding: 1.5rem 1.5rem 0;
+  }
+  figcaption h2 {
+    font-size: 1.35rem;
+    margin: 0.25rem 0;
+  }
+  figcaption p {
+    color: var(--muted);
+    font-size: 0.875rem;
+    margin: 0.4rem 0;
+  }
+  .map-scroll {
+    overflow-x: auto;
+    padding: 1rem 0;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    min-width: 760px;
+  }
+  .grid-dot {
+    fill: var(--border);
+    opacity: 0.5;
+  }
+  .edge {
+    pointer-events: none;
+  }
+  .edge path {
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .edge.message path {
+    stroke: var(--purple);
+    stroke-dasharray: 6 5;
+  }
+  .edge.return path {
+    stroke: var(--amber);
+    stroke-dasharray: 3 5;
+  }
+  .edge.active path {
+    stroke: var(--accent);
+    stroke-width: 2.3;
+  }
+  .edge-label {
+    fill: var(--muted);
+    font:
+      12px Inter,
+      sans-serif;
+    paint-order: stroke;
+    stroke: var(--surface);
+    stroke-width: 5px;
+    stroke-linejoin: round;
+    text-anchor: middle;
+  }
+  .map-node {
+    color: var(--icon-color);
+    outline: none;
+  }
+  .hit-area {
+    fill: var(--surface);
+    stroke: transparent;
+  }
+  .plinth {
+    fill: currentColor;
+    opacity: 0.12;
+  }
+  .map-node:hover .hit-area,
+  .map-node:focus-visible .hit-area,
+  .map-node.active .hit-area {
+    fill: var(--soft);
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  .map-node:focus-visible .hit-area {
+    stroke-width: 3;
+  }
+  .node-name {
+    fill: var(--text);
+    font:
+      650 16px Inter,
+      sans-serif;
+    text-anchor: middle;
+  }
+  .node-subtitle {
+    fill: var(--muted);
+    font:
+      12px Inter,
+      sans-serif;
+    text-anchor: middle;
+  }
+  .map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    padding: 1rem 1.5rem;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hit-area {
+      transition:
+        fill 0.15s,
+        stroke 0.15s;
+    }
+  }
+</style>

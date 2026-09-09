@@ -1,12 +1,17 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import Sources from './Sources.astro';
+import StatusBadge from './StatusBadge.astro';
 import { editUrl } from '@lib/urls';
 interface Props {
   service: CollectionEntry<'services'>;
   products: CollectionEntry<'products'>[];
+  detail?: boolean;
 }
-const { service, products } = Astro.props;
+
+const { service, products, detail = false } = Astro.props;
+const LimitsHeading = detail ? 'h2' : 'h3';
+const SourceHeading = detail ? 'h3' : 'h4';
 const groups = [
   ...service.data.groups,
   { id: undefined, name: 'Products', summary: undefined },
@@ -25,7 +30,7 @@ const kinds = {
 ---
 
 {
-  groups.length > 0 && (
+  !detail && groups.length > 0 && (
     <nav class="section-nav" aria-label="Product groups">
       {groups.map((group) => (
         <a href={`#products-${group.id ?? 'other'}`}>{group.name}</a>
@@ -36,73 +41,106 @@ const kinds = {
 {
   groups.map((group) => (
     <section id={`products-${group.id ?? 'other'}`} class="product-group">
-      <h2>{group.name}</h2>
-      {group.summary && <p>{group.summary}</p>}
-      <div
-        class="table-scroll"
-        role="region"
-        aria-label={`${group.name}: capabilities and local development`}
-        tabindex="0"
-      >
-        <table>
-          <>
-            <caption>{group.name}: capabilities and local development</caption>
-            <thead>
-              <tr>
-                <>
-                  <th scope="col">Product</th>
-                  <th scope="col">What you get</th>
-                  <th scope="col">Local development</th>
-                </>
-              </tr>
-            </thead>
-          </>
-          <tbody>
-            {group.products.map(({ id, data }) => (
-              <tr>
-                <th scope="row">
-                  <a href={data.docs}>{data.name}</a>
-                  {data.aliases.length > 0 && (
-                    <p class="muted">Also: {data.aliases.join(', ')}</p>
+      {!detail && <h2>{group.name}</h2>}
+      {!detail && group.summary && <p>{group.summary}</p>}
+      {!detail && (
+        <div
+          class="table-scroll"
+          role="region"
+          aria-label={`${group.name}: capabilities and local development`}
+          tabindex="0"
+        >
+          <table>
+            <>
+              <caption>
+                {group.name}: capabilities and local development
+              </caption>
+              <thead>
+                <tr>
+                  <>
+                    <th scope="col">Product</th>
+                    <th scope="col">What you get</th>
+                    <th scope="col">Local development</th>
+                  </>
+                </tr>
+              </thead>
+            </>
+            <tbody>
+              {group.products.map(({ id, data }) => (
+                <tr>
+                  <th scope="row">
+                    <a href={data.docs}>{data.name}</a>
+                    <StatusBadge lastVerified={data.lastVerified} />
+                    {data.aliases.length > 0 && (
+                      <p class="muted">Also: {data.aliases.join(', ')}</p>
+                    )}
+                    <a class="small" href={`#product-${id.split('/')[1]}`}>
+                      Limits &amp; sources
+                    </a>
+                  </th>
+                  <td>
+                    {data.capability}
+                    {data.notes && <p>{data.notes}</p>}
+                  </td>
+                  <td>
+                    <ul class="local-options">
+                      {data.localDev.map((option) => (
+                        <li>
+                          <span class="option-kind">{kinds[option.kind]}</span>
+                          {option.name && (
+                            <strong>
+                              {option.url ? (
+                                <a href={option.url}>{option.name}</a>
+                              ) : (
+                                option.name
+                              )}
+                            </strong>
+                          )}
+                          <p>{option.summary}</p>
+                          {!option.name && option.url && (
+                            <a href={option.url}>Documentation</a>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {detail &&
+        group.products.map(({ data }) => (
+          <section id="local-development">
+            <h2>Local development</h2>
+            {data.localDev.map((option) => (
+              <section>
+                <h3>
+                  {option.url ? (
+                    <a href={option.url}>{option.name ?? kinds[option.kind]}</a>
+                  ) : (
+                    (option.name ?? kinds[option.kind])
                   )}
-                  <a class="small" href={`#product-${id.split('/')[1]}`}>
-                    Limits &amp; sources
-                  </a>
-                </th>
-                <td>
-                  {data.capability}
-                  {data.notes && <p>{data.notes}</p>}
-                </td>
-                <td>
-                  <ul class="local-options">
-                    {data.localDev.map((option) => (
-                      <li>
-                        <span class="option-kind">{kinds[option.kind]}</span>
-                        {option.name && (
-                          <strong>
-                            {option.url ? (
-                              <a href={option.url}>{option.name}</a>
-                            ) : (
-                              option.name
-                            )}
-                          </strong>
-                        )}
-                        <p>{option.summary}</p>
-                        {!option.name && option.url && (
-                          <a href={option.url}>Documentation</a>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </td>
-              </tr>
+                </h3>
+                <p>{option.summary}</p>
+              </section>
             ))}
-          </tbody>
-        </table>
-      </div>
+            <slot name="local-content" />
+            {data.notes && (
+              <aside class="product-note">
+                <strong>Keep in mind</strong>
+                <p>{data.notes}</p>
+              </aside>
+            )}
+            <StatusBadge lastVerified={data.lastVerified} />
+          </section>
+        ))}
+      {detail && <slot name="deployment" />}
       {group.products.map(({ id, data }) => (
         <section class="product-detail" id={`product-${id.split('/')[1]}`}>
-          <h3>{data.name}: usage limits</h3>
+          <LimitsHeading>{data.name}: usage limits</LimitsHeading>
+          <StatusBadge lastVerified={data.limits.lastVerified} />
           {data.limits.metrics.length > 0 && (
             <div
               class="table-scroll"
@@ -140,12 +178,12 @@ const kinds = {
             </div>
           )}
           {data.limits.note && <p>{data.limits.note}</p>}
-          <h4>Limits sources</h4>
+          <SourceHeading>Limits sources</SourceHeading>
           <Sources
             sources={data.limits.sources}
             lastVerified={data.limits.lastVerified}
           />
-          <h4>Product and local-development sources</h4>
+          <SourceHeading>Product and local-development sources</SourceHeading>
           <Sources sources={data.sources} lastVerified={data.lastVerified} />
           <a
             class="small"
@@ -160,3 +198,10 @@ const kinds = {
     </section>
   ))
 }
+
+<style>
+  th > a.small {
+    display: block;
+    margin-top: 0.5rem;
+  }
+</style>

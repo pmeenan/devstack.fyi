@@ -1,0 +1,183 @@
+---
+title: Workers
+summary: Serverless application code running in Cloudflare’s workerd runtime,
+  with bindings to data and other services.
+order: 1
+sources:
+  - url: https://github.com/cloudflare/workerd
+    title: Open-source workerd runtime
+  - url: https://developers.cloudflare.com/workers/wrangler/commands/
+    title: Wrangler deployment commands
+  - url: https://developers.cloudflare.com/workers/runtime-apis/cache/
+    title: Cache API
+  - url: https://developers.cloudflare.com/workers/runtime-apis/fetch/
+    title: Outbound Fetch API
+  - url: https://developers.cloudflare.com/workers/reference/how-the-cache-works/
+    title: Fetch caching versus Cache API
+  - url: https://developers.cloudflare.com/workers/reference/how-workers-works/
+    title: V8 isolates and distributed execution
+  - url: https://developers.cloudflare.com/workers/runtime-apis/webassembly/
+    title: WebAssembly support and constraints
+  - url: https://developers.cloudflare.com/workers/runtime-apis/webassembly/javascript/
+    title: Bundled Wasm and JavaScript interop
+  - url: https://developers.cloudflare.com/workers/observability/errors/
+    title: Request-scoped I/O objects
+  - url: https://developers.cloudflare.com/workers/platform/limits/
+    title: CPU, memory and streaming limits
+  - url: https://developers.cloudflare.com/workers/runtime-apis/context/
+    title: Invocation lifetime and waitUntil
+  - url: https://developers.cloudflare.com/workers/runtime-apis/nodejs/
+    title: Node.js compatibility
+  - url: https://emscripten.org/docs/introducing_emscripten/about_emscripten.html
+    title: C and C++ compilation with Emscripten
+  - url: https://developers.cloudflare.com/workers/runtime-apis/handlers/fetch/
+    title: Workers HTTP fetch handler
+  - url: https://developers.cloudflare.com/workers/runtime-apis/bindings/
+    title: Workers resource bindings
+  - url: https://developers.cloudflare.com/workers/local-development/
+    title: Workers local development
+lastVerified: 2026-09-08
+---
+
+import CloudflareProduct from '@components/CloudflareProduct.astro';
+
+import WorkersRuntime from '@components/WorkersRuntime.astro';
+import RequestTimeline from '@components/diagrams/RequestTimeline.astro';
+
+<CloudflareProduct slug="workers" introduction="Workers runs application code on Cloudflare’s network. Use it for APIs, request handling, and server-side application logic without managing an application server.">
+<WorkersRuntime slot="architecture">
+
+<h3 id="runtime-concurrency">Concurrency comes from yielding</h3>
+
+A Worker can have multiple instances. Within one isolate, request handlers share
+an event loop: while A awaits network I/O, B can execute. CPU-heavy synchronous
+code holds up other work in that isolate. This is an illustrative schedule, not
+a promise about which request runs next. [Runtime model](https://developers.cloudflare.com/workers/reference/how-workers-works/).
+
+<RequestTimeline />
+
+<h3 id="runtime-globals">Globals are reusable, temporary, and shared</h3>
+
+Module-level variables can survive between requests in the same isolate.
+There is **no one-isolate-per-origin guarantee**, no shared heap across instances,
+and no persistence after eviction. Treat global reuse as an optimization that
+correctness never depends on. [Isolate lifecycle](https://developers.cloudflare.com/workers/reference/how-workers-works/).
+
+<div className="state-table" role="region" aria-label="State ownership comparison" tabIndex={0}>
+
+| Put it here           | Examples                                           | Why                                                                  |
+| --------------------- | -------------------------------------------------- | -------------------------------------------------------------------- |
+| Module scope          | Immutable lookup data; initialized Wasm instance   | Reuse setup across requests.                                         |
+| Handler scope         | Current user, authorization decision, request body | Keep each invocation’s data separate.                                |
+| Disposable data cache | Bounded cached strings or parsed data              | Tolerate misses, stale data, and instance replacement.               |
+| Persistent service    | Records or coordination shared across instances    | Choose a storage service with the guarantees your application needs. |
+
+</div>
+
+A global `currentUser` can be overwritten by B while A is awaiting I/O.
+Keep it in A’s handler scope instead. Sharing a `Response`, stream, or other
+request-owned I/O object across invocations can also fail at runtime; cache
+plain data and construct a fresh response. [Request I/O restrictions](https://developers.cloudflare.com/workers/observability/errors/#cannot-perform-io-on-behalf-of-a-different-request).
+
+<h3 id="runtime-wasm">Wasm runs beside JavaScript, inside the isolate</h3>
+
+<div
+  className="wasm-pipeline"
+  aria-label="Compile source languages to a bundled WebAssembly module"
+>
+  <span>C / C++</span>
+  <span>Rust</span>
+  <span>Go</span>
+  <span aria-hidden="true">→</span>
+  <strong>.wasm</strong>
+  <span aria-hidden="true">→</span>
+  <strong>Import + instantiate</strong>
+</div>
+
+Compile and bundle a `.wasm` module, instantiate it at module scope, then call
+its exported functions from your handler. Imports supplied during instantiation
+allow callbacks into JavaScript; generated glue such as `wasm-bindgen` can handle
+the interop. These language bindings are different from `env` resource bindings.
+[Wasm interop](https://developers.cloudflare.com/workers/runtime-apis/webassembly/javascript/).
+
+C/C++ can target Wasm with [Emscripten](https://emscripten.org/docs/introducing_emscripten/about_emscripten.html);
+Rust and Go also have Wasm targets. Compiler/runtime support varies. This is
+sandboxed compiled execution, not loading an arbitrary native executable or
+spawning an OS process. Wasm does not give the isolate another execution thread;
+Workers does not support Wasm threads, and WASI support is experimental.
+[Wasm support](https://developers.cloudflare.com/workers/runtime-apis/webassembly/).
+
+<h3 id="runtime-fetch-cache">
+  fetch, cache, and env are three everyday surfaces
+</h3>
+
+**Global `fetch(url)` sends outbound HTTP.** It is distinct from your exported
+`fetch(request, env, ctx)` handler, which receives inbound requests. Start network
+I/O in a handler, not at module initialization. [Fetch API](https://developers.cloudflare.com/workers/runtime-apis/fetch/).
+
+**`caches.default` gives explicit cache access.** Use `match()` to look up a
+response and `put()` to store one. These entries live outside the isolate heap,
+are local to a data center, and do not replicate globally. A cache miss is a
+normal case your handler must handle; the cache is not durable storage.
+[Cache API](https://developers.cloudflare.com/workers/runtime-apis/cache/).
+
+**Fetch caching and explicit cache operations are different paths.** Eligible
+`fetch()` requests follow Cloudflare cache behavior and can use Tiered Cache.
+`cache.put()` can store a response your Worker generated, but does not use Tiered
+Cache. Do not read a `fetch()` arrow as “always goes to the origin” or “always
+cached.” [Cache behavior](https://developers.cloudflare.com/workers/reference/how-the-cache-works/).
+
+**`env` exposes configured resources**, such as a D1 database, R2 bucket, or
+another Worker service. It complements these global APIs.
+[Resource bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/).
+
+<h3 id="runtime-boundaries">Three more boundaries to design around</h3>
+
+- **Memory is per isolate; CPU is metered per invocation.** The 128 MB memory
+  budget includes JavaScript and Wasm and is shared by concurrent requests.
+  Stream large bodies instead of buffering them. Waiting on I/O does not consume
+  CPU time, but the computation before and after it does.
+  [Resource limits](https://developers.cloudflare.com/workers/platform/limits/).
+- **Returning a response can end your background work.** Await required work.
+  For short follow-up tasks, `ctx.waitUntil()` permits up to 30 seconds after an
+  HTTP response or disconnect, shared across that invocation’s calls. Use
+  [Queues](/cloudflare/queues/) for reliable deferred delivery; use
+  [Workflows](/cloudflare/workflows/) for durable multi-step execution.
+  [Invocation lifetime](https://developers.cloudflare.com/workers/runtime-apis/context/#waituntil).
+- **workerd has its own API surface.** `env` bindings expose external resources;
+  their data is outside your heap. Node.js compatibility includes full, partial,
+  and stubbed APIs, so a successful import alone does not establish compatibility.
+  Check your compatibility date and each package’s runtime needs.
+  [Bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/),
+  [Node.js support](https://developers.cloudflare.com/workers/runtime-apis/nodejs/).
+
+The request flow below zooms back out to the handler’s inputs, service calls,
+and response.
+
+</WorkersRuntime>
+<div slot="local-content">
+
+To run workerd directly, install a [prebuilt binary](https://github.com/cloudflare/workerd#running-workerd)
+and create a configuration that names your Worker module and listening socket,
+then run `workerd serve my-config.capnp`. The repository includes
+[configuration samples](https://github.com/cloudflare/workerd/tree/main/samples).
+This runs your code locally; it does not provision Cloudflare-hosted resources.
+
+</div>
+<section slot="deployment">
+
+## Deployment
+
+**Wrangler is Cloudflare’s project and deployment CLI.** For a configured Worker
+project, `npx wrangler deploy` deploys it to Cloudflare. Keep the project’s
+entry point, compatibility date, and resource bindings in its Wrangler configuration.
+[Wrangler commands](https://developers.cloudflare.com/workers/wrangler/commands/).
+
+Wrangler also offers `npx wrangler dev` as a convenient local-development wrapper:
+it uses Miniflare, which executes your code in workerd. The runtime can run
+independently of the deployment CLI. Local bindings are simulated by default;
+remote bindings opt into real Cloudflare resources.
+[Local execution and bindings](https://developers.cloudflare.com/workers/local-development/).
+
+</section>
+</CloudflareProduct>

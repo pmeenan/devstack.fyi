@@ -1,0 +1,154 @@
+---
+title: Workers KV
+summary: Distributed key-value storage for read-heavy data that can tolerate
+  eventual consistency.
+order: 5
+sources:
+  - url: https://developers.cloudflare.com/workers/platform/storage-options/
+    title: Storage models and use cases
+  - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
+    title: Programmatic Miniflare local test harness
+  - url: https://developers.cloudflare.com/workers/local-development/local-data/
+    title: Local data
+  - url: https://developers.cloudflare.com/kv/get-started/
+    title: Get started
+  - url: https://developers.cloudflare.com/workers/local-development/bindings-per-env/
+    title: Bindings per env
+  - url: https://developers.cloudflare.com/kv/concepts/how-kv-works/
+    title: How KV stores, caches, and reads data
+  - url: https://developers.cloudflare.com/workers/local-development/
+    title: Workers local development
+  - url: https://developers.cloudflare.com/kv/api/read-key-value-pairs/
+    title: KV read caching and cacheTtl
+  - url: https://developers.cloudflare.com/kv/api/write-key-value-pairs/
+    title: KV writes, conflicts, and expiration
+  - url: https://www.cloudflare.com/products/kv/
+    title: Advertised KV hot-read latency
+  - url: https://developers.cloudflare.com/durable-objects/concepts/what-are-durable-objects/
+    title: Durable Objects as globally addressable state
+  - url: https://developers.cloudflare.com/durable-objects/reference/data-location/
+    title: Durable Object placement and network latency
+lastVerified: 2026-09-08
+---
+
+import CloudflareProduct from '@components/CloudflareProduct.astro';
+
+<CloudflareProduct slug="kv" introduction="Workers KV is distributed key-value storage for read-heavy data such as configuration and routing metadata. Use it when reads can tolerate updates taking time to become visible.">
+<span slot="introduction-extra"> For a Memcached-style coherent shared cache, use <a href="/cloudflare/durable-objects/">Durable Objects</a>; access is low-latency when callers are near the object’s location.</span>
+
+<div slot="explanation">
+
+## Latency: hot reads, cold reads, and writes
+
+KV combines persistent central storage with caches near readers. A local cache
+hit takes the shortest path; a miss travels through regional and central cache
+tiers, reaching storage for a truly cold read. Writes go to central storage,
+without synchronously refreshing every location’s cache.
+[How KV works](https://developers.cloudflare.com/kv/concepts/how-kv-works/).
+
+Cloudflare advertises **under 5 ms for hot reads**. Treat that as a description of
+the hot path, not a bound for every `get()`, cold read, write, or complete HTTP
+request. The product page does not give a corresponding cold-read or write
+latency bound. [KV product page](https://www.cloudflare.com/products/kv/).
+
+For capacity planning, measure `get()` and `put()` separately from end-to-end
+request time. Compare repeated reads with infrequently accessed keys, across the
+regions your users occupy. Record p50, p95, and p99: an average alone can hide
+slow misses. This is a suggested measurement strategy, not a published benchmark.
+
+### Cache lifetime is different from data lifetime
+
+- **`cacheTtl` on reads:** defaults to **60 seconds**, minimum **30 seconds**.
+  Longer caching can reduce cold reads for rarely changing data, but extends how
+  long readers may use an older result. Zero is not a supported way to request a
+  strongly consistent read. Cache entries can also be evicted.
+- **`expirationTtl` on writes:** deletes the stored key after the configured
+  duration, with a minimum of **60 seconds**. This is data expiration, not a
+  refresh interval. Expiration takes precedence over a longer cache lifetime.
+
+[Read options](https://developers.cloudflare.com/kv/api/read-key-value-pairs/),
+[Write expiration](https://developers.cloudflare.com/kv/api/write-key-value-pairs/).
+
+## Global visibility: a successful write is not a global barrier
+
+KV is eventually consistent. Another location can return an older value for
+**60 seconds or more**; 60 seconds is not a guaranteed convergence deadline.
+Even immediate visibility in the writer’s location is not guaranteed.
+Missing-key results are cached too.
+[Consistency model](https://developers.cloudflare.com/kv/concepts/how-kv-works/#consistency).
+
+For example, with a routing configuration:
+
+1. London reads `route = v1`, caching that result.
+2. A Worker in Virginia successfully writes `route = v2`.
+3. London can still serve `v1` while another reader sees `v2`.
+4. London eventually refreshes its cached view; the write did not establish a
+   moment when all readers switched together.
+
+If London had cached “key missing,” creating the key has the same visibility
+problem. This is an illustration of the documented model, not a timed guarantee.
+[Cached reads and misses](https://developers.cloudflare.com/kv/api/read-key-value-pairs/#cachettl-parameter).
+
+### Read–modify–write is not an atomic operation
+
+Two Workers reading a counter and writing back its increment can overwrite one
+another’s work. Concurrent same-key writes use last-write-wins behavior, and KV
+limits writes to **one per second per key**. A read followed by a write cannot
+implement a reliable lock, unique reservation, or exact global rate counter.
+[Concurrent writes and limits](https://developers.cloudflare.com/kv/api/write-key-value-pairs/#concurrent-writes-to-the-same-key).
+
+A [Durable Object](/cloudflare/durable-objects/) can serialize writes for a key,
+but readers going through KV still get KV’s eventual consistency. Put operations
+that require coordination through the coordinating service itself.
+[Stronger coordination](https://developers.cloudflare.com/kv/concepts/how-kv-works/#consistency).
+
+### Need one shared, immediately updated value?
+
+A [Durable Object](/cloudflare/durable-objects/) gives Workers a globally
+addressable instance with its own state. Route reads and writes to the same
+object identity to operate on that shared state directly. Its attached storage
+is strongly consistent; its in-memory state can serve as a cache while the
+instance is active. This is a building block for a shared cache or coordinator.
+[Durable Object model](https://developers.cloudflare.com/durable-objects/concepts/what-are-durable-objects/).
+
+The object runs at a particular location, so distant callers pay the network
+round trip to it. Globally addressable does not mean locally available at every
+edge location. [Placement and latency](https://developers.cloudflare.com/durable-objects/reference/data-location/).
+
+### Choose based on what an old value would break
+
+Our design guidance: KV fits configuration snapshots, routing metadata, and
+cached content when serving an older version is acceptable. A cosmetic feature
+flag can tolerate a gradual rollout; immediate access revocation or selling the
+last available seat needs a different consistency contract. Use the same
+question for session data: display preferences and authorization state have very
+different freshness requirements.
+
+Successful local tests check application logic. Test update visibility against a
+staging namespace from multiple locations before depending on distributed behavior.
+
+</div>
+<div slot="local-content">
+
+For a local test harness, the [Miniflare JavaScript API](https://developers.cloudflare.com/workers/testing/miniflare/get-started/)
+lets you configure Worker code and local bindings and dispatch requests from
+Node.js. See [Workers local development](/cloudflare/workers/#local-development)
+for the underlying workerd runtime; service emulation supplies the binding behavior.
+
+</div>
+<section slot="deployment">
+
+## Deployment
+
+Create a namespace, bind its ID to the Worker, then deploy the Worker with
+Wrangler. Code deployment and namespace data are separate operations.
+[Namespace setup and deployment](https://developers.cloudflare.com/kv/get-started/).
+
+`npx wrangler dev` is the local wrapper. Seed its namespace with Wrangler’s
+`--local` data commands. For real-service checks, point a remote binding at a
+staging namespace; that accesses hosted data rather than the local emulator.
+[Local data](https://developers.cloudflare.com/workers/local-development/local-data/),
+[Binding modes](https://developers.cloudflare.com/workers/local-development/bindings-per-env/).
+
+</section>
+</CloudflareProduct>

@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import StatusBadge from '@components/StatusBadge.astro';
 import { loadContent } from '@lib/content';
 import { CATEGORIES, type CategoryId } from '@lib/taxonomy';
 import { entryPath } from '@lib/urls';
@@ -41,11 +42,10 @@ const categories = (
                       <div>
                         <div class="card-heading">
                           <h3>{service.data.title}</h3>
-                          <span class:list={['badge', service.data.status]}>
-                            {service.data.status === 'draft'
-                              ? 'Draft'
-                              : 'Reviewed'}
-                          </span>
+                          <StatusBadge
+                            lastVerified={service.data.lastVerified}
+                            status={service.data.status}
+                          />
                         </div>
                         <p>{service.data.summary}</p>
                       </div>

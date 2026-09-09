@@ -1,0 +1,77 @@
+---
+title: Workflows
+summary: Durable multi-step execution with persisted state, retries, sleeps, and
+  waits for external events.
+order: 8
+sources:
+  - url: https://developers.cloudflare.com/workflows/build/local-development/
+    title: Local development
+  - url: https://developers.cloudflare.com/workflows/get-started/guide/
+    title: Guide
+  - url: https://developers.cloudflare.com/workflows/build/rules-of-workflows/
+    title: Rules of workflows
+  - url: https://developers.cloudflare.com/workflows/
+    title: Workflows overview
+  - url: https://developers.cloudflare.com/workflows/build/sleeping-and-retrying/
+    title: Workflow sleeps and step retry policies
+  - url: https://developers.cloudflare.com/workflows/build/events-and-parameters/
+    title: Workflow parameters, events, and persisted results
+  - url: https://developers.cloudflare.com/workflows/build/trigger-workflows/
+    title: Creating Workflow instances from Workers
+  - url: https://developers.cloudflare.com/workers/runtime-apis/bindings/
+    title: Resource bindings on Workflow classes
+  - url: https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/
+    title: Calling Worker services through RPC or HTTP
+lastVerified: 2026-09-08
+---
+
+import CloudflareProduct from '@components/CloudflareProduct.astro';
+
+<CloudflareProduct slug="workflows" introduction="Workflows runs multi-step jobs with saved progress, retries, and waits. Use it for processes that must resume after failures or pause for an external event.">
+<div slot="explanation">
+
+## Who runs the work?
+
+A Worker starts an instance with a Workflow binding’s `create()` method.
+The Workflow then runs **its own step code**. It can save results, retry failed
+steps, sleep, or wait for an external event. Starting a Workflow does not mean
+that each step is dispatched to a separate Worker.
+
+A step can also call a **Worker service** through a configured service binding,
+using RPC or HTTP. That is an optional way to reuse application code. The
+overview labels instance creation and a step’s service call separately.
+
+[Triggering Workflows](https://developers.cloudflare.com/workflows/build/trigger-workflows/)
+and [service bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/)
+describe those two interfaces.
+
+## Progress belongs to the instance, not a live stack
+
+Treat completed step results as saved progress. Code can resume after a pause
+or retry without relying on an isolate’s globals staying alive. Put work that
+needs retry and persistence behavior inside steps, and design external effects
+so a retry is safe. A successful external write and a saved step result are
+separate concerns.
+[Workflow rules](https://developers.cloudflare.com/workflows/build/rules-of-workflows/).
+
+The [Workers runtime model](/cloudflare/workers/#architecture) explains code
+execution. Workflow persistence adds a longer-lived layer around that execution;
+it does not make every JavaScript variable durable.
+
+</div>
+<section slot="deployment">
+
+## Deployment
+
+Configure the Workflow name, exported class, and binding, then deploy its
+Worker with Wrangler. Creating a Workflow instance is a separate operation
+from deploying its code.
+[Workflow setup](https://developers.cloudflare.com/workflows/get-started/guide/).
+
+`npx wrangler dev` starts the local emulator. While it runs, use
+`wrangler workflows` commands with `--local` to trigger or inspect local
+instances (Wrangler 4.79.0 or later).
+[Local Workflow tooling](https://developers.cloudflare.com/workflows/build/local-development/).
+
+</section>
+</CloudflareProduct>

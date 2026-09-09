@@ -1,0 +1,67 @@
+---
+title: D1
+summary: Managed relational database with SQLite SQL semantics, queried through
+  Workers bindings or an HTTP API.
+order: 4
+sources:
+  - url: https://developers.cloudflare.com/workers/platform/storage-options/
+    title: Storage models and use cases
+  - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
+    title: Programmatic Miniflare local test harness
+  - url: https://developers.cloudflare.com/d1/best-practices/local-development/
+    title: Local development
+  - url: https://developers.cloudflare.com/d1/get-started/
+    title: Get started
+  - url: https://developers.cloudflare.com/d1/worker-api/
+    title: D1 Worker binding API
+  - url: https://developers.cloudflare.com/d1/
+    title: D1 overview
+  - url: https://developers.cloudflare.com/d1/best-practices/local-development/
+    title: D1 local development
+  - url: https://developers.cloudflare.com/d1/platform/pricing/
+    title: D1 row-based usage accounting
+lastVerified: 2026-09-08
+---
+
+import CloudflareProduct from '@components/CloudflareProduct.astro';
+
+<CloudflareProduct slug="d1" introduction="D1 is a managed SQL database with SQLite semantics. Use it for application records that you need to query and relate with SQL.">
+<div slot="explanation">
+
+## SQL execution is a service call
+
+The Worker prepares and executes a statement through its binding; the database
+stores the records outside the isolate. Returned rows become application data
+in that invocation. SQL semantics are SQLite-based, but the D1 binding is the
+interface your application must exercise.
+[D1 overview](https://developers.cloudflare.com/d1/),
+[Worker API](https://developers.cloudflare.com/d1/worker-api/).
+
+Rows read and written drive usage accounting. A query returning a few rows may
+still scan many rows; examine query shape and indexes, not just response size.
+[Usage accounting](https://developers.cloudflare.com/d1/platform/pricing/).
+
+</div>
+<div slot="local-content">
+
+For a local test harness, the [Miniflare JavaScript API](https://developers.cloudflare.com/workers/testing/miniflare/get-started/)
+lets you configure Worker code and local bindings and dispatch requests from
+Node.js. See [Workers local development](/cloudflare/workers/#local-development)
+for the underlying workerd runtime; service emulation supplies the binding behavior.
+
+</div>
+<section slot="deployment">
+
+## Deployment
+
+Create a D1 database, configure its Worker binding, apply the intended schema
+to that database, and deploy the Worker. Deploying code does not copy your local
+database into production. [D1 setup](https://developers.cloudflare.com/d1/get-started/).
+
+Wrangler provides `dev` and D1 query/migration commands. Choose `--local`
+explicitly for local queries or migrations. Workers can opt into remote
+bindings; Pages local D1 development cannot target a remote database.
+[Local D1](https://developers.cloudflare.com/d1/best-practices/local-development/).
+
+</section>
+</CloudflareProduct>

@@ -1,0 +1,77 @@
+name: Workflows
+group: developer-platform
+order: 8
+docs: https://developers.cloudflare.com/workflows/
+capability: Durable multi-step execution with persisted state, retries, sleeps,
+  and waits for external events.
+notes: A Worker can create a Workflow instance. The Workflow runs its own step
+  code and can call other Workers through service bindings. Use it for jobs that
+  must save progress, retry, or wait for approval.
+localDev:
+  - kind: vendor
+    name: Local Workflow emulation
+    summary: >-
+      Run an emulated Workflow locally with its Worker code. Exercise step results,
+      retries, and events; this is a local execution environment rather than
+      Cloudflare’s globally hosted orchestration service. Remote bindings and fully
+      remote dev mode are unsupported.
+    url: https://developers.cloudflare.com/workflows/build/local-development/
+limits:
+  tiers:
+    - id: free
+      name: Workers Free
+    - id: paid
+      name: Workers Paid
+  metrics:
+    - name: Requests / invocations
+      values:
+        free: 100,000 / day; shared with Workers
+        paid: 10 million / month included; additional usage metered
+    - name: Steps allowance
+      values:
+        free: 3,000 / day
+        paid: 500,000 / month included; additional usage metered
+    - name: CPU per step
+      values:
+        free: 10 ms
+        paid: 30 seconds default; configurable to 5 minutes
+    - name: Maximum steps per instance
+      values:
+        free: 1,024
+        paid: 10,000 default; configurable to 25,000
+    - name: Concurrent executing instances per account
+      values:
+        free: '100'
+        paid: 50,000
+      note: Sleeping or waiting instances do not consume execution concurrency.
+    - name: Persisted state per instance
+      values:
+        free: 100 MB
+        paid: 1 GB
+    - name: Completed state retention
+      values:
+        free: 3 days
+        paid: 30 days
+  note: Execution requests share the Workers allowance. Storage, CPU, and steps
+    also have their own usage accounting; step-count caps differ from included
+    step allowances.
+  sources:
+    - url: https://developers.cloudflare.com/workflows/reference/limits/
+      title: Workflows limits
+    - url: https://developers.cloudflare.com/workflows/reference/pricing/
+      title: Workflows pricing
+  lastVerified: 2026-09-08
+sources:
+  - url: https://developers.cloudflare.com/workflows/build/local-development/
+    title: Local runtime and simulation
+  - url: https://developers.cloudflare.com/workflows/
+    title: Workflows overview
+  - url: https://developers.cloudflare.com/workflows/build/local-development/
+    title: Workflows local development
+  - url: https://developers.cloudflare.com/workflows/build/trigger-workflows/
+    title: Creating Workflow instances from Workers
+  - url: https://developers.cloudflare.com/workers/runtime-apis/bindings/
+    title: Resource bindings on Workflow classes
+  - url: https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/
+    title: Calling Worker services through RPC or HTTP
+lastVerified: 2026-09-08

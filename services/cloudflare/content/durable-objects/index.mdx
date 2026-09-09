@@ -1,0 +1,93 @@
+---
+title: Durable Objects
+summary: 'Your code plus its own database, addressable by name: one instance per
+  chat room, game session, shared document, or tenant workspace.'
+order: 6
+sources:
+  - url: https://developers.cloudflare.com/workers/platform/storage-options/
+    title: Storage models and use cases
+  - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
+    title: Programmatic Miniflare local test harness
+  - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
+    title: Get started
+  - url: https://developers.cloudflare.com/durable-objects/concepts/durable-object-lifecycle/
+    title: Durable object lifecycle
+  - url: https://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/
+    title: Durable objects migrations
+  - url: https://developers.cloudflare.com/workers/local-development/local-data/
+    title: Local data
+  - url: https://developers.cloudflare.com/workers/local-development/bindings-per-env/
+    title: Bindings per env
+  - url: https://developers.cloudflare.com/durable-objects/concepts/what-are-durable-objects/
+    title: Durable Object identity, compute, and storage
+  - url: https://developers.cloudflare.com/durable-objects/get-started/
+    title: Durable Objects stubs and SQLite setup
+  - url: https://developers.cloudflare.com/durable-objects/platform/limits/
+    title: Durable Objects limits
+  - url: https://developers.cloudflare.com/durable-objects/best-practices/rules-of-durable-objects/
+    title: One Durable Object per room, document, session, or workspace
+lastVerified: 2026-09-08
+---
+
+import CloudflareProduct from '@components/CloudflareProduct.astro';
+
+<CloudflareProduct slug="durable-objects" introduction="Durable Objects combines your code with private durable storage for each named instance. Use one per chat room, game session, or shared document to coordinate participants and state.">
+<div slot="explanation">
+
+## A small stateful service for each thing in your app
+
+Think **one named instance of your code, with its own database**. Give a chat
+room, multiplayer session, shared document, or tenant workspace its own object.
+Requests for the same name reach the same object, bringing the code that manages
+that thing together with its stored state.
+
+For a chat room, the object can coordinate the connected participants and keep
+room history. For a shared document, it can coordinate edits. The useful part
+is being able to address that stateful unit directly, instead of spreading its
+coordination across otherwise separate request handlers.
+
+The diagram uses a chat room as a concrete example. Other rooms get their own
+objects. Memory is temporary; data that must survive instance lifecycle changes
+belongs in the object’s durable storage.
+[Cloudflare’s design guidance](https://developers.cloudflare.com/durable-objects/best-practices/rules-of-durable-objects/)
+explains how to choose that unit of state.
+
+## Object identity survives; the active instance can change
+
+A room’s durable storage and its current in-memory state have different
+lifetimes. Eviction discards memory; a later activation reconstructs an instance
+that can read its stored data. Put room history in storage and treat active
+connections or temporary calculations as lifecycle-dependent.
+[Object lifecycle](https://developers.cloudflare.com/durable-objects/concepts/durable-object-lifecycle/).
+
+Use the [Workers page](/cloudflare/workers/#runtime-concurrency) for the base
+single-threaded execution model, but do not transfer stateless Worker routing
+assumptions to a named Durable Object. Identity is the reason callers can meet
+at the same stateful unit.
+
+</div>
+<div slot="local-content">
+
+For a local test harness, the [Miniflare JavaScript API](https://developers.cloudflare.com/workers/testing/miniflare/get-started/)
+lets you configure Worker code and local bindings and dispatch requests from
+Node.js. See [Workers local development](/cloudflare/workers/#local-development)
+for the underlying workerd runtime; service emulation supplies the binding behavior.
+
+</div>
+<section slot="deployment">
+
+## Deployment
+
+Export the Durable Object class, configure its namespace binding and class
+lifecycle declaration, then deploy the owning Worker with Wrangler. Follow the
+current configuration guide when adding or changing classes; these changes
+are distinct from editing the data inside existing objects.
+[Durable Object setup](https://developers.cloudflare.com/durable-objects/get-started/),
+[Class lifecycle configuration](https://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/).
+
+`npx wrangler dev` wraps local execution. Initialize test state by calling object
+methods rather than expecting a generic database-seeding command.
+[Local object data](https://developers.cloudflare.com/workers/local-development/local-data/).
+
+</section>
+</CloudflareProduct>

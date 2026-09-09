@@ -1,0 +1,88 @@
+<figure class="request-timeline" aria-labelledby="request-timeline-title">
+  <figcaption id="request-timeline-title">
+    Two requests, one execution thread
+  </figcaption>
+  <div
+    class="timeline-scroll"
+    role="region"
+    aria-label="Request scheduling example: scrollable timeline"
+    tabindex="0"
+  >
+    <table>
+      <thead
+        ><tr><th>Time →</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead
+      >
+      <tbody>
+        <tr
+          ><th>Request A</th><td class="running">Run JS</td><td
+            class="waiting"
+            colspan="2">await fetch() · waiting on network</td
+          ><td class="running">Resume → respond</td></tr
+        >
+        <tr
+          ><th>Request B</th><td>Not arrived</td><td class="running"
+            >Run JS / Wasm</td
+          ><td class="running">Respond</td><td>Finished</td></tr
+        >
+        <tr
+          ><th>Execution thread</th><td>A</td><td>B</td><td>B</td><td>A</td></tr
+        >
+      </tbody>
+    </table>
+  </div>
+  <p>
+    Requests overlap in elapsed time. Their synchronous code does not run in
+    parallel within this isolate.
+  </p>
+</figure>
+<style>
+  .request-timeline {
+    margin: 1.5rem 0;
+    padding: 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+  figcaption {
+    font-weight: 650;
+    margin-bottom: 1rem;
+  }
+  .timeline-scroll {
+    overflow-x: auto;
+  }
+  table {
+    min-width: 680px;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 4px;
+    font-size: 0.8rem;
+  }
+  th,
+  td {
+    padding: 0.65rem;
+    border: 0;
+    text-align: center;
+    border-radius: 4px;
+  }
+  th:first-child {
+    text-align: left;
+  }
+  td {
+    color: var(--muted);
+  }
+  .running {
+    color: var(--green);
+    border: 1px solid var(--green);
+    background: var(--soft);
+    font-weight: 600;
+  }
+  .waiting {
+    color: var(--purple);
+    border: 1px dashed var(--purple);
+  }
+  p {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 0;
+  }
+</style>

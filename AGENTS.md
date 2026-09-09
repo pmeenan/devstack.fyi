@@ -71,6 +71,7 @@ build → commit loop, on-demand reviews, and the human commit gate.
 | [docs/plan.md](docs/plan.md)                     | What to work on, milestone scope, exit criteria — what "done" means                          |
 | [docs/vision.md](docs/vision.md)                 | Why the project exists, who it's for, success criteria, non-goals                            |
 | [docs/features.md](docs/features.md)             | The feature matrix: confirmed scope, proposed additions, open questions                      |
+| [docs/style-guide.md](docs/style-guide.md)       | Any diagram, page layout, icon, color, or interaction work — approved visual conventions     |
 | [docs/architecture.md](docs/architecture.md)     | Site structure, content model, theming and deploy shape                                      |
 | [docs/toolchain.md](docs/toolchain.md)           | Version pins, checks, licenses, CSP/cache and deploy cleanup contract                        |
 | [docs/hosting.md](docs/hosting.md)               | Maintainer hosting, nginx installation/recovery, deployment and live verification            |
@@ -116,10 +117,11 @@ build → commit loop, on-demand reviews, and the human commit gate.
 
 ## Current status
 
-**M0 and M1 complete (2026-09-08).** The owner approved the plan and style
-guide, deployed the shell, installed the nginx reference, and disabled analytics.
-Local checks and final public route/header/browser checks pass. Cloudflare NEL
-is permitted under amended D-005. Cloudflare remains an introductory draft;
-**M2.1 (developer-platform research and content acceptance) is next.** Deployment
-and server changes remain human-run. See [docs/plan.md](docs/plan.md) and the
-README for commands and verification.
+**M0, M1, and M2.1 complete (2026-09-08).** The shell is live; the working
+Cloudflare draft now covers eight developer-platform products with sources,
+local-development options, limits, freshness badges, a visual overview and
+dedicated product pages with focused diagrams.
+Local checks and CSP browser checks pass. **Current focus is owner iteration on the overview/product-page structure;
+M2.2 (edge/network and service-wide configuration) follows.** One vendor-docs contradiction is flagged in Cloudflare
+research. Owner review, commits, deployment and server changes remain human-run.
+See [docs/plan.md](docs/plan.md) and the README for commands and verification.

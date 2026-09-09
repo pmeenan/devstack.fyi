@@ -1,0 +1,63 @@
+name: Queues
+group: developer-platform
+order: 7
+docs: https://developers.cloudflare.com/queues/
+capability: Message queues for buffering and moving background work between
+  producers and consumers.
+notes: A typical successful delivery uses write, read, and delete operations.
+  Larger messages and retries increase operation usage.
+localDev:
+  - kind: vendor
+    name: Miniflare queue simulation
+    summary: >-
+      Run producer and consumer Workers locally with Miniflare/workerd and an emulated
+      queue between them. Test duplicates and failures deliberately; a local happy path
+      is not evidence of exactly-once or ordered delivery.
+    url: https://developers.cloudflare.com/queues/configuration/local-development/
+limits:
+  tiers:
+    - id: free
+      name: Workers Free
+    - id: paid
+      name: Workers Paid
+  metrics:
+    - name: Standard operations
+      values:
+        free: 10,000 / day
+        paid: 1 million / month included; additional usage metered
+    - name: Message retention
+      values:
+        free: 24 hours; fixed
+        paid: 4 days default; configurable up to 14 days
+    - name: Maximum message size
+      values:
+        free: 128 KB
+        paid: 128 KB
+    - name: Consumer batch size
+      values:
+        free: 100 messages
+        paid: 100 messages
+    - name: Queues per account
+      values:
+        free: 10,000
+        paid: 10,000
+    - name: Throughput per queue
+      values:
+        free: 5,000 messages / second
+        paid: 5,000 messages / second
+  note: Operations are counted in 64 KB chunks; an operations allowance is not a
+    message allowance. Consumer Workers incur their own usage.
+  sources:
+    - url: https://developers.cloudflare.com/queues/platform/limits/
+      title: Queues limits
+    - url: https://developers.cloudflare.com/queues/platform/pricing/
+      title: Queues pricing
+  lastVerified: 2026-09-08
+sources:
+  - url: https://developers.cloudflare.com/queues/configuration/local-development/
+    title: Local runtime and simulation
+  - url: https://developers.cloudflare.com/queues/
+    title: Queues overview
+  - url: https://developers.cloudflare.com/queues/configuration/local-development/
+    title: Queues local development
+lastVerified: 2026-09-08

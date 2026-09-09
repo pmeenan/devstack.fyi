@@ -28,5 +28,10 @@ const { Content } = await render(service);
 
 <Service service={service} pages={pages}>
   <Content components={{ pre: CodeBlock }} />
-  <Products service={service} products={products} />
+  <Products
+    service={service}
+    products={products.filter(
+      (product) => !pages.some((page) => page.id === product.id),
+    )}
+  />
 </Service>

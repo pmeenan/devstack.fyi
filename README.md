@@ -28,8 +28,11 @@ are in [docs/plan.md](docs/plan.md).
 
 ## Status
 
-The site is live. Cloudflare is the first service and is currently an
-introductory draft; researched product coverage is next. See the
+The shell is live. The working Cloudflare draft now documents eight developer-
+platform products, with sourced limits, local-development options and an
+visual overview and dedicated product pages (M2.1). Layout and content
+structure are being iterated before edge/network coverage; publication
+remains human-run. See the
 [plan](docs/plan.md) for scope and progress.
 
 ## Contributing
@@ -65,6 +68,8 @@ pnpm build
 ```
 
 `pnpm dev` starts the local development server and prints its URL.
+It may reuse a background server. If newly added content is missing, run
+`pnpm exec astro dev stop` followed by `pnpm dev` to resync the collections.
 `pnpm preview` serves the static `dist/` build locally. It does not send the
 production CSP/header policy.
 The catalog and service pages use the accepted Field notes design. For the

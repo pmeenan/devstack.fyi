@@ -1,0 +1,83 @@
+name: Durable Objects
+group: developer-platform
+order: 6
+docs: https://developers.cloudflare.com/durable-objects/
+capability: >-
+  A global singleton per object identity: one instance of your code with shared
+  memory and strongly consistent storage.
+  Build a Memcached-style coherent cache, live counter, chat room, or shared document.
+  Workers call the same object directly; latency depends on distance to its location.
+notes: Use SQLite-backed objects for new applications. The legacy key-value
+  backend is restricted to paid accounts that already have a key-value-backed
+  namespace.
+localDev:
+  - kind: vendor
+    name: workerd + Miniflare Durable Objects
+    summary: >-
+      Run the object class and its caller locally with workerd and Miniflare’s Durable
+      Object support. Seed state through calls to the object’s own methods. Remote
+      Durable Object bindings are unsupported.
+    url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
+limits:
+  tiers:
+    - id: free
+      name: Workers Free
+    - id: paid
+      name: Workers Paid
+  metrics:
+    - name: Requests
+      values:
+        free: 100,000 / day
+        paid: 1 million / month included; additional usage metered
+    - name: Duration
+      values:
+        free: 13,000 GB-s / day
+        paid: 400,000 GB-s / month included; additional usage metered
+    - name: SQLite rows read
+      values:
+        free: 5 million / day
+        paid: 25 billion / month included; additional usage metered
+    - name: SQLite rows written
+      values:
+        free: 100,000 / day
+        paid: 50 million / month included; additional usage metered
+    - name: SQLite storage per account
+      values:
+        free: 5 GB
+        paid: No cap; 5 GB-month included
+    - name: SQLite storage per object
+      values:
+        free: 'Unresolved: official page says both 10 GB and 1 GB'
+        paid: 10 GB
+    - name: Object classes per account
+      values:
+        free: '100'
+        paid: '500'
+  note:
+    'This table covers SQLite-backed objects. Evidence gap: the general limits
+    table gives 10 GB per object, while its storage-error section says 1 GB on
+    Free. Confirm with Cloudflare before relying on a Free per-object capacity.'
+  sources:
+    - url: https://developers.cloudflare.com/durable-objects/platform/limits/
+      title: Durable Objects limits
+    - url: https://developers.cloudflare.com/durable-objects/platform/pricing/
+      title: Durable Objects pricing
+  lastVerified: 2026-09-08
+sources:
+  - url: https://developers.cloudflare.com/durable-objects/concepts/what-are-durable-objects/
+    title: Shared state and strongly consistent storage
+  - url: https://developers.cloudflare.com/durable-objects/reference/data-location/
+    title: Object placement and call latency
+  - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
+    title: Local runtime and simulation
+  - url: https://developers.cloudflare.com/durable-objects/
+    title: Durable Objects overview
+  - url: https://developers.cloudflare.com/workers/local-development/
+    title: Durable Objects local development
+  - url: https://developers.cloudflare.com/durable-objects/get-started/
+    title: Durable Objects local setup
+  - url: https://developers.cloudflare.com/durable-objects/platform/limits/
+    title: Storage backend availability and conflicting Free limits
+  - url: https://developers.cloudflare.com/durable-objects/best-practices/rules-of-durable-objects/
+    title: One Durable Object per room, document, session, or workspace
+lastVerified: 2026-09-08

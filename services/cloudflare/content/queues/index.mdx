@@ -1,0 +1,55 @@
+---
+title: Queues
+summary: Message queues for buffering and moving background work between
+  producers and consumers.
+order: 7
+sources:
+  - url: https://developers.cloudflare.com/queues/configuration/local-development/
+    title: Local development
+  - url: https://developers.cloudflare.com/queues/get-started/
+    title: Get started
+  - url: https://developers.cloudflare.com/queues/reference/how-queues-works/
+    title: Queue producers, consumers, and messages
+  - url: https://developers.cloudflare.com/queues/reference/delivery-guarantees/
+    title: Queues delivery guarantees
+  - url: https://developers.cloudflare.com/queues/configuration/batching-retries/
+    title: Queues batching, acknowledgements, and retries
+  - url: https://developers.cloudflare.com/queues/configuration/dead-letter-queues/
+    title: Queues dead-letter handling
+lastVerified: 2026-09-08
+---
+
+import CloudflareProduct from '@components/CloudflareProduct.astro';
+
+<CloudflareProduct slug="queues" introduction="Queues buffers messages between producers and consumers. Use it to move processing out of a request and into background work that can be retried.">
+<div slot="explanation">
+
+## Publishing and processing are separate invocations
+
+The producer sends a message; a consumer handles it later. They do not share
+request scope or globals. A successful publish does not mean the business
+operation has completed. [How Queues works](https://developers.cloudflare.com/queues/reference/how-queues-works/).
+
+Delivery can repeat and order is not guaranteed. Design the consumer’s effects
+to tolerate duplicates, then decide when to acknowledge or retry. A dead-letter
+queue gives exhausted messages a destination for inspection.
+[Delivery guarantees](https://developers.cloudflare.com/queues/reference/delivery-guarantees/),
+[Retries](https://developers.cloudflare.com/queues/configuration/batching-retries/).
+
+</div>
+<section slot="deployment">
+
+## Deployment
+
+Create the queue, configure the producer binding and consumer settings, then
+deploy the relevant Workers with Wrangler. Set batching, retries, and any
+dead-letter destination deliberately.
+[Queue setup](https://developers.cloudflare.com/queues/get-started/).
+
+The local wrapper is `npx wrangler dev`; use multiple `-c` configuration
+arguments to run separate producer and consumer Workers together.
+`wrangler dev --remote` is unsupported for Queues.
+[Local queue execution](https://developers.cloudflare.com/queues/configuration/local-development/).
+
+</section>
+</CloudflareProduct>

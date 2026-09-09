@@ -1,0 +1,87 @@
+---
+import '../styles/diagram-colors.css';
+import { getEntry } from 'astro:content';
+import ArchitectureMap from './diagrams/ArchitectureMap.astro';
+import Products from './Products.astro';
+import { diagrams } from '../../services/cloudflare/content/diagrams';
+interface Props {
+  slug: keyof typeof diagrams;
+  introduction: string;
+}
+const { slug, introduction } = Astro.props;
+const product = await getEntry('products', `cloudflare/${slug}`);
+const service = await getEntry('services', 'cloudflare');
+if (!product || !service)
+  throw new Error(`Missing Cloudflare product or service: ${slug}`);
+const diagram = diagrams[slug];
+---
+
+<section id="architecture">
+  <p class="product-introduction">
+    {introduction}<slot name="introduction-extra" />
+  </p>
+  <slot name="architecture" />
+  <ArchitectureMap id={`${slug}-architecture`} diagram={diagram} />
+</section>
+<section id="components">
+  <h2>Components &amp; connections</h2><div class="pieces">
+    {
+      diagram.nodes.map((node, index) => (
+        <section id={`piece-${node.id}`} data-icon={node.icon}>
+          <>
+            <span class="piece-number">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <div>
+              <>
+                <h3>{node.label}</h3>
+                <p>{node.detail}</p>
+              </>
+            </div>
+          </>
+        </section>
+      ))
+    }
+  </div>
+</section>
+<slot name="explanation" />
+<Products service={service} products={[product]} detail>
+  <slot name="local-content" slot="local-content" />
+  <slot name="deployment" slot="deployment" />
+</Products>
+<style>
+  .pieces {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 2rem;
+    margin-block: 1.5rem 2.5rem;
+  }
+  .pieces section {
+    display: flex;
+    gap: 0.8rem;
+    align-items: baseline;
+  }
+  .piece-number {
+    flex-shrink: 0;
+    white-space: nowrap;
+    color: var(--icon-color);
+    font:
+      0.8rem 'JetBrains Mono',
+      monospace;
+  }
+  .pieces h3 {
+    color: var(--icon-color);
+    margin: 0 0 0.4rem;
+    font-size: 1rem;
+  }
+  .pieces p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  @media (max-width: 650px) {
+    .pieces {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,31 @@
+---
+import ArchitectureMap from './diagrams/ArchitectureMap.astro';
+import { runtime } from '../../services/cloudflare/content/workers/runtime';
+---
+
+<ArchitectureMap id="workers-runtime" diagram={runtime} />
+<slot />
+<style>
+  :global(.state-table) {
+    overflow-x: auto;
+  }
+  :global(.state-table table) {
+    min-width: 640px;
+  }
+  :global(.wasm-pipeline) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 1.2rem 0;
+  }
+  :global(.wasm-pipeline span:not([aria-hidden])),
+  :global(.wasm-pipeline strong) {
+    padding: 0.5rem 0.8rem;
+    border: 1px solid var(--green);
+    border-radius: 6px;
+    color: var(--green);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+  }
+</style>

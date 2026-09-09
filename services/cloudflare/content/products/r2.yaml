@@ -1,0 +1,70 @@
+name: R2
+group: developer-platform
+order: 3
+docs: https://developers.cloudflare.com/r2/
+capability: Object storage for files and blobs, accessible through Workers
+  bindings and an S3-compatible API.
+notes: The local binding simulation exercises the Workers API. Treat testing an
+  S3 client as a separate integration check against a staging R2 bucket.
+localDev:
+  - kind: vendor
+    name: Miniflare R2 binding emulation
+    summary: >-
+      Miniflare supplies a local bucket to a Worker running in workerd. This exercises
+      the Workers binding API with local object data. It is not an S3 endpoint
+      compatibility test or a reproduction of R2’s distributed infrastructure.
+    url: https://developers.cloudflare.com/workers/local-development/local-data/
+limits:
+  tiers:
+    - id: standard
+      name: Standard storage
+    - id: infrequent
+      name: Infrequent Access
+  metrics:
+    - name: Included storage allowance
+      values:
+        standard: 10 GB-month / month
+        infrequent: None
+    - name: Included Class A operations
+      values:
+        standard: 1 million / month
+        infrequent: None
+    - name: Included Class B operations
+      values:
+        standard: 10 million / month
+        infrequent: None
+    - name: Minimum storage duration
+      values:
+        standard: None
+        infrequent: 30 days
+    - name: Single-part upload limit
+      values:
+        standard: 5 GiB
+        infrequent: 5 GiB
+    - name: Multipart upload limit
+      values:
+        standard: 4.995 TiB
+        infrequent: 4.995 TiB
+    - name: Writes to the same object key
+      values:
+        standard: 1 / second
+        infrequent: 1 / second
+  note: R2 uses storage classes and usage allowances, not Workers or zone plan
+    tiers. The free allowance applies only to Standard storage; additional usage
+    is metered.
+  sources:
+    - url: https://developers.cloudflare.com/r2/platform/limits/
+      title: R2 limits
+    - url: https://developers.cloudflare.com/r2/pricing/
+      title: R2 storage classes and allowances
+  lastVerified: 2026-09-08
+sources:
+  - url: https://developers.cloudflare.com/workers/local-development/local-data/
+    title: Local runtime and simulation
+  - url: https://developers.cloudflare.com/r2/
+    title: R2 overview
+  - url: https://developers.cloudflare.com/workers/local-development/
+    title: R2 local development
+  - url: https://developers.cloudflare.com/r2/api/s3/api/
+    title: R2 S3 API compatibility
+lastVerified: 2026-09-08

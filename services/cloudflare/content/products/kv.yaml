@@ -1,0 +1,71 @@
+name: Workers KV
+group: developer-platform
+order: 5
+docs: https://developers.cloudflare.com/kv/
+capability: >-
+  Persistent key-value data cached near readers for fast, frequent reads. Use it
+  for configuration, routing metadata, and content that can tolerate older
+  values; updates can take 60 seconds or more to appear elsewhere.
+notes: Updates may take 60 seconds or more to become visible elsewhere. Even the
+  location that wrote a value is not guaranteed an immediately fresh read. Use
+  another model for transactional coordination.
+localDev:
+  - kind: vendor
+    name: Miniflare KV emulation
+    summary: >-
+      Run your Worker in workerd with Miniflare’s local KV namespace. Local data is
+      separate from deployed data. This is useful for binding/API tests, but does not
+      establish the freshness of reads across Cloudflare locations.
+    url: https://developers.cloudflare.com/workers/local-development/local-data/
+limits:
+  tiers:
+    - id: free
+      name: Workers Free
+    - id: paid
+      name: Workers Paid
+  metrics:
+    - name: Reads
+      values:
+        free: 100,000 / day
+        paid: No cap; 10 million / month included
+    - name: Writes to different keys
+      values:
+        free: 1,000 / day
+        paid: No cap; 1 million / month included
+    - name: Deletes
+      values:
+        free: 1,000 / day
+        paid: 1 million / month included; additional usage metered
+    - name: List requests
+      values:
+        free: 1,000 / day
+        paid: 1 million / month included; additional usage metered
+    - name: Stored data per account
+      values:
+        free: 1 GB
+        paid: No cap; 1 GB included
+    - name: Writes to the same key
+      values:
+        free: 1 / second
+        paid: 1 / second
+    - name: Value size
+      values:
+        free: 25 MiB
+        paid: 25 MiB
+  note: Paid included usage is not a hard cap. The per-key write rate still applies.
+  sources:
+    - url: https://developers.cloudflare.com/kv/platform/limits/
+      title: Workers KV limits
+    - url: https://developers.cloudflare.com/kv/platform/pricing/
+      title: Workers KV pricing
+  lastVerified: 2026-09-08
+sources:
+  - url: https://developers.cloudflare.com/workers/local-development/local-data/
+    title: Local runtime and simulation
+  - url: https://developers.cloudflare.com/kv/
+    title: Workers KV overview
+  - url: https://developers.cloudflare.com/workers/local-development/
+    title: Workers KV local development
+  - url: https://developers.cloudflare.com/kv/concepts/how-kv-works/
+    title: KV consistency model
+lastVerified: 2026-09-08

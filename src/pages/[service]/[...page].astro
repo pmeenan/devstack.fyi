@@ -4,13 +4,18 @@ import CodeBlock from '@components/CodeBlock.astro';
 import Service from '../../layouts/Service.astro';
 import { loadContent } from '@lib/content';
 export async function getStaticPaths() {
-  const { services, pages } = await loadContent();
+  const { services, pages, products } = await loadContent();
   return pages.map((page) => {
     const [service, ...segments] = page.id.split('/');
     return {
       params: { service, page: segments.join('/') },
       props: {
         page,
+        productSlug:
+          service === 'cloudflare' &&
+          products.some((product) => product.id === page.id)
+            ? segments.join('/')
+            : undefined,
         service: services.find((entry) => entry.id === service)!,
         pages: pages.filter((entry) => entry.id.startsWith(`${service}/`)),
       },
@@ -18,14 +23,15 @@ export async function getStaticPaths() {
   });
 }
 interface Props {
+  productSlug?: string;
   page: CollectionEntry<'pages'>;
   service: CollectionEntry<'services'>;
   pages: CollectionEntry<'pages'>[];
 }
-const { page, service, pages } = Astro.props;
+const { page, service, pages, productSlug } = Astro.props;
 const { Content } = await render(page);
 ---
 
-<Service service={service} page={page} pages={pages}>
+<Service service={service} page={page} pages={pages} productSlug={productSlug}>
   <Content components={{ pre: CodeBlock }} />
 </Service>

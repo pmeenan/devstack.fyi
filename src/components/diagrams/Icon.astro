@@ -1,0 +1,140 @@
+---
+import type { IconKind } from '@lib/diagram';
+interface Props {
+  kind: IconKind;
+}
+const { kind } = Astro.props;
+---
+
+<g
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2.2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  {
+    kind === 'compute' && (
+      <>
+        <>
+          <rect x="15" y="15" width="34" height="34" rx="6" />
+          <rect x="23" y="23" width="18" height="18" rx="3" />
+          <path d="M23 7v8m9-8v8m9-8v8M23 49v8m9-8v8m9-8v8M7 23h8M7 32h8M7 41h8m34-18h8m-8 9h8m-8 9h8" />
+          <path d="m35 25-8 9h8l-5 6" />
+        </>
+      </>
+    )
+  }
+  {
+    kind === 'browser' && (
+      <>
+        <>
+          <rect x="6" y="10" width="52" height="40" rx="5" />
+          <path d="M6 21h52M13 16h1m5 0h1M26 57h12M32 50v7m-9-27-7 7 7 7m18-14 7 7-7 7" />
+        </>
+      </>
+    )
+  }
+  {
+    kind === 'database' && (
+      <>
+        <>
+          <ellipse cx="32" cy="13" rx="23" ry="8" />
+          <path d="M9 13v36c0 11 46 11 46 0V13M9 25c0 11 46 11 46 0M9 37c0 11 46 11 46 0" />
+          <path d="M17 27v3m0 9v3m0 9v2" />
+        </>
+      </>
+    )
+  }
+  {
+    kind === 'bucket' && (
+      <>
+        <>
+          <ellipse cx="32" cy="13" rx="23" ry="7" />
+          <path d="M9 13 15 51Q32 61 49 51L55 13" />
+          <path d="M22 29h14l7 7v13H22zM36 29v8h7" />
+        </>
+      </>
+    )
+  }
+  {
+    kind === 'keys' && (
+      <>
+        <>
+          <rect x="7" y="8" width="50" height="13" rx="4" />
+          <rect x="7" y="26" width="50" height="13" rx="4" />
+          <rect x="7" y="44" width="50" height="13" rx="4" />
+          <path d="M16 14h3m10 0h19M16 32h3m10 0h19M16 50h3m10 0h19" />
+        </>
+      </>
+    )
+  }
+  {
+    kind === 'queue' && (
+      <>
+        <path d="M4 14h56M4 50h56m-6-5 6 5-6 5" />
+        {[7, 25, 43].map((x) => (
+          <>
+            <rect x={x} y="23" width="14" height="18" rx="2" />
+            <path d={`m${x} 24 7 7 7-7`} />
+          </>
+        ))}
+      </>
+    )
+  }
+  {
+    kind === 'workflow' && (
+      <>
+        <>
+          <rect x="4" y="7" width="19" height="17" rx="4" />
+          <rect x="41" y="7" width="19" height="17" rx="4" />
+          <rect x="23" y="42" width="19" height="17" rx="4" />
+          <path d="M23 15h18m-5-4 5 4-5 4M50 24v9H32v9M13 24v9h19" />
+        </>
+      </>
+    )
+  }
+  {
+    kind === 'object' && (
+      <>
+        <>
+          <rect x="5" y="7" width="54" height="50" rx="10" />
+          <rect x="13" y="17" width="19" height="19" rx="3" />
+          <path d="M18 13v4m9-4v4M18 36v4m9-4v4M9 22h4m-4 9h4M32 22h4m-4 9h4" />
+          <ellipse cx="44" cy="37" rx="9" ry="4" />
+          <path d="M35 37v12c0 5 18 5 18 0V37M35 43c0 5 18 5 18 0" />
+        </>
+      </>
+    )
+  }
+  {
+    kind === 'code' && (
+      <>
+        <>
+          <rect x="5" y="7" width="54" height="50" rx="6" />
+          <path d="m23 23-10 9 10 9m18-18 10 9-10 9m-6-24-6 30" />
+        </>
+      </>
+    )
+  }
+  {
+    kind === 'clock' && (
+      <>
+        <>
+          <circle cx="32" cy="33" r="23" />
+          <path d="M32 17v16l12 8M23 4h18M32 4v6" />
+        </>
+      </>
+    )
+  }
+  {
+    kind === 'message' && (
+      <>
+        <>
+          <rect x="5" y="13" width="54" height="38" rx="5" />
+          <path d="m7 16 25 19 25-19M7 48l17-17m33 17L40 31" />
+        </>
+      </>
+    )
+  }
+</g>

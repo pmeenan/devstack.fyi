@@ -22,6 +22,18 @@ Environment / Repro or measurement / Observed / Expected / Impact / Links
 
 Newest first. RE-numbers are never reused.
 
+## RE-010: Background dev server retained an empty product collection (2026-09-08, status: worked-around)
+
+Environment: Astro 7.3.2, a background dev server started before M2.1 product
+files existed. Its startup log reported no matching product YAML files. After
+the new directory and records landed, MDX updates appeared but the diagram's
+`getEntry('products', 'cloudflare/kv')` returned nothing. Fresh static builds
+passed. Running `pnpm dev` merely reused the old process, so it did not resync.
+Stopping it with `pnpm exec astro dev stop` and starting `pnpm dev` restored
+the page: HTTP 200 with all eight product sections and the diagram. The exact
+watcher invalidation trigger is unconfirmed; restart when newly added records
+are absent, and verify the actual dev route before handing off a preview.
+
 ---
 
 ## RE-009: pnpm 12 lockfile contains multiple YAML documents (2026-09-08, status: worked-around)

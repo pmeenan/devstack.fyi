@@ -9,3 +9,8 @@ Verify product names, capabilities, local development and applicable plan
 limits from current official sources. Cite each claim and date product and
 limits verification separately. Record gaps rather than guessing. Keep the
 service `draft` until the owner approves its complete coverage.
+
+For diagram or layout work, read `../../docs/style-guide.md` (Visual architecture
+maps). The overview, Workers, Pages, and Workers KV are owner-approved (product pages for now). Apply
+their visual and content conventions to other product pages: execution/state
+boundaries, runnable local equivalents, and separate deployment tooling.

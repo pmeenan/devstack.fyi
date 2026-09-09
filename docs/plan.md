@@ -107,7 +107,7 @@ contracts; the scopes and exit criteria here determine the work order.
 No load-bearing choices change in this rewrite.
 
 Work in order, one implementation step or content pass per task unless the
-owner asks for a larger unit. M0 and M1 are complete; **next is M2.1, Cloudflare developer-platform research and content acceptance**. Each
+owner asks for a larger unit. M0, M1, and M2.1 are complete; **current work is iterating the M2.1 visual structure with the owner; M2.2 follows**. Each
 handoff includes the working-tree changes and relevant verification; the
 human commits. All implementation steps require `pnpm check` and
 `pnpm build` once available. Temporary fixtures and browser output stay
@@ -321,7 +321,7 @@ coverage because the live draft has no snippets. **M1 is complete; M2.1 is next.
 implementation checks pass and the owner has launched and checked the shell at `https://devstack.fyi/`. Until the owner performs
 that last item, report “implementation ready; owner launch pending.”
 
-## M2 — Cloudflare end to end `pending`
+## M2 — Cloudflare end to end `in progress`
 
 Goal: the first service answers all four reader questions in vision.md.
 Depends on M1. The four passes below preserve the entire owner-selected
@@ -336,16 +336,16 @@ their own sources and dates. Do not substitute zone plans for product-specific
 plans, add prices, or guess unpublished limits. Record unresolved evidence
 in the working docs and mark the coverage gap visibly when relevant.
 
-### M2.1 — Developer platform and content acceptance
+### M2.1 — Developer platform and content acceptance `done`
 
-- [ ] Research and document Workers, Pages, KV, R2, D1, Durable Objects,
+- [x] Research and document Workers, Pages, KV, R2, D1, Durable Objects,
       Queues, and Workflows.
-- [ ] Exercise the complete product/local-dev/limits/source rendering with
+- [x] Exercise the complete product/local-dev/limits/source rendering with
       real records; implement visible stale badges on entries and catalog
       cards using the shared stale logic. Verify service, sub-page, product,
       and limits dates independently, the 180-day boundary, and warnings
       that never fail the build.
-- [ ] Add the first useful interactive SVG/Astro diagram using a vanilla
+- [x] Add the first useful interactive SVG/Astro diagram using a vanilla
       custom element, with a readable static rendering, keyboard/touch
       interaction, accessible labels, and reduced-motion behavior.
 
@@ -353,6 +353,76 @@ in the working docs and mark the coverage gap visibly when relevant.
 source-backed rename/retirement mapping), tables are readable on mobile in
 both themes, and the diagram works under the full CSP with two instances
 and with JavaScript disabled. The page remains `draft` pending owner review.
+
+**Verified 2026-09-08:** eight sourced product records, separate product/limits
+verification dates, and a capability/binding choice diagram are implemented.
+`pnpm check` and `pnpm build` pass. Real build fixtures exercise service,
+sub-page, product and limits staleness independently; exact 180-day boundary
+checks pass and stale warnings remain non-fatal. Chrome checks under the full
+CSP pass with two diagram instances at 390px and 1280px in both themes:
+independent Enter/Space and touch selection, unique IDs, working anchors,
+readable scrolling tables, no-JavaScript links, reduced motion and a 200% layout
+equivalent. No external asset requests or browser errors occurred. Visual
+inspection covered diagram and real table layouts in both themes.
+
+The Durable Objects Free per-object storage contradiction is visibly marked
+and recorded in [Cloudflare research](../services/cloudflare/docs/research.md).
+The page remains `draft`; complete owner review and publication are M2.4.
+Local Cloudflare emulator behavior is sourced from docs, not exercised against
+vendor accounts in this task. **M2.2 is next.**
+
+**Visual-structure iteration, 2026-09-08:** the owner requested representative
+icons, hover details, native links to dedicated product pages, and a deeper
+diagram on each page (D-017). Implemented an application overview with all eight
+product destinations and eight focused diagrams; detailed tables now live on
+the product pages. Fresh architecture/API sources and dates are in those MDX
+pages and Cloudflare research. Continue layout/flow/content iteration here
+before expanding into M2.2. The overview was subsequently accepted (see below).
+
+Validation: `pnpm check` and `pnpm build` pass (11 static routes). Build
+fixtures verify all eight detail pages, no duplicate overview tables, one
+limits table per product, and the existing independent freshness behavior.
+Chrome exercised all nine Cloudflare routes at 390px/1280px in both themes
+under the full CSP; hover tooltips, focus/escape, Enter navigation, touch links,
+no-JavaScript navigation, unique IDs, anchors, two independent map instances,
+reduced motion and a 200% layout equivalent pass. Final live development
+preview checks cover the overview and all eight product routes.
+
+**Second visual feedback pass, 2026-09-08:** fixed hover/focus dismissal,
+standardized arrowheads and rounded connectors, separated overview binding
+paths, and clarified Workflow creation versus optional calls to Worker services.
+Durable Objects now leads with useful per-room/document/session examples and a
+chat-room diagram. R2 and Durable Objects icons were refined. Official sources
+and dates were updated; check/build and targeted full-CSP browser checks pass.
+**Overview accepted, 2026-09-08:** the owner approved the overview. Its layering,
+icon colors, connector attachment, hover behavior and compact legend are now the
+shared baseline in `docs/style-guide.md`. The eight product diagrams adopt it,
+including icon-attached routes and color-matched component headings. Product
+page content/layout review is next, before M2.2.
+
+**Workers mental-model pass, 2026-09-08:** added a separate V8 isolate diagram,
+an illustrative asynchronous request timeline, global-state guidance, Wasm
+interop/language indicators, and explicit fetch/cache/env surfaces. Sources and
+verification date are on the Workers page. Shared region rendering preserves
+the approved visual baseline. Workers was subsequently accepted for now (see below).
+
+**Workers accepted for now, 2026-09-08:** the owner approved the Workers page.
+Applied its content conventions to the other seven developer-platform pages:
+execution/state mental models, runtime links where applicable, runnable local
+emulation with fidelity limits, and separate Deployment sections. Durable
+Objects visually distinguishes persistent and temporary state. Pages was subsequently accepted (see below); this does not accept the remaining pages or complete M2.
+
+**Pages accepted for now, 2026-09-08:** the owner approved its current state,
+including the Functions API explanation and the shared introduction → diagram
+→ components → descriptive text ordering. KV was subsequently accepted (see below).
+The service remains a draft; publication is still human-run.
+
+**Workers KV accepted for now, 2026-09-08:** the owner approved the KV page and
+related overview descriptions and tab ordering. Preserve the latency/consistency
+explanation and the distinction between cached KV reads and a Durable Object
+singleton per identity. Overview, Workers, Pages, and KV are accepted for now;
+R2, D1, Durable Objects, Queues, and Workflows remain for the next review session.
+The owner paused iteration until the morning; M2.2 has not started.
 
 ### M2.2 — Edge, network, and service-wide configuration
 

@@ -144,3 +144,110 @@ focus, blocked storage, reduced motion and JavaScript-disabled reading passed.
 The shared 1200×630 social card uses the approved typography, colors and
 wordmark; its PNG is a browser-rendered typographic asset using the existing
 licensed Inter font. Per-service generated cards remain M3.
+
+## Visual architecture maps (approved baseline, 2026-09-08)
+
+The owner approved the Cloudflare overview. Apply its visual conventions to
+every overview and product page; Workers, Pages, and Workers KV are also owner-approved for now; other product content and layouts remain open for review. `ArchitectureMap.astro` renders authored
+SVGs with representative chip, database, bucket, key/value, message-bus, object,
+and workflow icons from `Icon.astro`. These are capability illustrations, not
+vendor logos. Diagram content stays in Cloudflare's content area.
+
+Use native links for navigation. Hover and keyboard focus highlight connected
+paths and show an adjacent tooltip. Leaving
+the icon/note area clears hover state; moving into the note keeps it readable.
+Keyboard focus retains the note until blur, and Escape dismisses it. Diagram
+components are directly clickable on touch and without JavaScript, with
+screen-reader descriptions retained. The duplicate field-note box and component
+link list below the diagram are omitted. All additional
+claims have dated official sources on the relevant MDX page.
+
+Solid paths indicate the direction of the labeled call/operation, purple dashed paths indicate messages or
+background work, and amber dotted paths indicate retry/failure paths. Diagrams
+preserve legible type through a keyboard-focusable horizontal scroller on narrow
+screens. Focus has a visible outline; reduced motion disables transitions.
+Each map requires a page-unique `id` for SVG definitions and descriptions.
+Product pages put the focused map first, then component explanations, local
+development, deployment, limits, and independently dated sources. Overview cards link to
+those pages; they do not repeat the full reference tables. Card titles, borders,
+and arrows use the corresponding diagram icon color in both themes. The legend
+keeps the call-direction label and, where relevant, retry/failure paths.
+
+The accepted treatment keeps the compute/storage icon style, simplifies
+the R2 bucket and depicts Durable Objects as code plus storage. Connectors use
+consistent filled arrowheads and rounded elbows; overview binding routes are
+separated so solid and dashed paths do not overpaint one shared spine. Workflow
+creation and optional calls to a Worker service are labeled separately.
+
+SVG paint order is background grid, nodes, connectors/labels, then hover notes.
+Connector groups ignore pointer events so they cannot block the underlying
+product links or hover targets. Node surfaces must never cover edge labels.
+
+All diagram connectors terminate at visible icon boundaries, not the larger hover
+rectangles. Route outgoing calls around node captions rather than through them.
+One-way arrows identify the initiator of the labeled operation; they do not
+assert one-way data transfer. Return traffic is omitted unless explicitly shown.
+
+Use `src/styles/diagram-colors.css` and `data-icon` on diagram nodes and their
+related cards or component explanations. Compute/code is green, queues/workflow/
+clock purple, Durable Objects amber, and other icons use the blue accent.
+`src/lib/cloudflare-icons.ts` maps product identity to icon once for overview
+nodes and product cards. Do not duplicate color mappings in page components.
+
+When adding or revising a diagram, inspect every connector at both ends against
+`Icon.astro` geometry: the icon occupies a 64×64 frame centered at node.x and
+starting at node.y, while the larger hit area is only an interaction target.
+Route around the captions below that frame. Separate branches and place labels
+on clear segments; use rounded bends and the shared arrow marker. Keep arrows
+one-way for the labeled operation; draw return paths only when they explain
+behavior. Concrete examples and distinct operations belong in tooltips and
+linked details, not duplicate panels below the map.
+
+Before handoff, check every affected page in light/dark themes and at desktop
+and phone widths, including hover dismissal, keyboard focus/Escape, direct
+links, label clearance and icon attachment. Preserve the shared paint order
+and pointer passthrough, and run the repository checks/build. New service work
+must use this baseline before requesting further visual review.
+
+Use a separate runtime/boundary diagram when a request flow cannot explain
+execution, state ownership or lifecycle. Optional `Diagram.regions` draw labeled
+boundaries behind nodes; reuse the shared renderer for interactions and colors.
+Keep illustrative schedules distinct from routing or timing guarantees.
+
+Local-development sections lead with what can actually run on a developer’s
+machine: an open-source runtime, emulator, or substitute, with fidelity limits.
+Describe deployment CLIs in a separate Deployment section; mention their local
+dev wrappers there without conflating the wrapper with the underlying runtime.
+
+The Workers page is the accepted content baseline (2026-09-08): explain what
+executes, where state lives, its lifetime, and which API surfaces a developer
+uses. Apply those questions per product; link to shared runtime explanations
+instead of copying the isolate diagram into storage pages. A second diagram
+or boundary is useful only when the existing flow cannot express the distinction.
+Keep local emulator fidelity and hosted provisioning separate, with dated
+sources for both. The reusable product layout exposes architecture, explanation, local-content,
+and deployment slots so service-specific explanations stay in content files.
+
+Service navigation uses a connected product-tab strip and in-page navigation
+panel. The active product and the panel share a background; the active tab’s
+bottom edge opens into the panel. Product destinations belong in the upper
+strip; Sources and other section anchors belong in the lower panel. Keep both
+in the service layout, ahead of page content. On narrow screens the product
+strip scrolls horizontally and reveals the selected product; section links wrap.
+Use native links and aria-current, not ARIA tabs for full-page navigation.
+
+Every product page starts with a one- or two-sentence purpose/use-case introduction
+after the shared navigation, immediately followed by its architecture diagram. Put descriptive introductions and API explanations below the
+diagram, including content that previously preceded the product component.
+Use the explanation slot for prose. The optional architecture slot is for an
+additional leading diagram (Workers uses its runtime map there); it must start
+with the visual, not introductory prose.
+
+Place the diagram’s Components & connections section immediately after its map,
+before the longer descriptive explanations. The shared product layout orders
+these as brief introduction, diagram, component descriptions, explanatory prose, then local
+development and deployment.
+
+The required product introduction belongs in the page’s content and answers
+what the product is and what developers use it for. Keep API details, caveats,
+and longer explanations after the diagram and its component descriptions.

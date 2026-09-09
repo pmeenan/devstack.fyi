@@ -1,0 +1,187 @@
+import type { Diagram } from '../../../../src/lib/diagram';
+
+export const runtime: Diagram = {
+  title: 'One isolate, overlapping requests',
+  summary:
+    'workerd hosts many V8 isolates. Zoom in on one instance of your Worker; other instances have separate memory.',
+  width: 1000,
+  height: 640,
+  regions: [
+    {
+      label: 'ONE V8 ISOLATE · YOUR WORKER',
+      detail:
+        'Private JS heap + Wasm memory · reused while this instance lives',
+      x: 285,
+      y: 25,
+      width: 675,
+      height: 440,
+    },
+  ],
+  nodes: [
+    {
+      id: 'arrivals',
+      label: 'Requests A + B',
+      subtitle: 'Same deployed Worker',
+      icon: 'browser',
+      x: 125,
+      y: 120,
+      href: '#runtime-concurrency',
+      detail:
+        'Requests may overlap in one instance. Routing does not guarantee one isolate per origin or that later requests reuse this instance.',
+    },
+    {
+      id: 'execution',
+      label: 'Handler + event loop',
+      subtitle: 'One thread · async I/O',
+      icon: 'compute',
+      x: 425,
+      y: 120,
+      href: '#runtime-concurrency',
+      detail:
+        'A can yield while awaiting I/O, allowing B to run. Synchronous JavaScript or Wasm occupies the execution thread.',
+    },
+    {
+      id: 'globals',
+      label: 'Module globals',
+      subtitle: 'Shared within this isolate',
+      icon: 'keys',
+      x: 820,
+      y: 120,
+      href: '#runtime-globals',
+      detail:
+        'Reuse immutable setup or disposable cached data. Keep user identity and request I/O objects out of shared globals.',
+    },
+    {
+      id: 'wasm',
+      label: 'WebAssembly',
+      subtitle: 'C/C++ · Rust · Go → Wasm',
+      icon: 'code',
+      x: 425,
+      y: 315,
+      href: '#runtime-wasm',
+      detail:
+        'Import a bundled .wasm module and instantiate it. JavaScript calls its exports; supplied imports let Wasm call back into JavaScript.',
+    },
+    {
+      id: 'api',
+      label: 'Runtime APIs',
+      subtitle: 'fetch · caches · env',
+      icon: 'workflow',
+      x: 820,
+      y: 315,
+      href: '#runtime-boundaries',
+      detail:
+        'Application code uses runtime APIs for network and service operations. Wasm imports can bridge to these APIs through JavaScript.',
+    },
+    {
+      id: 'replicas',
+      label: 'Other isolates',
+      subtitle: 'Independent heaps',
+      icon: 'compute',
+      x: 125,
+      y: 475,
+      href: '#runtime-globals',
+      detail:
+        'Other instances do not share these globals. Eviction discards this instance’s in-memory state.',
+    },
+    {
+      id: 'cache',
+      label: 'Location cache',
+      subtitle: 'caches.default · match / put',
+      icon: 'keys',
+      x: 425,
+      y: 495,
+      href: '#runtime-fetch-cache',
+      detail:
+        'The Cache API reads and writes local cached responses. Entries are outside your heap, are not replicated between data centers, and are not durable records.',
+    },
+    {
+      id: 'fetch',
+      label: 'HTTP endpoints',
+      subtitle: 'fetch(url) · outgoing HTTP',
+      icon: 'browser',
+      x: 625,
+      y: 495,
+      href: '#runtime-fetch-cache',
+      detail:
+        'Global fetch sends an outbound HTTP request from a handler. Eligible requests can use Cloudflare caching; cache rules and request options affect behavior.',
+    },
+    {
+      id: 'services',
+      label: 'Bound services',
+      subtitle: 'env bindings',
+      icon: 'database',
+      x: 820,
+      y: 495,
+      href: '#runtime-boundaries',
+      detail:
+        'A resource binding gives code access to a service; it does not put that service’s database inside the JavaScript heap.',
+    },
+  ],
+  edges: [
+    {
+      from: 'arrivals',
+      to: 'execution',
+      d: 'M151 152 H398',
+      label: 'invoke',
+      x: 270,
+      y: 138,
+    },
+    {
+      from: 'execution',
+      to: 'globals',
+      d: 'M450 152 H793',
+      label: 'reuse / access',
+      x: 625,
+      y: 138,
+    },
+    {
+      from: 'execution',
+      to: 'wasm',
+      d: 'M400 161 H322 Q310 161 310 173 V275 Q310 287 322 287 H413 Q425 287 425 299 V320',
+      label: 'call export',
+      x: 366,
+      y: 274,
+    },
+    {
+      from: 'execution',
+      to: 'api',
+      d: 'M450 161 H533 Q545 161 545 173 V263 Q545 275 557 275 H808 Q820 275 820 287 V346',
+      label: 'await I/O',
+      x: 680,
+      y: 262,
+    },
+    {
+      from: 'wasm',
+      to: 'api',
+      d: 'M452 347 H800',
+      label: 'JS imports',
+      x: 625,
+      y: 333,
+    },
+    {
+      from: 'api',
+      to: 'cache',
+      d: 'M802 348 H717 Q705 348 705 360 V443 Q705 455 693 455 H437 Q425 455 425 467 V501',
+      label: 'match / put',
+      x: 510,
+      y: 445,
+    },
+    {
+      from: 'api',
+      to: 'fetch',
+      d: 'M802 348 H752 Q740 348 740 360 V463 Q740 475 728 475 H637 Q625 475 625 487 V503',
+      label: 'fetch',
+      x: 687,
+      y: 492,
+    },
+    {
+      from: 'api',
+      to: 'services',
+      d: 'M838 347 H918 Q930 347 930 359 V458 Q930 470 918 470 H832 Q820 470 820 482 V498',
+      label: 'service call',
+      x: 875,
+      y: 487,
+    },
+  ],
+};

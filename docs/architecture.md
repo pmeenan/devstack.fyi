@@ -72,6 +72,16 @@ nginx vhost is part of the architecture even though agents never touch it.
 - **Staleness** is derived from `lastVerified` at 180 days; it warns and
   badges, never fails the build. (D-011)
 
+## Overview and product detail (D-017)
+
+Cloudflare's overview is a visual application map with product links. The
+existing MDX sub-page route serves eight product pages, each with a focused
+architecture map and the corresponding YAML record's local-dev/limits data.
+Matching page/product ids suppress duplicate overview tables; services without
+product sub-pages retain the original inline table rendering. SVG icons and
+hover/focus behavior are shared presentation components; the diagram content
+and sources remain with the service. All routes are static.
+
 ## Repository layout
 
 | Path                                                                     | Purpose                                                                                                                                                                                 | Lands                                                    |

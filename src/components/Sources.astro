@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import StatusBadge from './StatusBadge.astro';
 interface Props {
   sources: CollectionEntry<'services'>['data']['sources'];
   lastVerified: Date;
@@ -9,7 +10,10 @@ const date = lastVerified.toISOString().slice(0, 10);
 ---
 
 <section aria-label="Sources and verification">
-  <p>Last verified: <time datetime={date}>{date}</time></p>
+  <p>
+    Last verified: <time datetime={date}>{date}</time>
+    <StatusBadge lastVerified={lastVerified} />
+  </p>
   <ul>
     {
       sources.map((source) => (

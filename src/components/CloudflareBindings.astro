@@ -1,0 +1,166 @@
+---
+import { getCollection } from 'astro:content';
+import ArchitectureMap from './diagrams/ArchitectureMap.astro';
+import { cloudflareIcons } from '@lib/cloudflare-icons';
+import type { Diagram } from '@lib/diagram';
+interface Props {
+  id: string;
+}
+const { id } = Astro.props;
+const products = await getCollection('products', (product) =>
+  product.id.startsWith('cloudflare/'),
+);
+const choices: [keyof typeof cloudflareIcons, string, number, number][] = [
+  ['pages', 'Sites & frontends', 160, 45],
+  ['workers', 'Application compute', 405, 265],
+  ['kv', 'Cached · eventual updates', 665, 45],
+  ['r2', 'Files & blobs', 885, 45],
+  ['d1', 'Relational SQL', 665, 265],
+  ['durable-objects', 'Coherent shared state', 885, 265],
+  ['workflows', 'Runs durable step code', 405, 510],
+  ['queues', 'Message bus', 665, 510],
+];
+const diagram: Diagram = {
+  title: 'Your application on Cloudflare',
+  summary:
+    'Compute at the edge. Data where it belongs. Messages connecting background work.',
+  width: 1000,
+  height: 655,
+  nodes: [
+    {
+      id: 'client',
+      label: 'Your users',
+      subtitle: 'Browser / API client',
+      icon: 'browser',
+      x: 160,
+      y: 265,
+      href: '#reading-map',
+      detail:
+        'A browser can request a Pages site or an application endpoint served by a Worker. The paths here illustrate application choices.',
+    },
+    {
+      id: 'worker-service',
+      label: 'Worker service',
+      subtitle: 'Called from a step',
+      icon: 'compute',
+      x: 160,
+      y: 510,
+      href: '/cloudflare/workers/',
+      detail:
+        'A Workflow step can call another Worker through a configured service binding (RPC or HTTP). The Workflow itself runs the step code; calling a separate Worker is optional.',
+    },
+    ...choices.map(([slug, subtitle, x, y]) => {
+      const product = products.find(
+        (product) => product.id === `cloudflare/${slug}`,
+      );
+      if (!product)
+        throw new Error(`Missing diagram product: cloudflare/${slug}`);
+      return {
+        id: slug,
+        label: product.data.name,
+        subtitle,
+        icon: cloudflareIcons[slug],
+        x,
+        y,
+        href: `/cloudflare/${slug}/`,
+        detail:
+          slug === 'workflows'
+            ? 'A Worker creates a Workflow instance. The Workflow runs its own steps, saving progress, retrying failures, and waiting when needed. Steps can also call a separate Worker service. Useful for an approval process or a multi-stage job.'
+            : `${product.data.name}: ${product.data.capability}`,
+      };
+    }),
+    {
+      id: 'consumer',
+      label: 'Consumer Worker',
+      subtitle: 'Background processing',
+      icon: 'compute',
+      x: 885,
+      y: 510,
+      href: '/cloudflare/workers/',
+      detail:
+        'A queue can deliver message batches to a consumer Worker, separating background processing from the producer’s request handler.',
+    },
+  ],
+  edges: [
+    {
+      from: 'workflows',
+      to: 'worker-service',
+      d: 'M376 542 H187',
+      label: 'optional call',
+      x: 280,
+      y: 528,
+    },
+    {
+      from: 'client',
+      to: 'pages',
+      d: 'M134 290 H112 Q96 290 96 274 V93 Q96 77 112 77 H132',
+      label: 'request assets',
+      x: 145,
+      y: 215,
+    },
+    {
+      from: 'client',
+      to: 'workers',
+      d: 'M186 297 H378',
+      label: 'request',
+      x: 280,
+      y: 283,
+    },
+    {
+      from: 'workers',
+      to: 'kv',
+      d: 'M430 288 C505 288 505 77 638 77',
+      label: 'KV calls',
+      x: 548,
+      y: 157,
+    },
+    {
+      from: 'workers',
+      to: 'r2',
+      d: 'M396 272 V28 Q396 12 412 12 H869 Q885 12 885 28 V49',
+    },
+    {
+      from: 'workers',
+      to: 'd1',
+      d: 'M430 297 H640',
+      label: 'SQL calls',
+      x: 575,
+      y: 282,
+    },
+    {
+      from: 'workers',
+      to: 'durable-objects',
+      d: 'M430 305 H514 Q530 305 530 321 V414 Q530 430 546 430 H962 Q978 430 978 414 V313 Q978 297 962 297 H914',
+    },
+    {
+      from: 'workers',
+      to: 'workflows',
+      d: 'M396 322 V328 Q396 340 384 340 H320 Q304 340 304 356 V454 Q304 470 320 470 H389 Q405 470 405 486 V515',
+      label: 'create Workflow',
+      x: 366,
+      y: 453,
+      kind: 'message',
+    },
+    {
+      from: 'workers',
+      to: 'queues',
+      d: 'M430 314 H472 Q488 314 488 330 V453 Q488 471 506 471 H647 Q665 471 665 489 V522',
+      label: 'publish messages',
+      x: 649,
+      y: 458,
+      kind: 'message',
+    },
+    {
+      from: 'queues',
+      to: 'consumer',
+      d: 'M695 542 H858',
+      label: 'deliver',
+      x: 775,
+      y: 528,
+      kind: 'message',
+    },
+  ],
+};
+---
+
+<ArchitectureMap id={id} diagram={diagram} />

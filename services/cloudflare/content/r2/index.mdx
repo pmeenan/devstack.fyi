@@ -1,0 +1,64 @@
+---
+title: R2
+summary: Object storage for files and blobs, accessible through Workers bindings
+  and an S3-compatible API.
+order: 3
+sources:
+  - url: https://developers.cloudflare.com/workers/platform/storage-options/
+    title: Storage models and use cases
+  - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
+    title: Programmatic Miniflare local test harness
+  - url: https://developers.cloudflare.com/workers/local-development/local-data/
+    title: Local data
+  - url: https://developers.cloudflare.com/r2/get-started/
+    title: Get started
+  - url: https://developers.cloudflare.com/r2/how-r2-works/
+    title: R2 architecture
+  - url: https://developers.cloudflare.com/r2/api/s3/api/
+    title: R2 S3 API compatibility
+  - url: https://developers.cloudflare.com/r2/api/workers/workers-api-usage/
+    title: R2 Workers binding API
+lastVerified: 2026-09-08
+---
+
+import CloudflareProduct from '@components/CloudflareProduct.astro';
+
+<CloudflareProduct slug="r2" introduction="R2 stores files and other blobs, such as images, web assets, and datasets. Access objects from Workers or through an S3-compatible API.">
+<div slot="explanation">
+
+## Object bytes live outside the Worker
+
+An R2 binding gives your code access to a bucket. It does not load the bucket
+into the isolate. The architecture separates API access, metadata, read caching,
+and stored object bytes. Your Worker is one caller; an S3 client uses a different
+API surface. [R2 architecture](https://developers.cloudflare.com/r2/how-r2-works/).
+
+Choose local tests for the interface you actually use. A passing Workers-binding
+test says nothing about an S3 client’s request signing or operation support.
+[R2 S3 compatibility](https://developers.cloudflare.com/r2/api/s3/api/).
+
+</div>
+<div slot="local-content">
+
+For a local test harness, the [Miniflare JavaScript API](https://developers.cloudflare.com/workers/testing/miniflare/get-started/)
+lets you configure Worker code and local bindings and dispatch requests from
+Node.js. See [Workers local development](/cloudflare/workers/#local-development)
+for the underlying workerd runtime; service emulation supplies the binding behavior.
+
+</div>
+<section slot="deployment">
+
+## Deployment
+
+Create the hosted bucket and configure the application’s access. Workers use
+a bucket binding; external S3 clients use R2’s S3 endpoint and credentials.
+Deploying application code is separate from uploading object data.
+[R2 setup](https://developers.cloudflare.com/r2/get-started/).
+
+Wrangler provides the local wrapper (`npx wrangler dev`) and object-management
+commands. Use `--local` when seeding local objects. Use a staging bucket for
+hosted binding or S3 integration tests.
+[Local objects](https://developers.cloudflare.com/workers/local-development/local-data/).
+
+</section>
+</CloudflareProduct>

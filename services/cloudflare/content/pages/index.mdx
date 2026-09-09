@@ -1,0 +1,96 @@
+---
+title: Pages
+summary: Web application hosting with static asset delivery, build/deployment
+  integration, and optional Pages Functions.
+order: 2
+sources:
+  - url: https://developers.cloudflare.com/pages/functions/api-reference/
+    title: Pages Functions handler and context API
+  - url: https://developers.cloudflare.com/pages/functions/routing/
+    title: File routing and Functions invocation routes
+  - url: https://developers.cloudflare.com/pages/functions/advanced-mode/
+    title: Module Worker syntax in Pages advanced mode
+  - url: https://developers.cloudflare.com/pages/functions/local-development/
+    title: Local development
+  - url: https://developers.cloudflare.com/pages/get-started/direct-upload/
+    title: Direct upload
+  - url: https://developers.cloudflare.com/pages/get-started/git-integration/
+    title: Pages Git integration and builds
+  - url: https://developers.cloudflare.com/pages/functions/
+    title: Pages Functions
+  - url: https://developers.cloudflare.com/pages/functions/bindings/
+    title: Pages Functions bindings
+  - url: https://developers.cloudflare.com/pages/platform/limits/
+    title: Pages build and Functions limits
+lastVerified: 2026-09-08
+---
+
+import CloudflareProduct from '@components/CloudflareProduct.astro';
+
+<CloudflareProduct slug="pages" introduction="Pages hosts primarily static websites, with optional server-side Functions for features such as form handling and authentication.">
+<div slot="explanation">
+
+## Build output and request execution are different layers
+
+A Pages build produces deployable assets. A visitor can receive a static file or
+reach a Pages Function for dynamic behavior. Functions use the Workers runtime;
+build processes and browser JavaScript do not share their isolate or globals.
+[Pages Functions](https://developers.cloudflare.com/pages/functions/).
+
+## Pages Functions: a Pages API on the Workers runtime
+
+Functions are server-side code deployed with your Pages application. In the
+usual mode, Pages supplies file-based routing and a handler API:
+`functions/api/hello.js` handles `/api/hello`, exporting `onRequest(context)`
+or a method-specific handler such as `onRequestGet(context)`.
+[File routing](https://developers.cloudflare.com/pages/functions/routing/).
+
+The context contains `request`, `env`, route `params`, and `waitUntil()`.
+Resource bindings are available through `context.env`.
+`context.next()` continues through middleware or falls back to asset serving.
+You still use familiar runtime APIs such as `Request`, `Response`, and outbound
+`fetch()`, but the entry-point signature differs from a standalone Worker’s
+`fetch(request, env, ctx)`.
+[Functions API](https://developers.cloudflare.com/pages/functions/api-reference/).
+
+**Advanced mode uses Worker module syntax.** Put `_worker.js` in the build output
+and export a Worker-style fetch handler. This replaces the `/functions` router
+and middleware; your code handles routing and serves static assets through
+`env.ASSETS.fetch(request)`. It is still deployed as part of the Pages project.
+[Advanced mode](https://developers.cloudflare.com/pages/functions/advanced-mode/).
+
+So a normal Pages Function is not just a route pointing at a separately
+deployed Worker. It has a Pages authoring API on the same execution runtime;
+its usage counts toward Workers quotas. Calling a separate Worker through a
+service binding is another, explicit integration.
+[Bindings](https://developers.cloudflare.com/pages/functions/bindings/),
+[Limits](https://developers.cloudflare.com/pages/platform/limits/).
+
+The diagram above shows the file-based mode. Invocation is also controlled by
+`_routes.json`: excluding static paths avoids invoking Functions for them.
+A route falling back to an asset is not itself proof that no Function ran.
+[Invocation routes](https://developers.cloudflare.com/pages/functions/routing/#functions-invocation-routes).
+
+For server-side state, concurrency, Wasm, and fetch/cache APIs, use the
+[Workers runtime model](/cloudflare/workers/#architecture). A binding in a
+Function reaches an external resource; it does not bundle that resource into
+the deployed assets. [Function bindings](https://developers.cloudflare.com/pages/functions/bindings/).
+
+</div>
+<section slot="deployment">
+
+## Deployment
+
+Choose Git integration for Cloudflare-managed builds, or build the assets
+yourself and upload with `npx wrangler pages deploy <OUTPUT_DIR>`. Functions are
+part of the application deployment; configure their resource bindings as well.
+[Git integration](https://developers.cloudflare.com/pages/get-started/git-integration/),
+[Direct Upload](https://developers.cloudflare.com/pages/get-started/direct-upload/).
+
+For the CLI’s local wrapper, `npx wrangler pages dev <OUTPUT_DIR>` serves the
+built files and runs Functions. Build first. Local Pages D1 bindings cannot
+point at a remote database.
+[Local development](https://developers.cloudflare.com/pages/functions/local-development/).
+
+</section>
+</CloudflareProduct>

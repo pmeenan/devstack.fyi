@@ -25,6 +25,26 @@ Decision / Context / Consequences / Reopen if
 
 ---
 
+## D-017: Visual service overview with dedicated product pages (2026-09-08, status: accepted)
+
+**Decision.** At the owner's request, `/cloudflare/` becomes a visual overview
+linking to `/cloudflare/<product>/` for each covered product. Product pages
+hold focused diagrams, component explanations, local development, usage limits,
+and sources. These are sub-pages of the Cloudflare service, not new catalog
+services. Existing product YAML remains the canonical capability/limits data.
+
+**Consequences.** Use the existing `pages` collection and MDX routes. A sub-page
+whose id matches a product id owns that product's detail rendering; the overview
+route renders inline tables only for products without a matching sub-page.
+Cloudflare overview directory anchors retain the earlier `#product-<slug>`
+links. Overview SVG nodes remain native links, with hover/focus explanations;
+product diagrams link to component explanations on the same page. The old
+click-to-select diagram interaction is replaced by click-to-navigate.
+
+**Reopen if.** Product-page names conflict with another sub-page, or experience
+with later services calls for a different detail URL scheme. Visual styling and
+content density remain open to owner iteration.
+
 ## D-016: Pinned build toolchain, build-only license exceptions, and static delivery contract (2026-09-08, status: accepted)
 
 **Decision.** Use the tested Node 24.18.1 / pnpm 12.3.4 / Astro 7.3.2 /
