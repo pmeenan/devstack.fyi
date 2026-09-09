@@ -54,26 +54,32 @@ limits:
       values:
         free: 100 MB
         paid: 1 GB
+    - name: Storage allowance across instances
+      values:
+        free: 1 GB-month; writes fail at the cap
+        paid: 1 GB-month included; additional usage metered
+      note: Counts running, sleeping, errored, and completed instances until their retention ends.
     - name: Completed state retention
       values:
         free: 3 days
         paid: 30 days
   note: Execution requests share the Workers allowance. Storage, CPU, and steps
-    also have their own usage accounting; step-count caps differ from included
-    step allowances.
+    have their own accounting, billed since 2026-08-10; retries and rollback
+    handlers do not count as steps. Step-count caps differ from included step
+    allowances.
   sources:
     - url: https://developers.cloudflare.com/workflows/reference/limits/
       title: Workflows limits
     - url: https://developers.cloudflare.com/workflows/reference/pricing/
       title: Workflows pricing
-  lastVerified: 2026-09-08
+    - url: https://developers.cloudflare.com/changelog/post/2026-07-07-workflows-billing-updates/
+      title: Step and storage billing start date
+  lastVerified: 2026-09-09
 sources:
   - url: https://developers.cloudflare.com/workflows/build/local-development/
     title: Local runtime and simulation
   - url: https://developers.cloudflare.com/workflows/
     title: Workflows overview
-  - url: https://developers.cloudflare.com/workflows/build/local-development/
-    title: Workflows local development
   - url: https://developers.cloudflare.com/workflows/build/trigger-workflows/
     title: Creating Workflow instances from Workers
   - url: https://developers.cloudflare.com/workers/runtime-apis/bindings/

@@ -1,16 +1,19 @@
 area: build
 name: Pages
 group: developer-platform
-order: 2
+order: 9
 docs: https://developers.cloudflare.com/pages/
 apiReferences:
   - title: Functions API
     url: https://developers.cloudflare.com/pages/functions/api-reference/
   - title: Management REST API
     url: https://developers.cloudflare.com/api/resources/pages/
-capability: Web application hosting with static asset delivery, build/deployment
-  integration, and optional Pages Functions.
-notes: Pages Functions consume Workers quotas; upgrading a zone plan does not
+capability: Cloudflare’s earlier static-site hosting with Git builds, preview
+  deployments, and optional Pages Functions. Still supported on all plans;
+  superseded by Workers static assets for new projects.
+notes: No deprecation or sunset is announced; the only capability Workers
+  lacks is custom domains on zones whose nameservers are outside Cloudflare.
+  Pages Functions consume Workers quotas; upgrading a zone plan does not
   replace the Workers plan.
 localDev:
   - kind: vendor
@@ -59,22 +62,29 @@ limits:
         free: '100'
         pro: '250'
         business: '500'
+    - name: Projects per account
+      values:
+        free: '100'
+        pro: '100'
+        business: '100'
+      note: Not routinely raised; Cloudflare points larger fleets at Workers.
   note: Build and asset limits use Free/Pro/Business; Functions use the separate
     Workers plan. Paid file limits require PAGES_WRANGLER_MAJOR_VERSION=4.
-    Enterprise arrangements are custom.
+    Enterprise lists 500 custom domains (more through the account team) and
+    100,000 files; its build limits are not published.
   sources:
     - url: https://developers.cloudflare.com/pages/platform/limits/
       title: Pages limits
     - url: https://developers.cloudflare.com/pages/functions/pricing/
       title: Pages Functions pricing
-  lastVerified: 2026-09-08
+  lastVerified: 2026-09-09
 sources:
   - url: https://developers.cloudflare.com/pages/functions/local-development/
     title: Local runtime and simulation
   - url: https://developers.cloudflare.com/pages/
-    title: Pages overview
-  - url: https://developers.cloudflare.com/pages/functions/local-development/
-    title: Pages local development
+    title: Pages overview, including the recommendation to start new projects on Workers
+  - url: https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/
+    title: Migrating from Pages to Workers static assets
   - url: https://developers.cloudflare.com/d1/best-practices/local-development/
     title: D1 local development with Pages
 lastVerified: 2026-09-09

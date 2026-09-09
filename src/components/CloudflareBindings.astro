@@ -11,8 +11,8 @@ const products = await getCollection('products', (product) =>
   product.id.startsWith('cloudflare/'),
 );
 const choices: [keyof typeof cloudflareIcons, string, number, number][] = [
-  ['pages', 'Sites & frontends', 160, 45],
-  ['workers', 'Application compute', 405, 265],
+  ['pages', 'Existing static sites', 160, 45],
+  ['workers', 'Code + static assets', 405, 265],
   ['kv', 'Cached · eventual updates', 665, 45],
   ['r2', 'Files & blobs', 885, 45],
   ['d1', 'Relational SQL', 665, 265],
@@ -36,7 +36,7 @@ const diagram: Diagram = {
       y: 265,
       href: '#reading-map',
       detail:
-        'A browser can request a Pages site or an application endpoint served by a Worker. The paths here illustrate application choices.',
+        'A browser requests your Worker, which serves static files directly and runs code for everything else. Existing Pages projects still serve sites on their own path. The paths here illustrate application choices.',
     },
     {
       id: 'worker-service',

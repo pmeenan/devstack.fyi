@@ -35,6 +35,7 @@ lastVerified: 2026-09-09
 ---
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
+import MiniflareHarness from '@components/MiniflareHarness.astro';
 
 <CloudflareProduct slug="kv" introduction="Workers KV is distributed key-value storage for read-heavy data such as configuration and routing metadata. Use it when reads can tolerate updates taking time to become visible.">
 <span slot="introduction-extra"> For a Memcached-style coherent shared cache, use <a href="/cloudflare/durable-objects/">Durable Objects</a>; access is low-latency when callers are near the object’s location.</span>
@@ -175,14 +176,7 @@ Successful local tests check application logic. Test update visibility against a
 staging namespace from multiple locations before depending on distributed behavior.
 
 </div>
-<div slot="local-content">
-
-For a local test harness, the [Miniflare JavaScript API](https://developers.cloudflare.com/workers/testing/miniflare/get-started/)
-lets you configure Worker code and local bindings and dispatch requests from
-Node.js. See [Workers local development](/cloudflare/workers/#local-development)
-for the underlying workerd runtime; service emulation supplies the binding behavior.
-
-</div>
+<MiniflareHarness slot="local-content" />
 <section slot="deployment">
 
 ## Deployment

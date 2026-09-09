@@ -1,12 +1,14 @@
 ---
 title: Pages
 area: build
-summary: Web application hosting with static asset delivery, build/deployment
-  integration, and optional Pages Functions.
-order: 2
+summary: Cloudflare’s earlier static-site hosting with Git builds and optional
+  Functions. Still supported; new projects should start on Workers.
+order: 9
 sources:
-  - url: https://developers.cloudflare.com/pages/configuration/serving-pages/
-    title: Pages asset serving and caching
+  - url: https://developers.cloudflare.com/pages/
+    title: Pages overview and the Workers recommendation for new projects
+  - url: https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/
+    title: Migration guide and Workers/Pages compatibility matrix
   - url: https://developers.cloudflare.com/pages/functions/api-reference/
     title: Pages Functions handler and context API
   - url: https://developers.cloudflare.com/pages/functions/routing/
@@ -15,14 +17,14 @@ sources:
     title: Module Worker syntax in Pages advanced mode
   - url: https://developers.cloudflare.com/pages/functions/local-development/
     title: Local development
-  - url: https://developers.cloudflare.com/pages/get-started/direct-upload/
-    title: Direct upload
   - url: https://developers.cloudflare.com/pages/get-started/git-integration/
     title: Pages Git integration and builds
-  - url: https://developers.cloudflare.com/pages/functions/
-    title: Pages Functions
+  - url: https://developers.cloudflare.com/pages/get-started/direct-upload/
+    title: Direct upload
   - url: https://developers.cloudflare.com/pages/functions/bindings/
     title: Pages Functions bindings
+  - url: https://developers.cloudflare.com/pages/configuration/serving-pages/
+    title: Pages asset serving and caching
   - url: https://developers.cloudflare.com/pages/platform/limits/
     title: Pages build and Functions limits
 lastVerified: 2026-09-09
@@ -30,59 +32,56 @@ lastVerified: 2026-09-09
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
 
-<CloudflareProduct slug="pages" introduction="Pages hosts primarily static websites, with optional server-side Functions for features such as form handling and authentication.">
+<CloudflareProduct slug="pages" introduction="Pages is Cloudflare’s earlier product for hosting static sites, with Git-driven builds, preview deployments, and optional server-side Functions. It still works on every plan, but Cloudflare now tells new projects to start on Workers with static assets.">
 <div slot="explanation">
 
-## Build output and request execution are different layers
+## Supported, no longer recommended
 
-A Pages build produces deployable assets. A visitor can receive a static file or
-reach a Pages Function for dynamic behavior. Functions use the Workers runtime;
-build processes and browser JavaScript do not share their isolate or globals.
-[Pages Functions](https://developers.cloudflare.com/pages/functions/).
+The Pages overview opens by recommending Workers, which it calls Cloudflare’s
+primary platform for building applications. There is no deprecation notice or
+sunset date, and the docs are still maintained. Existing projects keep working.
+[Pages overview](https://developers.cloudflare.com/pages/).
 
-## Pages Functions: a Pages API on the Workers runtime
+**The one thing only Pages does:** custom domains on zones whose nameservers are
+not managed by Cloudflare. Four more Pages features need a workaround on Workers
+today: Early Hints, branch deploy controls, file-based routing for Functions, and
+Pages Plugins. Everything else, including Durable Objects and Cron Triggers, is
+available only on Workers or works the same on both.
+[Compatibility matrix](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/#compatibility-matrix).
 
-Functions are server-side code deployed with your Pages application. In the
-usual mode, Pages supplies file-based routing and a handler API:
-`functions/api/hello.js` handles `/api/hello`, exporting `onRequest(context)`
-or a method-specific handler such as `onRequestGet(context)`.
-[File routing](https://developers.cloudflare.com/pages/functions/routing/).
+Our guidance: start new work on [Workers static assets](/cloudflare/workers/#static-assets).
+Stay on Pages when you rely on an external-nameserver domain or its branch
+controls, and plan the migration below otherwise.
 
-The context contains `request`, `env`, route `params`, and `waitUntil()`.
-Resource bindings are available through `context.env`.
-`context.next()` continues through middleware or falls back to asset serving.
-You still use familiar runtime APIs such as `Request`, `Response`, and outbound
-`fetch()`, but the entry-point signature differs from a standalone Worker’s
-`fetch(request, env, ctx)`.
-[Functions API](https://developers.cloudflare.com/pages/functions/api-reference/).
+## Functions use a Pages-specific handler API
 
-**Advanced mode uses Worker module syntax.** Put `_worker.js` in the build output
-and export a Worker-style fetch handler. This replaces the `/functions` router
-and middleware; your code handles routing and serves static assets through
-`env.ASSETS.fetch(request)`. It is still deployed as part of the Pages project.
+Pages Functions are server-side code deployed with the site. In the usual mode,
+Pages supplies file-based routing: `functions/api/hello.js` handles `/api/hello`
+and exports `onRequest(context)` or a method-specific handler such as
+`onRequestGet(context)`. The context carries `request`, `env` (resource
+bindings), route `params`, `waitUntil()`, and `next()`, which continues through
+middleware or falls back to asset serving. This is the same Workers runtime with a
+different entry-point signature from a Worker’s `fetch(request, env, ctx)`.
+Invocation is controlled by `_routes.json`, so excluding static paths keeps
+Functions from running for them.
+[Functions API](https://developers.cloudflare.com/pages/functions/api-reference/),
+[File routing and invocation routes](https://developers.cloudflare.com/pages/functions/routing/).
+
+**Advanced mode** replaces the router with a `_worker.js` module in the build
+output that exports a Worker-style fetch handler and serves files through
+`env.ASSETS.fetch(request)`. That is the same shape as a Worker with static
+assets, which is why such projects migrate easily.
 [Advanced mode](https://developers.cloudflare.com/pages/functions/advanced-mode/).
 
-So a normal Pages Function is not just a route pointing at a separately
-deployed Worker. It has a Pages authoring API on the same execution runtime;
-its usage counts toward Workers quotas. Calling a separate Worker through a
-service binding is another, explicit integration.
+Functions usage counts toward Workers quotas, on the Workers plan rather than the
+zone plan. For server-side state, concurrency, and fetch/cache behavior, use the
+[Workers runtime model](/cloudflare/workers/#architecture).
 [Bindings](https://developers.cloudflare.com/pages/functions/bindings/),
 [Limits](https://developers.cloudflare.com/pages/platform/limits/).
 
-The diagram above shows the file-based mode. Invocation is also controlled by
-`_routes.json`: excluding static paths avoids invoking Functions for them.
-A route falling back to an asset is not itself proof that no Function ran.
-[Invocation routes](https://developers.cloudflare.com/pages/functions/routing/#functions-invocation-routes).
-
-For server-side state, concurrency, Wasm, and fetch/cache APIs, use the
-[Workers runtime model](/cloudflare/workers/#architecture). A binding in a
-Function reaches an external resource; it does not bundle that resource into
-the deployed assets. [Function bindings](https://developers.cloudflare.com/pages/functions/bindings/).
-
 <h2 id="api-example">API example</h2>
 
-Pages Functions uses `onRequestGet(context)` instead of a Worker’s fetch
-handler. Save this as `functions/api/hello.js` in a Pages project; GET
+Save this as `functions/api/hello.js` in a Pages project; GET
 `/api/hello?name=Sam` returns a JSON greeting. No resource binding is needed.
 
 ```javascript
@@ -92,26 +91,37 @@ export const onRequestGet = ({ request }) => {
 };
 ```
 
-To use storage from this Function, configure a Pages binding and access it via
-`context.env`. A separate Worker can call the deployed Pages URL with `fetch()`;
-Pages does not provide a Pages-specific storage binding for that call.
-
+To use storage, configure a Pages binding and read it from `context.env`.
 [Pages Functions API](https://developers.cloudflare.com/pages/functions/api-reference/),
 [Pages resource bindings](https://developers.cloudflare.com/pages/functions/bindings/).
 
+## Migrating to Workers
+
+The migration guide covers the common steps; most are configuration:
+
+- **Output directory:** `pages_build_output_dir` becomes `assets.directory` in
+  a Wrangler file that also sets `name` and `compatibility_date`.
+- **Serving behavior is explicit:** Pages guessed SPA versus 404 handling from
+  the presence of `index.html` and `404.html`; Workers requires
+  `not_found_handling` to be set.
+- **Functions:** a framework adapter targets Workers directly; an advanced-mode
+  `_worker.js` becomes the Worker’s `main` (kept out of the upload with
+  `.assetsignore`); a `functions/` folder is compiled into one Worker script
+  with `wrangler pages functions build --outdir`, which remains available.
+- **Domains:** custom domains and routes work when the zone is on Cloudflare
+  nameservers. When traffic has moved, delete the Pages project.
+
+[Migrate from Pages to Workers](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/).
+
 <h2 id="latency">Latency</h2>
 
-**Separate static asset delivery from Functions execution.** Pages serves
-uploaded static assets through Tiered Cache. A nearby cache hit and a request
-that must fill a cache have different paths; asset size and the client network
-also affect completion time. The serving guide does not publish a general TTFB
-(time to first byte) range. [Serving and caching Pages](https://developers.cloudflare.com/pages/configuration/serving-pages/).
-
-For dynamic routes, use the [Workers latency model](/cloudflare/workers/#latency)
-and include the Function’s downstream calls. Our measurement guidance: compare
-static and dynamic routes separately, recording TTFB and full download time for
-representative asset sizes and user locations. Build/deployment duration is a
-separate metric from serving latency.
+Static assets are served through Tiered Cache, so a nearby cache hit and a
+cache fill have different paths; the serving guide publishes no general TTFB
+(time to first byte) range. Dynamic routes follow the
+[Workers latency model](/cloudflare/workers/#latency) plus the Function’s
+downstream calls. Measure static and dynamic routes separately, and treat
+build duration as a separate metric from serving latency.
+[Serving and caching Pages](https://developers.cloudflare.com/pages/configuration/serving-pages/).
 
 </div>
 <section slot="deployment">
@@ -119,8 +129,8 @@ separate metric from serving latency.
 ## Deployment
 
 Choose Git integration for Cloudflare-managed builds, or build the assets
-yourself and upload with `npx wrangler pages deploy <OUTPUT_DIR>`. Functions are
-part of the application deployment; configure their resource bindings as well.
+yourself and upload with `npx wrangler pages deploy <OUTPUT_DIR>`. Functions
+deploy with the site; configure their bindings as well.
 [Git integration](https://developers.cloudflare.com/pages/get-started/git-integration/),
 [Direct Upload](https://developers.cloudflare.com/pages/get-started/direct-upload/).
 

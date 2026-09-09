@@ -99,7 +99,8 @@ decorative and must not be used alone to communicate interactive state.
   visible note, and `:target` highlights that note. IDs include the theme so
   paired instances do not interfere. At very narrow widths keep a 448px SVG
   in a focusable scrolling figure to preserve labels. These are native links;
-  no client JavaScript is needed. Rich custom-element behavior remains M2.
+  no client JavaScript is needed. Hover notes and keyboard dismissal are the
+  custom-element enhancement described under Visual architecture maps.
 - Keyboard focus uses a 3px accent outline with 4px offset. Never remove it.
   Native links support keyboard/touch and work with JavaScript disabled.
 - Color/shadow transitions are 140ms. Reduced motion sets them to zero and

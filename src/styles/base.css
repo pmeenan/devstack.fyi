@@ -130,7 +130,7 @@ p {
   margin-top: 0;
 }
 h1 {
-  font-size: clamp(2.25rem, 5.8cqi, 4rem);
+  font-size: clamp(2.25rem, 5.8vw, 4rem);
   line-height: 1.1;
   letter-spacing: -0.055em;
   margin-bottom: 1.5rem;
@@ -241,9 +241,6 @@ h1 {
   background: var(--purple-soft);
 }
 
-h1 {
-  font-size: clamp(2.25rem, 5.8vw, 4rem);
-}
 h2 {
   font-size: 1.125rem;
   letter-spacing: -0.025em;

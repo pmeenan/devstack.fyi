@@ -2,7 +2,7 @@
 
 M2.2a scope map, 2026-09-09, recorded before moving the accepted overview.
 These are editorial assignments of the owner's scope (features.md questions
-8–9), not new claims about vendor capabilities or current product names.
+8 and 11), not new claims about vendor capabilities or current product names.
 
 | Area                                   | Existing coverage                                              | Planned coverage                                                                                                                                        |
 | -------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -15,7 +15,9 @@ The root declares ordered areas; each page and product declares one `area`.
 An available area's overview uses its area id as the page directory. Product
 URLs stay at `/cloudflare/<product>/`; membership does not change routing.
 The root retains `#product-<slug>` as visible links to canonical product pages.
-Build's storage order stays R2, D1, KV, Durable Objects.
+Build's tab order is Workers first (the application entry point), storage as
+R2, D1, KV, Durable Objects, then Queues and Workflows, with Pages last
+(2026-09-09: still supported, superseded by Workers static assets).
 
 Planned areas appear in the root directory and area switcher with a Planned
 label and no link to an unwritten page. Add their focused overview and change

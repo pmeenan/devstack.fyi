@@ -58,13 +58,15 @@ limits:
       values:
         free: 25 MiB
         paid: 25 MiB
-  note: Paid included usage is not a hard cap. The per-key write rate still applies.
+  note: Free daily limits reset at 00:00 UTC, and operations beyond them fail
+    with an error. Paid included usage is not a hard cap. The per-key write
+    rate still applies on both plans.
   sources:
     - url: https://developers.cloudflare.com/kv/platform/limits/
       title: Workers KV limits
     - url: https://developers.cloudflare.com/kv/platform/pricing/
       title: Workers KV pricing
-  lastVerified: 2026-09-08
+  lastVerified: 2026-09-09
 sources:
   - url: https://developers.cloudflare.com/workers/local-development/local-data/
     title: Local runtime and simulation

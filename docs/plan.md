@@ -24,7 +24,7 @@ owning docs rather than accumulating them here or in AGENTS.md.
 ## M2 — Cloudflare end to end `in progress`
 
 Goal: cover the owner-selected scope in [features.md](features.md), answered
-questions 8 and 9. M2.1 is complete; M2.2a awaits owner preview review, and
+questions 8 and 11. M2.1 is complete; M2.2a awaits owner preview review, and
 M2.2b through M2.4 remain.
 
 For each content pass, research current official sources in the Cloudflare
@@ -70,7 +70,11 @@ routes at 1280px and 390px in both themes under the production CSP, native
 keyboard/JavaScript-disabled area switching, all eight old product fragments,
 and 144 internal links. Preview: `/cloudflare/` and `/cloudflare/build/`.
 
-- [ ] **Owner:** review the restructured preview before M2.2b content expansion.
+- [ ] **Owner:** review the restructured preview before M2.2b content expansion,
+      including the 2026-09-09 accuracy-pass changes recorded in
+      [Cloudflare research](../services/cloudflare/docs/research.md): the Pages
+      recommendation for Workers, enforced Free-plan limits, limits notes, the
+      new Workers static-assets section, and the slimmed last-tab Pages page.
 
 **Structure exit:** the root explains the available topic areas; the accepted
 application overview is reachable in its own area; product URLs and content
@@ -111,7 +115,7 @@ limits and rendering requirements, with unresolved research recorded.
       warrants a documented presentation adjustment. Place these initially
       under Build applications; review its tab density before adding all six,
       and propose a focused additional area if needed rather than dropping scope.
-- [ ] Reconcile every scope item in features.md answered questions 8 and 9 against
+- [ ] Reconcile every scope item in features.md answered questions 8 and 11 against
       the page and working docs; resolve remaining gaps before calling the
       promised first pass complete. Check the complete page's navigation,
       mobile tables, source links, dates, and diagrams in both themes.

@@ -9,9 +9,12 @@ apiReferences:
   - title: Management REST API
     url: https://developers.cloudflare.com/api/resources/workers/
 capability: Serverless application code running in Cloudflare’s workerd runtime,
-  with bindings to data and other services.
-notes: Workers can also serve static assets. Set explicit CPU limits for paid
-  HTTP handlers; other trigger types have their own limits.
+  with bindings to data and other services, plus static asset hosting for the
+  site the code sits behind.
+notes: Requests served by static assets are free and unlimited; only requests
+  reaching your code count. Workers is Cloudflare's recommended target for new
+  sites, ahead of Pages. Set explicit CPU limits for paid HTTP handlers; other
+  trigger types have their own limits.
 localDev:
   - kind: open-source
     name: workerd
@@ -23,8 +26,9 @@ localDev:
   - kind: vendor
     name: Miniflare
     summary: A local simulator built on workerd, adding local implementations of
-      Cloudflare resource bindings. Running the compute runtime locally and
-      reproducing managed services are separate concerns.
+      Cloudflare resource bindings and serving the assets directory from disk.
+      Running the compute runtime locally and reproducing managed services are
+      separate concerns.
     url: https://developers.cloudflare.com/workers/local-development/
 limits:
   tiers:
@@ -58,6 +62,11 @@ limits:
       values:
         free: 25 MiB
         paid: 25 MiB
+    - name: Worker size, uncompressed
+      values:
+        free: 64 MiB
+        paid: 64 MiB
+      note: Since 2026-09-04; the earlier compressed-size check was removed.
   note:
     Paid allowances are included usage, not a spending cap. This table covers
     current Workers plans and HTTP handlers, not legacy Bundled/Unbound plans.
@@ -66,12 +75,20 @@ limits:
       title: Workers limits
     - url: https://developers.cloudflare.com/workers/platform/pricing/
       title: Workers pricing
-  lastVerified: 2026-09-08
+    - url: https://developers.cloudflare.com/changelog/post/2026-09-04-increased-worker-size-limit/
+      title: Worker size limit change, September 2026
+  lastVerified: 2026-09-09
 sources:
   - url: https://github.com/cloudflare/workerd
     title: Open-source workerd runtime and local configuration
   - url: https://developers.cloudflare.com/workers/
     title: Workers overview
+  - url: https://developers.cloudflare.com/workers/static-assets/
+    title: Static asset hosting on Workers
+  - url: https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/
+    title: Static asset requests are free and unlimited
+  - url: https://developers.cloudflare.com/pages/
+    title: Pages overview recommending Workers for new projects
   - url: https://developers.cloudflare.com/workers/local-development/
     title: Workers local development
 lastVerified: 2026-09-09

@@ -17,8 +17,9 @@ localDev:
     name: Miniflare queue simulation
     summary: >-
       Run producer and consumer Workers locally with Miniflare/workerd and an emulated
-      queue between them. Test duplicates and failures deliberately; a local happy path
-      is not evidence of exactly-once or ordered delivery.
+      queue between them. Consumer concurrency is not emulated locally. Test duplicates
+      and failures deliberately; a local happy path is not evidence of exactly-once or
+      ordered delivery.
     url: https://developers.cloudflare.com/queues/configuration/local-development/
 limits:
   tiers:
@@ -58,12 +59,10 @@ limits:
       title: Queues limits
     - url: https://developers.cloudflare.com/queues/platform/pricing/
       title: Queues pricing
-  lastVerified: 2026-09-08
+  lastVerified: 2026-09-09
 sources:
   - url: https://developers.cloudflare.com/queues/configuration/local-development/
     title: Local runtime and simulation
   - url: https://developers.cloudflare.com/queues/
     title: Queues overview
-  - url: https://developers.cloudflare.com/queues/configuration/local-development/
-    title: Queues local development
 lastVerified: 2026-09-09

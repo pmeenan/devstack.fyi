@@ -53,7 +53,7 @@ limits:
         paid: No cap; 5 GB-month included
     - name: SQLite storage per object
       values:
-        free: 'Unresolved: official page says both 10 GB and 1 GB'
+        free: 1 GB per the limits FAQ; the general table lists 10 GB without a plan qualifier
         paid: 10 GB
     - name: Object classes per account
       values:
@@ -61,14 +61,16 @@ limits:
         paid: '500'
   note:
     'This table covers SQLite-backed objects. Evidence gap: the general limits
-    table gives 10 GB per object, while its storage-error section says 1 GB on
-    Free. Confirm with Cloudflare before relying on a Free per-object capacity.'
+    table gives 10 GB per object with no plan qualifier, while every
+    plan-qualified statement on the same page ties 10 GB to Workers Paid and
+    the storage-error FAQ says 1 GB on Free. Plan on 1 GB; confirm with
+    Cloudflare before relying on more.'
   sources:
     - url: https://developers.cloudflare.com/durable-objects/platform/limits/
       title: Durable Objects limits
     - url: https://developers.cloudflare.com/durable-objects/platform/pricing/
       title: Durable Objects pricing
-  lastVerified: 2026-09-08
+  lastVerified: 2026-09-09
 sources:
   - url: https://developers.cloudflare.com/durable-objects/concepts/what-are-durable-objects/
     title: Shared state and strongly consistent storage

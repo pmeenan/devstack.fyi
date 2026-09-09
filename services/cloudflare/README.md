@@ -13,8 +13,12 @@ complete scope map and authoring rules. Checks/build and browser navigation
 checks pass on all ten routes in both themes at desktop/phone widths, including
 keyboard/no-JavaScript switching, old fragments, and internal links under CSP.
 
-Next is owner review of the restructured local preview, then M2.2b delivery
-content and the strict-origin-TLS/origin-cache-header notes.
+A 2026-09-09 accuracy pass rechecked every record and page against current
+official docs, then made Workers the lead for site hosting (static assets
+section) and demoted Pages to the last Build tab; both are recorded in
+[research.md](docs/research.md).
+Next is owner review of the restructured local preview and those changes, then
+M2.2b delivery content and the strict-origin-TLS/origin-cache-header notes.
 
 See [research.md](docs/research.md) for dated official sources, plan distinctions,
 local-development caveats and the unresolved Durable Objects Free per-object

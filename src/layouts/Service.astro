@@ -77,10 +77,8 @@ const product = page
     {
       page && page.id !== overviewId && (
         <>
-          <>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page">{page.data.title}</span>
-          </>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{page.data.title}</span>
         </>
       )
     }
@@ -132,16 +130,19 @@ const product = page
               <a href="#architecture">Architecture</a>
               <a href="#components">Components &amp; connections</a>
               <a href="#api-example">API example</a>
-              {productSlug === 'workflows' && <a href="#triggers">Triggers</a>}
+              {page?.data.sections.map((section) => (
+                <a href={`#${section.id}`}>{section.name}</a>
+              ))}
               <a href="#latency">Latency</a>
               <a href="#local-development">Local development</a>
               <a href="#deployment">Deployment</a>
               <a href={`#product-${productSlug}`}>Usage limits</a>
             </>
           )}
-          {page?.data.sections.map((section) => (
-            <a href={`#${section.id}`}>{section.name}</a>
-          ))}
+          {!productSlug &&
+            page?.data.sections.map((section) => (
+              <a href={`#${section.id}`}>{section.name}</a>
+            ))}
           <a href="#page-sources">Sources</a>
         </nav>
       </div>

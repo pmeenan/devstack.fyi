@@ -29,6 +29,7 @@ lastVerified: 2026-09-09
 ---
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
+import MiniflareHarness from '@components/MiniflareHarness.astro';
 
 <CloudflareProduct slug="r2" introduction="R2 stores files and other blobs, such as images, web assets, and datasets. Access objects from Workers or through an S3-compatible API.">
 <div slot="explanation">
@@ -100,8 +101,9 @@ fixed object; it does not implement range or conditional GET handling.
 <h2 id="latency">Latency</h2>
 
 **Published upload example: roughly 500 ms p50, down from roughly 2 seconds.**
-Cloudflare’s February 3, 2026 Local Uploads announcement reports this improvement
-in upload time to last byte (TTLB), with up to a 75% reduction in its tests.
+Cloudflare’s February 3, 2026 Local Uploads announcement shows this improvement
+in its chart of upload time to last byte (TTLB); the text claims up to a 75%
+reduction in its tests.
 This is a vendor benchmark for that feature, not a general R2 `put()` latency
 or a guarantee. The short announcement does not specify enough workload details,
 such as object size, to apply those absolute times to every upload.
@@ -119,14 +121,7 @@ transfer time, and compare cached public downloads with direct binding or S3
 requests. Record object sizes and caller/bucket regions with p50, p95, and p99.
 
 </div>
-<div slot="local-content">
-
-For a local test harness, the [Miniflare JavaScript API](https://developers.cloudflare.com/workers/testing/miniflare/get-started/)
-lets you configure Worker code and local bindings and dispatch requests from
-Node.js. See [Workers local development](/cloudflare/workers/#local-development)
-for the underlying workerd runtime; service emulation supplies the binding behavior.
-
-</div>
+<MiniflareHarness slot="local-content" />
 <section slot="deployment">
 
 ## Deployment

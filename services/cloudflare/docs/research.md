@@ -5,18 +5,11 @@
 Read current official product overviews, local-development guides, pricing and
 limits pages on 2026-09-08. The eight records in `content/products/` hold
 claim-level source lists and separate capability/local-development and limits
-dates. Below is the evidence map for future updates; links were read, not
-inferred from product names. No vendor accounts or resources were created.
+dates. Below is the source map for future updates; links were read, not
+inferred from product names. Claim wording lives in the records and pages, not
+here, so it cannot drift. No vendor accounts or resources were created.
 
 ### D1
-
-Managed relational database with SQLite SQL semantics, queried through Workers bindings or an HTTP API.
-
-Usage counts rows read or written, not just SQL statements. Local and deployed data are separate.
-
-Local evidence: Wrangler provides a local D1 database with persistent state. Use explicit --local when running D1 CLI queries or migrations; remote bindings are an opt-in for Workers, unavailable for Pages.
-
-Limits treatment: Paid includes usage allowances and permits metered overages within platform limits. Indexes affect rows scanned and writes.
 
 - [D1 overview](https://developers.cloudflare.com/d1/)
 - [D1 local development](https://developers.cloudflare.com/d1/best-practices/local-development/)
@@ -24,14 +17,6 @@ Limits treatment: Paid includes usage allowances and permits metered overages wi
 - [D1 pricing](https://developers.cloudflare.com/d1/platform/pricing/)
 
 ### Durable Objects
-
-Named stateful objects combining compute with private, strongly consistent storage for coordination.
-
-Use SQLite-backed objects for new applications. The legacy key-value backend is restricted to paid accounts that already have a key-value-backed namespace.
-
-Local evidence: Run the companion Worker and object class with Wrangler. Durable Object bindings are simulated locally; remote: true is unsupported.
-
-Limits treatment: This table covers SQLite-backed objects. Evidence gap: the general limits table gives 10 GB per object, while its storage-error section says 1 GB on Free. Confirm with Cloudflare before relying on a Free per-object capacity.
 
 - [Durable Objects overview](https://developers.cloudflare.com/durable-objects/)
 - [Durable Objects local development](https://developers.cloudflare.com/workers/local-development/)
@@ -41,14 +26,6 @@ Limits treatment: This table covers SQLite-backed objects. Evidence gap: the gen
 
 ### Workers KV
 
-Distributed key-value storage for read-heavy data that can tolerate eventual consistency.
-
-Updates may take 60 seconds or more to become visible elsewhere. Even the location that wrote a value is not guaranteed an immediately fresh read. Use another model for transactional coordination.
-
-Local evidence: Local KV bindings start with local data, not your deployed namespace. Use a staging namespace with remote: true to exercise the real service.
-
-Limits treatment: Paid included usage is not a hard cap. The per-key write rate still applies.
-
 - [Workers KV overview](https://developers.cloudflare.com/kv/)
 - [Workers KV local development](https://developers.cloudflare.com/workers/local-development/)
 - [KV consistency model](https://developers.cloudflare.com/kv/concepts/how-kv-works/)
@@ -56,14 +33,6 @@ Limits treatment: Paid included usage is not a hard cap. The per-key write rate 
 - [Workers KV pricing](https://developers.cloudflare.com/kv/platform/pricing/)
 
 ### Pages
-
-Web application hosting with static asset delivery, build/deployment integration, and optional Pages Functions.
-
-Pages Functions consume Workers quotas; upgrading a zone plan does not replace the Workers plan.
-
-Local evidence: Serves your built asset directory and runs Functions locally. Build the assets first; D1 bindings in Pages local development cannot target a remote database.
-
-Limits treatment: Build and asset limits use Free/Pro/Business; Functions use the separate Workers plan. Paid file limits require PAGES_WRANGLER_MAJOR_VERSION=4. Enterprise arrangements are custom.
 
 - [Pages overview](https://developers.cloudflare.com/pages/)
 - [Pages local development](https://developers.cloudflare.com/pages/functions/local-development/)
@@ -73,28 +42,12 @@ Limits treatment: Build and asset limits use Free/Pro/Business; Functions use th
 
 ### Queues
 
-Message queues for buffering and moving background work between producers and consumers.
-
-A typical successful delivery uses write, read, and delete operations. Larger messages and retries increase operation usage.
-
-Local evidence: Wrangler simulates queues locally; run producer and consumer Workers together with multiple -c configuration arguments. wrangler dev --remote is unsupported.
-
-Limits treatment: Operations are counted in 64 KB chunks; an operations allowance is not a message allowance. Consumer Workers incur their own usage.
-
 - [Queues overview](https://developers.cloudflare.com/queues/)
 - [Queues local development](https://developers.cloudflare.com/queues/configuration/local-development/)
 - [Queues limits](https://developers.cloudflare.com/queues/platform/limits/)
 - [Queues pricing](https://developers.cloudflare.com/queues/platform/pricing/)
 
 ### R2
-
-Object storage for files and blobs, accessible through Workers bindings and an S3-compatible API.
-
-The local binding simulation exercises the Workers API. Treat testing an S3 client as a separate integration check against a staging R2 bucket.
-
-Local evidence: Wrangler simulates the R2 binding locally; remote: true connects that binding to a real bucket. Use a separate staging bucket for integration checks.
-
-Limits treatment: R2 uses storage classes and usage allowances, not Workers or zone plan tiers. The free allowance applies only to Standard storage; additional usage is metered.
 
 - [R2 overview](https://developers.cloudflare.com/r2/)
 - [R2 local development](https://developers.cloudflare.com/workers/local-development/)
@@ -104,28 +57,12 @@ Limits treatment: R2 uses storage classes and usage allowances, not Workers or z
 
 ### Workers
 
-Serverless application code running in Cloudflare’s workerd runtime, with bindings to data and other services.
-
-Workers can also serve static assets. Set explicit CPU limits for paid HTTP handlers; other trigger types have their own limits.
-
-Local evidence: Runs locally through Miniflare/workerd; configured bindings use local simulations by default. Local execution and remote resource access are separate choices.
-
-Limits treatment: Paid allowances are included usage, not a spending cap. This table covers current Workers plans and HTTP handlers, not legacy Bundled/Unbound plans.
-
 - [Workers overview](https://developers.cloudflare.com/workers/)
 - [Workers local development](https://developers.cloudflare.com/workers/local-development/)
 - [Workers limits](https://developers.cloudflare.com/workers/platform/limits/)
 - [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/)
 
 ### Workflows
-
-Durable multi-step execution with persisted state, retries, sleeps, and waits for external events.
-
-Use steps to resume multi-stage work after failures. Local emulation lets you test control flow; it does not establish production scale or timing.
-
-Local evidence: Wrangler runs an emulated Workflow locally. While dev is running, use wrangler workflows commands with --local (Wrangler 4.79.0+). Remote bindings and wrangler dev --remote are unsupported.
-
-Limits treatment: Execution requests share the Workers allowance. Storage, CPU, and steps also have their own usage accounting; step-count caps differ from included step allowances.
 
 - [Workflows overview](https://developers.cloudflare.com/workflows/)
 - [Workflows local development](https://developers.cloudflare.com/workflows/build/local-development/)
@@ -134,20 +71,28 @@ Limits treatment: Execution requests share the Workers allowance. Storage, CPU, 
 
 ## Evidence gaps and scope boundaries
 
-- **Durable Objects Free per-object capacity is unresolved.** The general
-  SQLite limits table says 10 GB per object without a tier qualifier; the
-  storage-error section says 10 GB on Paid and 1 GB on Free. The public table
-  marks the contradiction rather than choosing a value. The account cap
-  (5 GB on Free) is separate and consistent. Revisit the linked limits page
-  or seek vendor clarification before recommending a per-object Free capacity.
+- **Durable Objects Free per-object capacity is still contradictory
+  (rechecked 2026-09-09).** The general SQLite limits table says 10 GB per
+  object without a tier qualifier; every plan-qualified sentence on the page
+  ties 10 GB to Workers Paid, and the storage-error FAQ says 1 GB on Free. The
+  public table now shows 1 GB for Free with the qualifier visible, and the note
+  says to confirm before relying on more. The account cap (5 GB on Free) is
+  separate and consistent.
 - Workers development-testing URLs redirect to `/workers/local-development/`.
   Use that canonical source; its Markdown representation is at `index.md`.
-- Workers overview/limits and Workflows limits contain different script-size
-  presentations. Script packaging is outside this selected quota table; do
-  not copy a compressed-size figure without checking the current packaging
-  rules and reconciling the product-specific docs.
-- Pages remains in the coverage list; it is not mapped to a retirement.
-  Its Functions quotas belong to Workers, while build tiers are Free/Pro/Business.
+- Worker size is now one figure: 64 MiB uncompressed on all plans since the
+  2026-09-04 changelog removed the compressed-size check. The Workers limits
+  table carries it; do not reintroduce the old 3 MB/10 MB compressed values.
+- Pages remains in the coverage list and is not retired, but since August 2026
+  its overview recommends Workers with static assets for new projects and links
+  a migration guide. The Pages page and record say so; Functions quotas belong
+  to Workers, while build tiers are Free/Pro/Business.
+- Free-plan quotas are enforced, not soft: D1 queries fail past the daily row
+  limits since 2026-09-01, and KV operations fail past their daily limits.
+  Both reset at 00:00 UTC. The limits notes say so.
+- KV's legacy REST routes under `/workers/namespaces/` stop working on
+  2026-10-15; the site links only the current `/storage/kv/namespaces/`
+  reference, so no page change is needed unless a sample uses the old path.
 - R2 columns are storage classes, not invented Free/Paid subscription tiers.
   Standard’s free allowance does not apply to Infrequent Access. Object-size
   ceiling and upload ceilings differ; this pass records the usable single-part
@@ -492,3 +437,69 @@ emulator fidelity or deployed API sample execution. No vendor resources were
 provisioned for this content pass. The Durable Objects Free per-object storage
 contradiction remains documented above and visible in its limits. Full-service
 reviewed status and owner publication remain M2.4 work.
+
+## 2026-09-09 — Accuracy review against current official docs
+
+Rechecked every capability, local-development, limits, latency, and API-sample
+claim on the eight product records and pages against the current official
+pages (limits pages dated through 2026-09-05, changelogs through 2026-09-04).
+All cited URLs resolve. Changes made:
+
+- Pages: the overview now recommends Workers with static assets for new
+  projects and links a migration guide. Record, page introduction, a short
+  section, and the Workers record say so. Added the 100-projects-per-account
+  cap and the published Enterprise domain/file values.
+- Workers: added the 64 MiB uncompressed size limit (2026-09-04 changelog).
+- D1: Free daily row limits are enforced since 2026-09-01 (queries fail until
+  the 00:00 UTC reset). Latency now cites the limits page's SQL-duration
+  guidance (sub-millisecond indexed reads, several-millisecond writes).
+- KV: Free daily limits fail past the cap and reset at 00:00 UTC.
+- Durable Objects: Free per-object storage now shows 1 GB with the
+  qualifier visible; the contradiction stays documented above.
+- R2: single-part upload is effectively 4.995 GiB per the limits footnote; the
+  Local Uploads p50 figures are attributed to the announcement's chart.
+- Workflows: step and storage billing has been live since 2026-08-10; added
+  the storage allowance row. The queue-consumer trigger now uses
+  `createBatch()`, which the Workers API documents as idempotent on duplicate
+  IDs, where `create()` throws. The Pages trigger notes Cloudflare's advice to
+  move to Workers static assets. The limits page still disagrees with itself
+  on concurrent instances (table 50,000 Paid, prose 10,000); the record follows
+  the table.
+- Queues: consumer concurrency is not emulated locally, and multi-config
+  `wrangler dev` is labeled experimental.
+- Removed duplicate source entries and moved the shared Miniflare harness
+  paragraph into one component used by KV, R2, D1, and Durable Objects.
+
+Limits and product dates moved to 2026-09-09. These are documentation checks
+against vendor pages, not measurements; no resource was provisioned.
+
+## 2026-09-09 — Workers static assets lead; Pages demoted
+
+Owner decision: keep Pages (it is in scope, still supported, and readers need
+the decoder), but make Workers the lead for site hosting and move Pages to the
+end of the Build tabs. Verified the static-assets overview (2026-07-03), the
+configuration/binding reference (2026-09-04), routing worker-script page
+(2026-08-18), billing and limitations (2026-04-23), Workers Builds (2026-08-28),
+the migration guide with its compatibility matrix (2026-08-14), the Workers
+local-development page (assets served from disk), and the Pages overview
+(2026-08-25).
+
+Findings: Pages has no deprecation notice or sunset date and is "available on
+all plans". The matrix lists one Pages-only capability (custom domains on
+zones with external nameservers) and four Pages features needing workarounds
+on Workers (Early Hints, branch deploy controls, file-based routing, Plugins).
+Workers static assets: asset-first routing by default, asset requests free and
+unlimited with no storage cost, `not_found_handling` explicit,
+`run_worker_first` as boolean or up to 100 glob patterns, one assets directory
+per Worker, `.assetsignore`, and a Free-plan 429 on worker-first paths once the
+daily request limit is exhausted. `wrangler pages functions build --outdir`
+remains available for migrating a `functions/` folder.
+
+Changes: Workers page gains a Static assets section with configuration and
+handler samples and a navigation link; its record's capability, notes, local
+summary, and sources cover assets. Pages page rewritten to what it is, what
+only it does, the Functions handler difference, the API example, migration
+steps, and a short latency note; its record moves to order 9 and describes the
+positioning. The application map relabels the Pages node "Existing static
+sites" and the Workers node "Code + static assets"; geometry is unchanged. No
+resource was provisioned; samples are syntax-checked only.

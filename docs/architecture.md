@@ -170,7 +170,7 @@ no color (D-009).
   and the footer (license, GitHub link, "edit this page" when the page passes
   a source path).
 - `Service.astro` wraps `Base` for `/<slug>/` and its sub-pages: title block
-  with status badge (stale UI lands in M2.1), category label, the vendor website link, the
+  with status badge (draft/reviewed, or the derived stale state), category label, the vendor website link, the
   last-verified line, a sub-page list when `pages` has entries for the
   service, the slot for MDX prose, the grouped product sections, and the
   sources list.
@@ -183,7 +183,7 @@ in order, then ungrouped products. Capability/local-development tables link to
 per-product limits and sources below; tier columns, notes, aliases and each
 independent verification date remain visible. `Sources.astro` renders cited
 lists and dates. Product edit links point to YAML; page links point to MDX.
-Visible stale badges remain M2.1 work.
+`StatusBadge.astro` shows the derived stale state wherever a date is rendered.
 
 **Shared UI:** `ThemeToggle.astro` enhances a hidden button, `CodeBlock.astro`
 keeps fenced code keyboard-scrollable without JavaScript, and

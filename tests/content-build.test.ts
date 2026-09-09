@@ -147,16 +147,17 @@ import CloudflareBindings from '@components/CloudflareBindings.astro';
       buildOverview.indexOf('class="product-tabs"'),
       buildOverview.indexOf('class="page-sections"'),
     );
+    // Workers leads as the entry point; Pages is last (superseded, 2026-09-09).
     const expectedTabs = [
       'build',
       'workers',
-      'pages',
       'r2',
       'd1',
       'kv',
       'durable-objects',
       'queues',
       'workflows',
+      'pages',
     ];
     assert.deepEqual(
       [...tabs.matchAll(/href="\/cloudflare\/([^/]+)\/"/g)].map(

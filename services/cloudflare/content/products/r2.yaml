@@ -47,8 +47,9 @@ limits:
         infrequent: 30 days
     - name: Single-part upload limit
       values:
-        standard: 5 GiB
-        infrequent: 5 GiB
+        standard: 5 GiB, effectively 4.995 GiB
+        infrequent: 5 GiB, effectively 4.995 GiB
+      note: The limits page footnote subtracts 5 MiB from both headline sizes.
     - name: Multipart upload limit
       values:
         standard: 4.995 TiB
@@ -65,7 +66,7 @@ limits:
       title: R2 limits
     - url: https://developers.cloudflare.com/r2/pricing/
       title: R2 storage classes and allowances
-  lastVerified: 2026-09-08
+  lastVerified: 2026-09-09
 sources:
   - url: https://developers.cloudflare.com/workers/local-development/local-data/
     title: Local runtime and simulation

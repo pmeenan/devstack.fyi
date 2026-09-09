@@ -68,178 +68,22 @@ export function isStale(lastVerified: Date, now: Date = new Date()): boolean {
 
 ## Collection definitions (`src/content.config.ts`)
 
-```ts
-import { defineCollection } from 'astro:content';
-import { z } from 'astro/zod'; // not from 'astro:content': deprecated in 7, removed in 8
-import { glob } from 'astro/loaders';
-import { CATEGORY_IDS } from './lib/taxonomy';
+The zod definitions live in `src/content.config.ts` and are not duplicated
+here: the field references below are the documentation, and the file is the
+contract. Conventions that file follows, so a reader knows what to expect
+before opening it:
 
-// ---- shared pieces --------------------------------------------------------
-
-/** kebab-case identifier: group ids, tier ids. */
-const slugId = z
-  .string()
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'kebab-case id expected');
-
-/**
- * Calendar date. Frontmatter YAML hands us a Date, data-file YAML a
- * YYYY-MM-DD string; both become a UTC-midnight Date.
- */
-const calendarDate = z.union([
-  z.date(),
-  z.iso.date().transform((s) => new Date(`${s}T00:00:00Z`)),
-]);
-
-/** One cited official source (D-006). */
-const source = z.strictObject({
-  url: z.url(),
-  title: z.string().min(1),
-  note: z.string().min(1).optional(),
-});
-const sources = z.array(source).min(1);
-
-// ---- services: one MDX page per service ------------------------------------
-
-const services = defineCollection({
-  loader: glob({
-    pattern: ['*/content/index.mdx', '!_*/**'],
-    base: './services',
-    generateId: ({ entry }) => entry.split('/')[0]!,
-  }),
-  schema: z.strictObject({
-    title: z.string().min(1),
-    website: z.url(),
-    category: z.enum(CATEGORY_IDS),
-    summary: z.string().min(1).max(200),
-    status: z.enum(['draft', 'reviewed']),
-    groups: z
-      .array(
-        z.strictObject({
-          id: slugId,
-          name: z.string().min(1),
-          summary: z.string().min(1).optional(),
-        }),
-      )
-      .default([]),
-    sources,
-    lastVerified: calendarDate,
-  }),
-});
-
-// ---- pages: optional MDX sub-pages under a service -------------------------
-
-const pages = defineCollection({
-  loader: glob({
-    pattern: ['*/content/*/**/index.mdx', '!_*/**'],
-    base: './services',
-    generateId: ({ entry }) =>
-      entry.replace('/content/', '/').replace(/\/index\.mdx$/, ''),
-  }),
-  schema: z.strictObject({
-    title: z.string().min(1),
-    summary: z.string().min(1).max(200),
-    order: z.number().int().optional(),
-    sources,
-    lastVerified: calendarDate,
-  }),
-});
-
-// ---- products: one YAML record per documented product ----------------------
-
-const localDevOption = z.strictObject({
-  kind: z.enum(['vendor', 'open-source', 'mock', 'remote']),
-  name: z.string().min(1).optional(),
-  summary: z.string().min(1),
-  url: z.url().optional(),
-});
-
-const limits = z
-  .strictObject({
-    tiers: z
-      .array(
-        z.strictObject({
-          id: slugId,
-          name: z.string().min(1),
-          note: z.string().min(1).optional(),
-        }),
-      )
-      .min(1),
-    metrics: z.array(
-      z.strictObject({
-        name: z.string().min(1),
-        values: z.record(slugId, z.string().min(1)),
-        note: z.string().min(1).optional(),
-      }),
-    ),
-    note: z.string().min(1).optional(),
-    sources,
-    lastVerified: calendarDate,
-  })
-  .superRefine((l, ctx) => {
-    const tierIds = l.tiers.map((t) => t.id);
-    if (new Set(tierIds).size !== tierIds.length) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['tiers'],
-        message: 'duplicate tier id',
-      });
-    }
-    if (l.metrics.length === 0 && !l.note) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['metrics'],
-        message:
-          'no metrics: add a `note` saying the vendor publishes no per-tier limits',
-      });
-    }
-    l.metrics.forEach((m, i) => {
-      const keys = Object.keys(m.values);
-      for (const k of keys) {
-        if (!tierIds.includes(k)) {
-          ctx.addIssue({
-            code: 'custom',
-            path: ['metrics', i, 'values', k],
-            message: `unknown tier "${k}"`,
-          });
-        }
-      }
-      for (const t of tierIds) {
-        if (!keys.includes(t)) {
-          ctx.addIssue({
-            code: 'custom',
-            path: ['metrics', i, 'values'],
-            message: `missing value for tier "${t}"`,
-          });
-        }
-      }
-    });
-  });
-
-const products = defineCollection({
-  loader: glob({
-    pattern: ['*/content/products/*.yaml', '!_*/**'],
-    base: './services',
-    generateId: ({ entry }) =>
-      entry.replace('/content/products/', '/').replace(/\.yaml$/, ''),
-  }),
-  schema: z.strictObject({
-    name: z.string().min(1),
-    aliases: z.array(z.string().min(1)).default([]),
-    group: slugId.optional(),
-    order: z.number().int().optional(),
-    docs: z.url(),
-    apiReferences: z.array(source).default([]),
-    capability: z.string().min(1),
-    notes: z.string().min(1).optional(),
-    localDev: z.array(localDevOption).min(1),
-    limits,
-    sources,
-    lastVerified: calendarDate,
-  }),
-});
-
-export const collections = { services, pages, products };
-```
+- `import { z } from 'astro/zod'`, not `astro:content` (deprecated in Astro 7,
+  removed in 8), using zod 4 idioms (`z.url()`, `z.iso.date()`,
+  `z.strictObject()`, two-argument `z.record()`).
+- Every object is a `strictObject`; every id is kebab-case; every date accepts
+  a frontmatter `Date` or a `YYYY-MM-DD` string and becomes UTC midnight.
+- The `limits` sub-record carries a `superRefine` that rejects duplicate tier
+  ids, unknown tier keys in `values`, a missing tier value, and an empty
+  `metrics` list without a `note`.
+- Cross-entry rules (group and area membership, overview routes, page/product
+  agreement) are checked once by `loadContent()` in `src/lib/content.ts`, not
+  by the zod schema, because they need more than one collection.
 
 ## Field reference
 
@@ -256,6 +100,7 @@ is a calendar date; the build never authors "stale", it derives it (D-011).
 | `category`     | yes      | One of `CATEGORY_IDS` (D-010). Exactly one per service (D-008).                                                                                                                                |
 | `summary`      | yes      | One sentence, at most 200 characters, for the catalog card and OpenGraph description.                                                                                                          |
 | `status`       | yes      | `draft` or `reviewed`, authored; `stale` is derived and overrides the display of both (D-011).                                                                                                 |
+| `areas`        | no       | Ordered topic areas `{ id, name, summary, status }` with status `available` or `planned` (D-018). Default empty; see "Service topic areas" below for the membership rules.                     |
 | `groups`       | no       | Ordered list of `{ id, name, summary? }` that products may name in `group`; the page renders products in this order. Cloudflare's four groups from answered question 8 go here. Default empty. |
 | `sources`      | yes      | At least one `{ url, title, note? }` for the service-wide notes (D-006).                                                                                                                       |
 | `lastVerified` | yes      | Date the service-wide notes were last checked against the sources.                                                                                                                             |
@@ -268,7 +113,8 @@ have to).
 ### `pages` (frontmatter of `content/<page>/index.mdx`)
 
 `title`, `summary`, `sources`, `lastVerified` as above, plus optional
-`order` for the sub-page list. Sub-pages exist so a service can split off a
+`order` for the sub-page list, `area` (required when the service declares
+areas), and `sections: [{ id, name }]` for extra in-page navigation links. Sub-pages exist so a service can split off a
 long topic (`/cloudflare/local-dev/`); D-017 uses matching product sub-pages for Cloudflare. When a page id matches a
 product id (for example `cloudflare/kv`), its MDX explicitly renders that
 product’s details; the overview omits the duplicate inline product table.
@@ -277,19 +123,21 @@ Sub-page sources/dates cover its additional prose and diagram claims.
 
 ### `products` (`content/products/<product>.yaml`)
 
-| Field          | Required | Meaning                                                                                                                                                                                                                                                                                                                                     |
-| -------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`         | yes      | The vendor's current product name, as the vendor writes it.                                                                                                                                                                                                                                                                                 |
-| `aliases`      | no       | Former or alternative names. Vendors rename products (D-006 context) and the decoder should still find them. Default empty.                                                                                                                                                                                                                 |
-| `group`        | no       | Id of one of the service's `groups`. An id the service did not declare fails the build. Ungrouped products render after the groups.                                                                                                                                                                                                         |
-| `order`        | no       | Sort key inside its group; ties and unset values sort by `name`.                                                                                                                                                                                                                                                                            |
-| `docs`         | yes      | The product's official documentation landing page; the product name links here.                                                                                                                                                                                                                                                             |
-| `capability`   | yes      | One line saying what the product _is_ in generic terms — the phrase someone would search for without knowing the brand (D-010, single field).                                                                                                                                                                                               |
-| `notes`        | no       | A short plain-text gotcha or scope note for the row. Anything longer belongs in the service's MDX prose.                                                                                                                                                                                                                                    |
-| `localDev`     | yes      | At least one option, first is the recommendation. `kind` is `vendor` (a vendor CLI dev mode or emulator), `open-source` (a runnable open-source runtime or stand-in, including vendor-maintained projects), `mock` (stub it yourself), or `remote` (no local equivalent; use a dev account). `name` and `url` optional, `summary` required. |
-| `limits`       | yes      | The per-tier usage limits sub-record (D-013), below.                                                                                                                                                                                                                                                                                        |
-| `sources`      | yes      | Sources for the capability and local-dev claims.                                                                                                                                                                                                                                                                                            |
-| `lastVerified` | yes      | Date those claims were last checked.                                                                                                                                                                                                                                                                                                        |
+| Field           | Required | Meaning                                                                                                                                                                                                                                                                                                                                     |
+| --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`          | yes      | The vendor's current product name, as the vendor writes it.                                                                                                                                                                                                                                                                                 |
+| `aliases`       | no       | Former or alternative names. Vendors rename products (D-006 context) and the decoder should still find them. Default empty.                                                                                                                                                                                                                 |
+| `group`         | no       | Id of one of the service's `groups`. An id the service did not declare fails the build. Ungrouped products render after the groups.                                                                                                                                                                                                         |
+| `area`          | no       | Topic-area id (D-018); required when the service declares `areas`, and must match the same-id page's `area`.                                                                                                                                                                                                                                |
+| `order`         | no       | Sort key inside its group; ties and unset values sort by `name`.                                                                                                                                                                                                                                                                            |
+| `docs`          | yes      | The product's official documentation landing page; the product name links here.                                                                                                                                                                                                                                                             |
+| `apiReferences` | no       | Labeled API reference links `{ title, url, note? }` shown beside `docs` on product pages. Default empty; see "Prominent official documentation links" below.                                                                                                                                                                                |
+| `capability`    | yes      | One line saying what the product _is_ in generic terms — the phrase someone would search for without knowing the brand (D-010, single field).                                                                                                                                                                                               |
+| `notes`         | no       | A short plain-text gotcha or scope note for the row. Anything longer belongs in the service's MDX prose.                                                                                                                                                                                                                                    |
+| `localDev`      | yes      | At least one option, first is the recommendation. `kind` is `vendor` (a vendor CLI dev mode or emulator), `open-source` (a runnable open-source runtime or stand-in, including vendor-maintained projects), `mock` (stub it yourself), or `remote` (no local equivalent; use a dev account). `name` and `url` optional, `summary` required. |
+| `limits`        | yes      | The per-tier usage limits sub-record (D-013), below.                                                                                                                                                                                                                                                                                        |
+| `sources`       | yes      | Sources for the capability and local-dev claims.                                                                                                                                                                                                                                                                                            |
+| `lastVerified`  | yes      | Date those claims were last checked.                                                                                                                                                                                                                                                                                                        |
 
 ### `limits` sub-record
 
@@ -505,8 +353,10 @@ routes remain unchanged. Navigation filters pages by area and excludes the
 area overview from the product list, putting it first as Overview. `order`
 continues to sort product destinations. Page frontmatter can declare
 `sections: [{ id, name }]` (default `[]`) for overview/topic section navigation;
-ids must point to real rendered anchors. Product section links retain their
-existing layout contract.
+ids must point to real rendered anchors. On a product page the shared layout
+renders its fixed section list (architecture through usage limits) and inserts
+any declared `sections` after the API example link, so a product page can add
+a page-specific section such as Workflows' Triggers without touching the shell.
 
 The root renders a topic directory from these declarations. Available areas
 link to their overview, with links to products that have dedicated pages;

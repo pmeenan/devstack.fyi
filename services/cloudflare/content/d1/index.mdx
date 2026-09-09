@@ -13,6 +13,8 @@ sources:
     title: D1 SQL timing and serving metadata
   - url: https://developers.cloudflare.com/d1/best-practices/read-replication/
     title: D1 read replication and latency
+  - url: https://developers.cloudflare.com/d1/platform/limits/
+    title: SQL duration guidance for indexed reads and writes
   - url: https://developers.cloudflare.com/workers/platform/storage-options/
     title: Storage models and use cases
   - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
@@ -25,14 +27,13 @@ sources:
     title: D1 Worker binding API
   - url: https://developers.cloudflare.com/d1/
     title: D1 overview
-  - url: https://developers.cloudflare.com/d1/best-practices/local-development/
-    title: D1 local development
   - url: https://developers.cloudflare.com/d1/platform/pricing/
     title: D1 row-based usage accounting
 lastVerified: 2026-09-09
 ---
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
+import MiniflareHarness from '@components/MiniflareHarness.astro';
 
 <CloudflareProduct slug="d1" introduction="D1 is a managed SQL database with SQLite semantics. Use it for application records that you need to query and relate with SQL.">
 <div slot="explanation">
@@ -112,8 +113,13 @@ INSERT or UPDATE and call `run()` instead of `first()`.
 read replication, reads and writes reach the primary database’s location.
 Read replication can shorten the trip for reads; writes still reach the primary.
 Use the Sessions API when using replicas so queries preserve session ordering.
-The replication guide does not publish a general read/write millisecond range.
 [D1 placement and replication](https://developers.cloudflare.com/d1/best-practices/read-replication/).
+
+**Published SQL duration guidance: under 1 ms for an indexed point read, several
+milliseconds for a write.** Cloudflare's limits page gives these as SQL execution
+time only. Neither figure includes the Worker-to-database trip, and no general
+round-trip range is published.
+[D1 query duration guidance](https://developers.cloudflare.com/d1/platform/limits/).
 
 Our measurement guidance: time the complete binding call and inspect its returned
 metadata. `timings.sql_duration_ms` measures SQL execution; it is not the full
@@ -122,14 +128,7 @@ to distinguish primary and replica reads, alongside query shape, indexes, and
 result size. [D1 result metadata](https://developers.cloudflare.com/d1/worker-api/return-object/).
 
 </div>
-<div slot="local-content">
-
-For a local test harness, the [Miniflare JavaScript API](https://developers.cloudflare.com/workers/testing/miniflare/get-started/)
-lets you configure Worker code and local bindings and dispatch requests from
-Node.js. See [Workers local development](/cloudflare/workers/#local-development)
-for the underlying workerd runtime; service emulation supplies the binding behavior.
-
-</div>
+<MiniflareHarness slot="local-content" />
 <section slot="deployment">
 
 ## Deployment

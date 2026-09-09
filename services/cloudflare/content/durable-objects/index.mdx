@@ -17,8 +17,6 @@ sources:
     title: Storage models and use cases
   - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
     title: Programmatic Miniflare local test harness
-  - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
-    title: Get started
   - url: https://developers.cloudflare.com/durable-objects/concepts/durable-object-lifecycle/
     title: Durable object lifecycle
   - url: https://developers.cloudflare.com/durable-objects/reference/durable-objects-migrations/
@@ -39,6 +37,7 @@ lastVerified: 2026-09-09
 ---
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
+import MiniflareHarness from '@components/MiniflareHarness.astro';
 
 <CloudflareProduct slug="durable-objects" introduction="A Durable Object is a named global singleton combining its own Worker-style code instance with shared memory and private durable storage. Use them for coherent caches, shared counters, pub/sub brokers, per-tenant coordination, or collaborative applications.">
 <div slot="explanation">
@@ -182,14 +181,7 @@ and persisted writes, and active versus newly activated objects. Include waiting
 under load in the caller’s elapsed time, not just time spent inside a method.
 
 </div>
-<div slot="local-content">
-
-For a local test harness, the [Miniflare JavaScript API](https://developers.cloudflare.com/workers/testing/miniflare/get-started/)
-lets you configure Worker code and local bindings and dispatch requests from
-Node.js. See [Workers local development](/cloudflare/workers/#local-development)
-for the underlying workerd runtime; service emulation supplies the binding behavior.
-
-</div>
+<MiniflareHarness slot="local-content" />
 <section slot="deployment">
 
 ## Deployment

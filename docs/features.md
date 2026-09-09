@@ -72,9 +72,9 @@ Numbering is stable because plan.md and architecture.md refer to it.
 
 ### Still open (answer during M0)
 
-None; questions 1–10 are answered and the milestone ladder was rewritten
-2026-09-08. The owner approved the plan and completed M0 the same day; M1
-is in progress.
+None; questions 1–11 are answered. The milestone ladder was rewritten
+2026-09-08, the owner approved the plan and completed M0 the same day, and
+question 11 was answered during M2 (2026-09-09).
 
 ### Answered (2026-09-08)
 
@@ -147,7 +147,7 @@ is in progress.
     (D-006); this list is the owner's scope statement, not a claim about
     current product naming.
 
-- **9. Cloudflare topic structure (2026-09-09)** → approved: root topic directory;
+- **11. Cloudflare topic structure (2026-09-09)** → approved: root topic directory;
   Build applications, Deliver HTTP traffic, Protect applications, Connect users
   and networks. Focused area overviews, stable product URLs, and breadcrumbs with
   an area switcher complement the existing two navigation rows (D-018).

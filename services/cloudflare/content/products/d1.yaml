@@ -55,19 +55,22 @@ limits:
       values:
         free: 30 seconds
         paid: 30 seconds
-  note: Paid includes usage allowances and permits metered overages within
-    platform limits. Indexes affect rows scanned and writes.
+  note: Free daily limits are enforced since 2026-09-01. Queries fail from the
+    binding and the REST API once the account exceeds the daily row read or
+    write limit, until it resets at midnight UTC. Paid includes usage
+    allowances and permits metered overages within platform limits. Indexes
+    affect rows scanned and writes.
   sources:
     - url: https://developers.cloudflare.com/d1/platform/limits/
       title: D1 limits
     - url: https://developers.cloudflare.com/d1/platform/pricing/
       title: D1 pricing
-  lastVerified: 2026-09-08
+    - url: https://developers.cloudflare.com/changelog/post/2026-09-01-d1-free-tier-limit-enforcement/
+      title: Free-tier limit enforcement, September 2026
+  lastVerified: 2026-09-09
 sources:
   - url: https://developers.cloudflare.com/d1/best-practices/local-development/
     title: Local runtime and simulation
   - url: https://developers.cloudflare.com/d1/
     title: D1 overview
-  - url: https://developers.cloudflare.com/d1/best-practices/local-development/
-    title: D1 local development
 lastVerified: 2026-09-09

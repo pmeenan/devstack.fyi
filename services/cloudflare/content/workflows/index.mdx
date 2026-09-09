@@ -4,6 +4,9 @@ area: build
 summary: Durable multi-step execution with persisted state, retries, sleeps, and
   waits for external events.
 order: 8
+sections:
+  - id: triggers
+    name: Triggers
 sources:
   - url: https://developers.cloudflare.com/workflows/reference/wrangler-commands/
     title: Manual and local Workflow triggers
@@ -61,7 +64,8 @@ that each step is dispatched to a separate Worker.
 
 A step can also call a **Worker service** through a configured service binding,
 using RPC or HTTP. That is an optional way to reuse application code. The
-overview labels instance creation and a step’s service call separately.
+[application map](/cloudflare/build/) labels instance creation and a step’s
+service call as two separate interfaces.
 
 [Triggering Workflows](https://developers.cloudflare.com/workflows/build/trigger-workflows/)
 and [service bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/)
@@ -205,21 +209,23 @@ retain the Workflow binding. Send messages shaped like `{ "name": "Sam" }`.
 ```javascript
 export default {
   async queue(batch, env) {
-    for (const message of batch.messages) {
-      await env.GREETING.create({
+    await env.GREETING.createBatch(
+      batch.messages.map((message) => ({
         id: message.id,
         params: message.body,
-      });
-      message.ack();
-    }
+      })),
+    );
+    batch.ackAll();
   },
 };
 ```
 
-Acknowledge after instance creation succeeds. A stable instance ID lets you
-recognize a repeated start attempt; production code should reconcile an existing
-instance on redelivery. This acknowledgement means “Workflow started,” not
-“Workflow finished.”
+Acknowledge after instance creation succeeds. Using the message ID as the
+instance ID makes a redelivered message harmless: `createBatch()` skips an ID
+that already exists within its retention window, whereas `create()` throws on
+a duplicate ID, which would fail the batch and trigger another redelivery. A
+queue batch holds at most 100 messages, matching the batch-create cap. This
+acknowledgement means “Workflow started,” not “Workflow finished.”
 [Instance creation](https://developers.cloudflare.com/workflows/build/workers-api/),
 [Queue redelivery](https://developers.cloudflare.com/queues/reference/delivery-guarantees/).
 
@@ -304,8 +310,10 @@ Creation does not wait for the child to complete.
 
 ### Pages Functions
 
-Pages calls a separate Worker that owns the Workflow. Use a service binding to
-the Worker from the HTTP example above.
+Pages cannot own a Workflow, so it calls a separate Worker that does, through a
+service binding to the Worker from the HTTP example above. Cloudflare's guide
+recommends moving such a project to Workers with static assets instead, so the
+Workflow class lives in the same Worker; see the [Pages page](/cloudflare/pages/).
 [Pages-to-Workflow setup](https://developers.cloudflare.com/workflows/build/call-workflows-from-pages/).
 
 **Pages project's wrangler.jsonc — relevant configuration**
