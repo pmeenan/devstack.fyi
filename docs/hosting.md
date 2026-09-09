@@ -2,7 +2,7 @@
 
 **Launched and verified on 2026-09-08.** Agents never run the deploy
 entry point, change plex, commit or push. Review and commit the working tree
-before each deployment. The owner launch check is complete; M2.1 is next.
+before each deployment. The owner launch check is complete; see [the plan](plan.md) for current work.
 
 Run the commands below from the repository root.
 
@@ -137,6 +137,16 @@ curl -I https://www.devstack.fyi/cloudflare/
 Check an actual `/_astro/` URL from page source for the immutable policy.
 Expected results: real content is 200, slash/www/HTTP redirects are 301 to the
 canonical URL, missing pages/assets are 404 with `no-store`, and CSP is present.
-Cloudflare currently has no code snippets; copy behavior was checked with
-local fictional content in M1.3 and will receive real-content acceptance in M2.
-The successful owner launch check is recorded in [plan.md](plan.md); M1 is complete.
+
+### Owner launch evidence (2026-09-08)
+
+After the owner installed the nginx reference, disabled analytics injection,
+and flushed Cloudflare caches, final public checks passed: all 14 checked page,
+redirect, error, and asset responses carried the approved CSP. Pages and stable
+files had five-minute caching; hashed assets were immutable; missing paths
+returned the custom 404 with no-store. HTTP/www/slash redirects were correct.
+Chrome checks at 390px and 1280px in both themes covered fonts, anchors,
+canonical URLs, theme persistence, and no-JavaScript reading, with no analytics
+beacon, third-party asset requests, or browser errors. NEL remained allowed.
+The initial live draft had no snippets; copy behavior had local fixture coverage.
+This is launch evidence, not a claim that later working-tree content is deployed.

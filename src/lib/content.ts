@@ -18,6 +18,42 @@ export async function loadContent() {
     if (new Set(groups).size !== groups.length)
       throw new Error(`${service.id}: duplicate group id`);
   }
+  for (const service of services) {
+    const areas = service.data.areas;
+    if (new Set(areas.map((area) => area.id)).size !== areas.length)
+      throw new Error(`${service.id}: duplicate area id`);
+    for (const area of areas) {
+      const overview = pages.find(
+        (page) => page.id === `${service.id}/${area.id}`,
+      );
+      if (area.status === 'available' && overview?.data.area !== area.id)
+        throw new Error(
+          `${service.id}/${area.id}: available area needs a matching overview`,
+        );
+      if (area.status === 'planned' && overview)
+        throw new Error(
+          `${overview.id}: planned area must not have an overview`,
+        );
+      if (products.some((product) => product.id === `${service.id}/${area.id}`))
+        throw new Error(
+          `${service.id}/${area.id}: area route collides with a product`,
+        );
+    }
+    for (const entry of [...pages, ...products].filter((entry) =>
+      entry.id.startsWith(`${service.id}/`),
+    )) {
+      const area = areas.find((area) => area.id === entry.data.area);
+      if ((areas.length || entry.data.area) && !area)
+        throw new Error(`${entry.id}: missing or undeclared area`);
+      if (area?.status === 'planned')
+        throw new Error(`${entry.id}: content belongs to a planned area`);
+    }
+  }
+  for (const page of pages) {
+    const product = products.find((product) => product.id === page.id);
+    if (product && product.data.area !== page.data.area)
+      throw new Error(`${page.id}: page and product area must match`);
+  }
   for (const product of products) {
     const service = byId.get(product.id.split('/')[0]!)!;
     if (

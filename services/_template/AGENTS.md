@@ -18,3 +18,7 @@ docs/content-schema.md and check sample syntax/API usage.
 
 For samples requiring bindings/config changes, put a labeled configuration block
 immediately before application code, with matching names and explicit placeholders.
+
+For services with topic areas, follow the README example and the validated area
+contract in docs/content-schema.md. Map all agreed scope in working docs first;
+keep canonical product URLs and mark unwritten areas planned without dead links.

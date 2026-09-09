@@ -1,457 +1,39 @@
 # Plan
 
-**This is a living document.** Milestones will be re-scoped, re-ordered, split,
-or added as planning conversations and findings come in. That churn is
-expected; what is _not_ allowed is silent change. Update the affected docs
-when scope changes; only changes to load-bearing choices need a decision-log
-entry (see AGENTS.md rule 1). Progress is reflected here by checking boxes
-and updating status lines as work lands.
+**Next: owner review of the M2.2a navigation preview, then M2.2b delivery content.**
+Topic restructuring is implemented and verified (2026-09-09). The accepted
+overview and eight product pages are preserved; the service remains a draft.
 
-Check a box only when the item is done and verified; partially done items stay
-unchecked, optionally with a note.
+This plan holds active and future work, not completed execution history. Work
+one implementation step or content pass per task unless the owner asks for a
+larger unit. Follow [workflow.md](workflow.md) for verification and human handoff.
+Only check an item when it is done and verified; record scope changes explicitly.
 
-**Status legend:** `pending` · `in progress` · `done` · `parked`
+## Completed milestones
 
-## M0 — Plan the plan `done`
+| Milestone                 | Completed state                                                                              | Durable references                                                                                                                                                            |
+| ------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| M0 — Planning             | Accepted 2026-09-08: scope, static architecture, content model, and toolchain settled.       | [Features](features.md), [decisions](decisions.md), [architecture](architecture.md), [content schema](content-schema.md), [toolchain](toolchain.md)                           |
+| M1 — Shell and launch     | Owner launched and accepted the shell on 2026-09-08; local and public checks passed.         | [Style guide](style-guide.md), [hosting and launch evidence](hosting.md), [toolchain checks](toolchain.md)                                                                    |
+| M2.1 — Developer platform | Implemented 2026-09-08; overview and all eight product pages accepted for now by 2026-09-09. | [Cloudflare working area](../services/cloudflare/README.md), [research and verification](../services/cloudflare/docs/research.md), [page/diagram conventions](style-guide.md) |
 
-Goal: turn the initial feature list into a settled vision, feature matrix,
-content model, architecture, and milestone ladder — through planning
-conversations with the project owner plus targeted checks where a decision
-needs evidence.
-
-- [x] Repo scaffolding for the AI-directed workflow (this scaffold).
-- [x] Feature triage: walked [features.md](features.md) with the owner on
-      2026-09-08; every `proposed` row promoted or rejected; open questions
-      1, 4, 6, 7, and 8 answered; recorded as D-010, D-011, D-012.
-- [x] Owner supplied the initial category taxonomy and the Cloudflare product
-      coverage list for the first pass (open questions 4 and 8; see the
-      answered-questions section of features.md).
-- [x] Spike: confirmed 2026-09-08 with a throwaway build (Astro 7.3, MDX
-      integration 8.0) that the content layer loads MDX from
-      `services/*/content/` while excluding the working docs; see the
-      "Content-layer spike" section of architecture.md. Answered open
-      question 2 (co-located layout) and logged RE-001 to RE-003.
-- [x] Check on plex: web server type, directory-index and trailing-slash
-      behavior, and whether `/var/www/devstack.fyi/` holds anything the build
-      does not own (open questions 5 and 9). Done 2026-09-08 by reading the
-      nginx vhost over ssh (host plex.meenan.us:10022). nginx 1.31.5; docroot
-      empty and owned by the deploy user (question 9 answered);
-      `build.format: 'directory'` + `trailingSlash: 'always'` (question 5
-      answered). Reading the vhost surfaced three owner-side follow-ups for
-      M1 (server changes wait until M1; the CSP and HTML-cache policy choices
-      remain M0 toolchain work): the missing
-      `/_astro/` immutable cache rule (D-012), the SPA `try_files` fallback
-      that must become `=404;` + `error_page` for a real 404 page, and the
-      strict CSP header (open question 10, RE-004).
-- [x] Draft the content collection schema for the hybrid model (D-010):
-      services entry with category enum, status, sources, last-verified;
-      structured product entries with capability, local equivalent, sources,
-      last-verified, and a per-tier limits sub-record with its own source and
-      date (D-013). Done 2026-09-08: [content-schema.md](content-schema.md)
-      (three collections: `services`, `pages`, `products`; one YAML file per
-      product, tier-by-metric limits table, directory name as slug; D-014),
-      verified with a throwaway build (`astro check` clean, bad records fail
-      the build with field messages). Two owner points are listed at the end
-      of that doc; the code lands with the M1 scaffold.
-- [x] Decide the diagram interactivity mechanism (open question 3). Done
-      2026-09-08 with a throwaway build (Astro 7.3.2, `@astrojs/preact`
-      6.0.5) driven in headless Chrome: vanilla `<script>` in Astro
-      components using custom elements, no island framework (D-015). The
-      same two-instance diagram cost zero JavaScript requests as a custom
-      element versus five files (11 kB gzipped) as Preact islands; both
-      paths work under Astro's `security.csp` policy sent as a header and
-      both break under plex's current header, and the `is:inline` theme
-      snippet is never hashed (RE-005). See the "Diagram mechanism spike"
-      section of architecture.md.
-- [x] First full draft of [architecture.md](architecture.md). Done
-      2026-09-08: system picture, repository layout, URLs and routing,
-      rendering and component inventory, theming, the client-side script
-      inventory, metadata and fonts (fonts API, sitemap, and 404 behavior
-      checked against current Astro docs), build and checks, hosting, cache
-      and deploy-script design (ledger-based retirement of hashed assets),
-      security headers, contribution surface, accessibility, extension
-      points; the dated spike sections kept as an evidence appendix. Three
-      owner points listed at the end of the doc (co-located layout veto,
-      deploy-script ergonomics, the five vhost changes). Open question 10
-      and the values it leaves (HTML TTL, grace duration, highlighter,
-      script inlining) roll into the toolchain item.
-- [x] Toolchain decisions: tested pins, strict config, formatter/checks, PR
-      workflow, transitive-license audit and owner-approved build-tool
-      exceptions, five-minute HTML TTL, seven-day asset retention and safe
-      cleanup are recorded in D-016 and [toolchain.md](toolchain.md)
-      (2026-09-08). Frozen install, check, build, formatting, and real-header
-      browser script execution passed in a throwaway project. The owner
-      approved full nginx CSP with external scripts and CSS on 2026-09-08
-      (question 10 answered). M1 implements the contract and reference vhost;
-      the owner performs the sudo install, nginx test, and reload on plex.
-      No server changes in M0.
-- [x] Rewrite the provisional ladder into scoped milestones with exit
-      criteria. Done 2026-09-08: M1 has ordered implementation steps and
-      a separate owner launch gate; M2 has four bounded Cloudflare passes;
-      M3–M5 retain the confirmed polish, breadth, and maintenance scope.
-
-**Exit criteria:** the owner has walked features.md (done 2026-09-08) and
-says the plan is good enough to build from; the content model, service layout, and diagram mechanism
-are decided (the rest may ride along as open questions); toolchain decided;
-M1+ milestones have scopes. M0 is a conversation, not a phase — it exits on the
-owner's call, not on a checklist reaching zero.
-
-**Owner exit:** plan approved and M0 completed on 2026-09-08. M1 is authorized.
-
-## Milestone ladder
-
-Rewritten 2026-09-08 against the confirmed [feature matrix](features.md),
-[architecture](architecture.md), [content schema](content-schema.md), and
-[toolchain contract](toolchain.md). Those documents supply implementation
-contracts; the scopes and exit criteria here determine the work order.
-No load-bearing choices change in this rewrite.
-
-Work in order, one implementation step or content pass per task unless the
-owner asks for a larger unit. M0, M1, and M2.1 are complete; **current work is iterating the M2.1 visual structure with the owner; M2.2 follows**. Each
-handoff includes the working-tree changes and relevant verification; the
-human commits. All implementation steps require `pnpm check` and
-`pnpm build` once available. Temporary fixtures and browser output stay
-outside the repository. Owner review, server changes, and publication are
-explicit exit items; implementation readiness alone does not complete them.
-
-## M1 — Scaffolding and first launch `done`
-
-Goal: a working static shell, validated content pipeline, and a tested manual
-deploy path. Depends on the owner's M0 exit call. Cloudflare is visibly a
-draft until M2 supplies the researched product coverage.
-
-### M1.1 — Toolchain and content foundation `done`
-
-- [x] Scaffold Astro + MDX with the exact pins, pnpm lockfile, strict
-      TypeScript, aliases, build-script approvals, and formatting policy in
-      toolchain.md. Document local setup, including the pnpm installation
-      alternative, and format the existing docs.
-- [x] Implement `pnpm check`, `pnpm build`, and `pnpm format`, including the
-      dependency-license audit and built-output CSP check. Record package,
-      optional-platform, Node distribution, and font license evidence in
-      `docs/dependency-licenses.md`; retain redistributed font licenses.
-- [x] Implement the three collections, taxonomy, URL helpers, group
-      validation, and stale-date helpers/build pass from content-schema.md.
-      Create the excluded `services/_template/` authoring example and the
-      Cloudflare working-doc skeleton (`AGENTS.md`, `README.md`, `docs/`).
-- [x] Add the minimal catalog and collection-driven service/sub-page routes,
-      with a clearly marked Cloudflare draft, official sources and an honest
-      verification date for any introductory claim. No invented product rows
-      or dates standing in for unfinished research.
-- [x] Add the PR check/build workflow with pinned, license-verified actions,
-      read-only permissions, no secrets, and cancellation of superseded runs.
-      Update the root layout table and setup/status docs as files land.
-
-**Step exit:** a frozen install, check, and static build pass. Temporary
-fictional records prove root/sub-page routing, product and limits validation,
-unknown-group rejection, and exclusion of working docs and `_template` from
-published output. The license/output checks reject representative invalid
-fixtures. The PR workflow uses the same passing commands locally; record its
-first hosted result when an actual PR runs it.
-
-**Verified 2026-09-08:** frozen install, `pnpm check` (0 Astro diagnostics,
-formatting, 381-package license inventory, five passing tests), and
-`pnpm build` pass in sequence. The real Astro fixture builds cover nested
-routes, working-doc/template exclusion, stale warnings and invalid records;
-output/license fixtures reject representative failures. Cache isolation is
-recorded in RE-008; multi-document lockfile handling is RE-009. Empty product
-and sub-page collections emit expected warnings until real content lands.
-The first hosted PR workflow run remains pending an actual PR.
-
-### M1.2 — Look, feel, and accepted style guide `done`
-
-- [x] Build a representative visual prototype using the M1.1 scaffold:
-      catalog cards, service headings, product/limits tables, code snippets,
-      badges, and a sample diagram treatment at narrow and wide sizes in
-      both light and dark themes. Fictional sample content is enough to
-      judge the design; keep it out of published service claims.
-- [x] Iterate with the owner on typography, spacing, page density, neon
-      palette, surfaces, borders, diagram styling, and interaction states.
-      Show both themes together in each feedback round and revise until the
-      owner is happy with the look and feel; one agent-selected design does
-      not complete this step.
-- [x] Capture the accepted direction in `docs/style-guide.md`, with visual
-      examples and concrete tokens/rules for colors, typography, spacing,
-      responsive layout, components, focus/hover states, and reduced motion.
-      Check contrast and legibility in both themes before acceptance; keep
-      the prototype's implemented tokens aligned with the guide.
-- [x] **Owner:** accept the style guide and representative light/dark views
-      before the full shell is built to that direction.
-
-**Round 1, 2026-09-08:** development-only `/design/compare/`,
-`/design/light/`, and `/design/dark/` views implement the accepted Field notes
-direction. [style-guide.md](style-guide.md) records accepted tokens, component
-rules, review links, and validation. Fictional specimens never enter the
-production build or sitemap. The owner approved both themes and the style guide on
-2026-09-08 ("Both approved"). M1.2 is complete; M1.3 is next.
-
-**Step exit:** the owner is happy with both themes and the style guide records
-that accepted direction with enough detail for later agents to implement it
-consistently. If feedback is pending, hand off the concrete prototype and
-keep this step in progress. M1.3 follows the accepted guide; later design
-changes update it alongside the implementation.
-
-### M1.3 — Usable shell in both themes `done`
-
-- [x] Build the base and service layouts, grouped catalog, draft/reviewed
-      badges, product/local-dev/limits rendering, source lists, verification
-      dates, and sub-page navigation. Empty categories stay hidden.
-- [x] Apply the accepted style guide to design tokens and responsive styles;
-      add self-hosted Inter and JetBrains Mono, favicon, and theme-aware
-      Prism code styling. Implement
-      the external blocking theme initializer, persistent toggle with storage
-      failure fallback, reduced-motion tokens, and snippet copy feedback.
-- [x] Add skip navigation, visible keyboard focus, semantic headings and
-      tables, repository/edit links, a custom 404, sitemap, robots.txt,
-      canonical URLs, OpenGraph metadata and an initial shared social image.
-
-**Step exit:** the built catalog, Cloudflare draft, 404, and temporary rich
-content fixtures work at narrow and wide viewport sizes in both themes.
-Under the real CSP header, verify theme reload without a wrong-theme flash,
-blocked storage, snippet copying, font loading, keyboard use, reduced motion,
-and readable content with JavaScript disabled. Check source/edit links,
-canonical/sitemap paths, 404 exclusion from the sitemap, and absence of
-third-party asset requests. Stale UI gets its full content acceptance in M2.1.
-
-**Verified 2026-09-08:** `pnpm check` and `pnpm build` pass (zero Astro
-diagnostics, formatting/license checks, five fixture tests, external-asset
-output guard). Headless Chrome exercised catalog, Cloudflare draft, custom
-404, and temporary product/sub-page fixtures at 390px and 1280px in both
-themes under the approved CSP HTTP header. Verified fonts, section anchors,
-early saved-theme resolution before body rendering, reload persistence,
-blocked storage and page-local toggling, clipboard success/failure feedback,
-keyboard skip navigation and focus, reduced motion, no-JavaScript code/table
-scrolling, and a 200% layout equivalent. All asset requests were same-origin;
-canonical, social, edit/source and sitemap paths were checked, with 404 and
-design routes excluded from the sitemap. Phone captures prompted wider
-product-table columns inside the scroll region. Fictional fixtures remain
-outside the repository. nginx behavior and owner publication remain M1.4.
-
-### M1.4 — Delivery contract and owner launch `done`
-
-- [x] Implement `scripts/deploy.sh` and its helper, following toolchain.md:
-      frozen install/check/build before transfer, fixed target, default dirty
-      tree refusal and confirmation (`--yes` to skip confirmation), read-only
-      dry-run, remote locking, assets before HTML, protected old assets, and
-      seven-day retirement tracked atomically outside the docroot. Confirm
-      remote runtime availability with read-only checks before selecting a
-      helper dependency.
-- [x] Add `pnpm run deploy` as the package-script wrapper for `scripts/deploy.sh`,
-      forwarding arguments so `pnpm run deploy --dry-run` previews the operation
-      and `pnpm run deploy --yes` uses the script's confirmation bypass. Document
-      these human-run commands in [hosting.md](hosting.md) and verify argument forwarding
-      through the local fixture harness. Add the wrapper with the tested
-      script, not as a placeholder before M1.4. Use the explicit `run` form:
-      bare `pnpm deploy` is pnpm's built-in workspace packaging command.
-- [x] Verify deployment and cleanup using temporary local fixtures covering
-      first retirement, unexpired/expired assets, rollback/reactivation and
-      second retirement, transfer failure, missing/corrupt state, unsafe paths
-      and symlinks, lock contention, and stale previews. Verify a dry-run
-      changes neither files nor ledger. Agents never run the deploy script;
-      exercise the transfer/cleanup implementation through a local fixture
-      harness, as required by toolchain.md.
-- [x] Prepare `deploy/nginx/devstack.fyi.conf` preserving TLS/certbot and
-      unrelated headers, with real 404 routing, immutable assets, five-minute
-      default TTL, apex redirects, and the approved CSP. Validate it with
-      local nginx for successful pages/assets, slash and host redirects,
-      missing pages/assets, security-header inheritance, and `no-store` errors.
-      Supply exact owner installation, `nginx -t`, reload, and deployment
-      instructions in [hosting.md](hosting.md).
-- [x] **Owner:** review and commit the shell, install/test/reload the vhost on
-      plex, inspect the deploy dry-run, and deploy. Check the public routes,
-      redirects, headers, theme and copy interactions; record the outcome.
-
-**Verified 2026-09-08:** read-only plex checks confirmed Python 3.12.3,
-rsync 3.2.7, the current vhost and TLS includes. `pnpm check` and `pnpm build`
-pass. Nine local Python fixture cases exercise real rsync transfers and the
-remote helper protocol, seven-day retirement/reactivation, failures before
-cleanup and during ledger/deletion, missing/corrupt ledgers, unsafe paths and
-symlinked parents, locks, stale previews, read-only dry runs, and package-script
-argument forwarding. They never execute the production deploy entry point or
-contact plex. A locally extracted nginx 1.24.0 validates the actual reference
-with temporary paths/ports/certificate: 200/304 pages and assets, trailing-slash
-and HTTP/HTTPS host redirects, custom 404 bodies, CSP inheritance, single cache
-headers, and `no-store` on 403/404/405. The reference uses directives supported
-by both this local nginx and plex's 1.31.5. [hosting.md](hosting.md) has exact owner commands.
-No server files were changed; no deploy script was run. **Implementation ready;
-owner launch pending.** M2 starts after the owner launch gate above.
-
-**Owner deployment / live checks, 2026-09-08:** the owner ran deployment;
-public catalog and Cloudflare pages return 200. Live Chrome checks pass for
-both themes at 390px/1280px, font loading, section anchors, canonical URLs,
-theme toggling/persistence across pages, and no-JavaScript reading. robots.txt
-and the sitemap are correct. No live snippet exists to exercise copying.
-At this initial check, launch acceptance remained pending:
-
-- Read-only SSH confirmed the old vhost is still installed. Missing pages and
-  assets return the catalog with 200; HTML has `no-cache`, actual hashed assets
-  have no explicit cache policy, HTTPS www serves 200 and HTTP www redirects
-  to HTTPS www. CSP is still the old policy. The owner must install/test/reload
-  the committed nginx reference using the [hosting instructions](hosting.md).
-- Cloudflare injects a `static.cloudflareinsights.com` beacon (blocked by CSP)
-  and sends `NEL`/`Report-To` network-error reporting headers. Disable beacon
-  injection to meet D-005, then recheck public responses. The owner subsequently
-  amended D-005 on 2026-09-08 to allow NEL telemetry; its headers and reports
-  are no longer launch blockers. CSP should remain strict. No server or Cloudflare settings were
-  changed by the checking agent.
-
-**Nginx installation recheck, 2026-09-08:** the owner installed/reloaded the
-reference. Public redirects now target the apex; missing pages/assets return
-404 with the custom body and `no-store`; pages/stable files carry the five-minute
-policy and hashed assets are immutable. Fresh query-string responses carry
-the approved CSP, and live browser theme/layout/persistence/no-JavaScript checks
-pass under it. Cloudflare cache HITs for the plain catalog and service URLs
-still retain the old CSP; fresh responses confirm the origin fix. Browser
-responses still inject the analytics beacon, which the new CSP blocks, even
-on fresh URLs. Disable that injection before final acceptance. NEL is allowed.
-
-**Owner launch accepted, 2026-09-08:** after the owner installed the nginx
-reference, disabled analytics and flushed Cloudflare caches, the final public
-checks pass. All 14 checked page, redirect, error and asset responses carry
-the approved CSP. Pages/stable files have five-minute caching; hashed assets
-are immutable; missing pages/assets return the custom 404 with `no-store`.
-HTTP/www/slash redirects are correct. Live Chrome checks of catalog and
-Cloudflare at 390px and 1280px in both themes pass, including fonts, anchors,
-canonical URLs, theme persistence and no-JavaScript reading. No analytics
-beacon, third-party asset requests or browser errors were observed. NEL
-remains permitted by amended D-005. Copy behavior retains its M1.3 fixture
-coverage because the live draft has no snippets. **M1 is complete; M2.1 is next.**
-
-**M1 exit:** the M1.2 style guide is owner-accepted, M1.1–M1.4
-implementation checks pass and the owner has launched and checked the shell at `https://devstack.fyi/`. Until the owner performs
-that last item, report “implementation ready; owner launch pending.”
+Completed checklists and superseded review notes were pruned on 2026-09-09.
+Use git history for execution history; preserve new durable rules in their
+owning docs rather than accumulating them here or in AGENTS.md.
 
 ## M2 — Cloudflare end to end `in progress`
 
-Goal: the first service answers all four reader questions in vision.md.
-Depends on M1. The four passes below preserve the entire owner-selected
-coverage list; names are research scope labels, to be re-verified against
-current official docs before authoring claims.
+Goal: cover the owner-selected scope in [features.md](features.md), answered
+questions 8 and 9. M2.1 is complete; M2.2a awaits owner preview review, and
+M2.2b through M2.4 remain.
 
-**For every pass:** extend the Cloudflare working docs with dated official
-research, then author the product-to-capability map, local-development
-options and their limitations, and applicable plan-tier usage limits with
-pricing/limits links. Capability/local-dev claims and limits each retain
-their own sources and dates. Do not substitute zone plans for product-specific
-plans, add prices, or guess unpublished limits. Record unresolved evidence
-in the working docs and mark the coverage gap visibly when relevant.
-
-### M2.1 — Developer platform and content acceptance `done`
-
-- [x] Research and document Workers, Pages, KV, R2, D1, Durable Objects,
-      Queues, and Workflows.
-- [x] Exercise the complete product/local-dev/limits/source rendering with
-      real records; implement visible stale badges on entries and catalog
-      cards using the shared stale logic. Verify service, sub-page, product,
-      and limits dates independently, the 180-day boundary, and warnings
-      that never fail the build.
-- [x] Add the first useful interactive SVG/Astro diagram using a vanilla
-      custom element, with a readable static rendering, keyboard/touch
-      interaction, accessible labels, and reduced-motion behavior.
-
-**Pass exit:** all eight scope items have sourced records (or a documented,
-source-backed rename/retirement mapping), tables are readable on mobile in
-both themes, and the diagram works under the full CSP with two instances
-and with JavaScript disabled. The page remains `draft` pending owner review.
-
-**Verified 2026-09-08:** eight sourced product records, separate product/limits
-verification dates, and a capability/binding choice diagram are implemented.
-`pnpm check` and `pnpm build` pass. Real build fixtures exercise service,
-sub-page, product and limits staleness independently; exact 180-day boundary
-checks pass and stale warnings remain non-fatal. Chrome checks under the full
-CSP pass with two diagram instances at 390px and 1280px in both themes:
-independent Enter/Space and touch selection, unique IDs, working anchors,
-readable scrolling tables, no-JavaScript links, reduced motion and a 200% layout
-equivalent. No external asset requests or browser errors occurred. Visual
-inspection covered diagram and real table layouts in both themes.
-
-The Durable Objects Free per-object storage contradiction is visibly marked
-and recorded in [Cloudflare research](../services/cloudflare/docs/research.md).
-The page remains `draft`; complete owner review and publication are M2.4.
-Local Cloudflare emulator behavior is sourced from docs, not exercised against
-vendor accounts in this task. **M2.2 is next.**
-
-**Visual-structure iteration, 2026-09-08:** the owner requested representative
-icons, hover details, native links to dedicated product pages, and a deeper
-diagram on each page (D-017). Implemented an application overview with all eight
-product destinations and eight focused diagrams; detailed tables now live on
-the product pages. Fresh architecture/API sources and dates are in those MDX
-pages and Cloudflare research. Continue layout/flow/content iteration here
-before expanding into M2.2. The overview was subsequently accepted (see below).
-
-Validation: `pnpm check` and `pnpm build` pass (11 static routes). Build
-fixtures verify all eight detail pages, no duplicate overview tables, one
-limits table per product, and the existing independent freshness behavior.
-Chrome exercised all nine Cloudflare routes at 390px/1280px in both themes
-under the full CSP; hover tooltips, focus/escape, Enter navigation, touch links,
-no-JavaScript navigation, unique IDs, anchors, two independent map instances,
-reduced motion and a 200% layout equivalent pass. Final live development
-preview checks cover the overview and all eight product routes.
-
-**Second visual feedback pass, 2026-09-08:** fixed hover/focus dismissal,
-standardized arrowheads and rounded connectors, separated overview binding
-paths, and clarified Workflow creation versus optional calls to Worker services.
-Durable Objects now leads with useful per-room/document/session examples and a
-chat-room diagram. R2 and Durable Objects icons were refined. Official sources
-and dates were updated; check/build and targeted full-CSP browser checks pass.
-**Overview accepted, 2026-09-08:** the owner approved the overview. Its layering,
-icon colors, connector attachment, hover behavior and compact legend are now the
-shared baseline in `docs/style-guide.md`. The eight product diagrams adopt it,
-including icon-attached routes and color-matched component headings. Product
-page content/layout review is next, before M2.2.
-
-**Workers mental-model pass, 2026-09-08:** added a separate V8 isolate diagram,
-an illustrative asynchronous request timeline, global-state guidance, Wasm
-interop/language indicators, and explicit fetch/cache/env surfaces. Sources and
-verification date are on the Workers page. Shared region rendering preserves
-the approved visual baseline. Workers was subsequently accepted for now (see below).
-
-**Workers accepted for now, 2026-09-08:** the owner approved the Workers page.
-Applied its content conventions to the other seven developer-platform pages:
-execution/state mental models, runtime links where applicable, runnable local
-emulation with fidelity limits, and separate Deployment sections. Durable
-Objects visually distinguishes persistent and temporary state. Pages was subsequently accepted (see below); this does not accept the remaining pages or complete M2.
-
-**Pages accepted for now, 2026-09-08:** the owner approved its current state,
-including the Functions API explanation and the shared introduction → diagram
-→ components → descriptive text ordering. KV was subsequently accepted (see below).
-The service remains a draft; publication is still human-run.
-
-**Workers KV accepted for now, 2026-09-08:** the owner approved the KV page and
-related overview descriptions and tab ordering. Preserve the latency/consistency
-explanation and the distinction between cached KV reads and a Durable Object
-singleton per identity. Overview, Workers, Pages, and KV are accepted for now;
-R2 was subsequently accepted (see below); D1, Durable Objects, Queues, and
-Workflows remain for review.
-Iteration resumed on 2026-09-09 with sourced latency guidance across all eight
-product pages and a matching requirement in the authoring template. M2.2 has
-not started.
-
-**R2 accepted for now, 2026-09-09:** the owner approved the R2 page after the
-latency guidance, API examples, and product-specific documentation links were
-added. Overview, Workers, Pages, KV, and R2 are now accepted for now. D1, Durable
-Objects, Queues, and Workflows remain for review; M2.2 has not started.
-
-**D1 accepted for now, 2026-09-09:** the owner approved the D1 page after
-clarifying the query result path through the D1 binding API back to the awaiting
-Worker. Overview, Workers, Pages, KV, R2, and D1 are accepted for now. Durable
-Objects, Queues, and Workflows remain for review; M2.2 has not started.
-
-**Durable Objects accepted for now, 2026-09-09:** the owner approved the page
-after reframing the diagram as a named global singleton with its own Worker-style
-code and private storage, and broadening examples to caches, counters,
-coordination, aggregation, pub/sub brokers, and collaboration. Queues and
-Workflows remain for review; M2.2 has not started.
-
-**Queues accepted for now, 2026-09-09:** the owner approved the page after
-clarifying work sharing versus broadcast, concurrent readers, and producer versus
-consumer configuration. Required Wrangler configuration now precedes JavaScript
-examples across applicable pages. Workflows remains for review; M2.2 has not started.
-
-**Workflows accepted for now, 2026-09-09:** the owner approved the page after
-expanding trigger coverage and configuration. The overview and all eight
-developer-platform product pages have completed this round of owner review.
-M2.2 is next and has not started; the broader Cloudflare service remains a draft.
+For each content pass, research current official sources in the Cloudflare
+working docs, then document capability, local development and fidelity limits,
+latency, API references/examples, applicable plan-tier limits, and service-wide
+notes. Capability and limits records keep independent dates and sources.
+Follow [content-schema.md](content-schema.md) and [style-guide.md](style-guide.md).
+Do not substitute zone plans for product-specific plans, add prices, or guess
+unpublished limits. Keep unresolved evidence visible where relevant.
 
 ### M2.2 — Topic structure, then edge/network and service-wide configuration
 
@@ -461,27 +43,34 @@ it must not grow into a diagram of everything Cloudflare offers. See D-018.
 
 #### M2.2a — Cloudflare topic landing page and navigation
 
-- [ ] Turn `/cloudflare/` into a topic directory with these initial areas:
+- [x] Turn `/cloudflare/` into a topic directory with these initial areas:
       **Build applications**, **Deliver HTTP traffic**, **Protect applications**,
       and **Connect users and networks**.
-- [ ] Move the accepted overview to `/cloudflare/build/`; retain all eight
+- [x] Move the accepted overview to `/cloudflare/build/`; retain all eight
       existing product URLs, their accepted content, and storage tab ordering.
       Preserve existing root `#product-<slug>` links with useful destinations.
-- [ ] Keep two connected navigation rows within each area: product/topic
+- [x] Keep two connected navigation rows within each area: product/topic
       destinations, then the current page's section links. Add a breadcrumb
       such as Cloudflare / Build applications / Workers and an accessible
       area switcher on the area name. Do not add a third tab row.
-- [ ] Give each area a focused overview as its coverage lands. Cross-link
-      intersections (such as Workers and CDN caching) instead of duplicating
-      product records or crowding one universal diagram. Unwritten areas must
-      be clearly marked as planned and must not link to missing pages.
-- [ ] Define explicit area membership for pages/products and separate it from
+- [x] Keep the accepted focused overview in Build applications and clearly
+      mark unwritten areas as planned without links to missing pages. The scope
+      map records where later focused overviews and intersection cross-links
+      belong; those land with their respective content passes.
+- [x] Define explicit area membership for pages/products and separate it from
       the catalog's service-category enum. Update the content schema, route
       handling, authoring template, and working docs with the implementation.
       Map every existing M2 scope item before moving content.
-- [ ] Verify root/area/product navigation, old links, breadcrumbs, keyboard and
+- [x] Verify root/area/product navigation, old links, breadcrumbs, keyboard and
       no-JavaScript access, phone widths, and both themes. Run checks/build and
       present the restructured preview for owner review before expanding content.
+
+Verified 2026-09-09: checks/build pass; browser checks cover all ten Cloudflare
+routes at 1280px and 390px in both themes under the production CSP, native
+keyboard/JavaScript-disabled area switching, all eight old product fragments,
+and 144 internal links. Preview: `/cloudflare/` and `/cloudflare/build/`.
+
+- [ ] **Owner:** review the restructured preview before M2.2b content expansion.
 
 **Structure exit:** the root explains the available topic areas; the accepted
 application overview is reachable in its own area; product URLs and content
@@ -498,7 +87,7 @@ remain intact; navigation uses two rows plus breadcrumbs/area switching.
       path; link relevant application and security pages at the intersections.
 
 **Pass exit:** M2.2a structure is reviewed; every delivery scope item and both required service-wide notes are
-covered, cited and dated; any diagrams meet the M2.1 interaction checks.
+covered, cited and dated; any diagrams meet the [style guide](style-guide.md) interaction checks.
 
 ### M2.3 — Security and access
 
@@ -522,7 +111,7 @@ limits and rendering requirements, with unresolved research recorded.
       warrants a documented presentation adjustment. Place these initially
       under Build applications; review its tab density before adding all six,
       and propose a focused additional area if needed rather than dropping scope.
-- [ ] Reconcile every scope item in features.md answered question 8 against
+- [ ] Reconcile every scope item in features.md answered questions 8 and 9 against
       the page and working docs; resolve remaining gaps before calling the
       promised first pass complete. Check the complete page's navigation,
       mobile tables, source links, dates, and diagrams in both themes.

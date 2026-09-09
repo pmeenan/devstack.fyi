@@ -29,10 +29,10 @@ are in [docs/plan.md](docs/plan.md).
 ## Status
 
 The shell is live. The working Cloudflare draft now documents eight developer-
-platform products, with sourced limits, local-development options and an
-visual overview and dedicated product pages (M2.1). Layout and content
-structure are being iterated before edge/network coverage; publication
-remains human-run. See the
+platform products, with sourced limits, local-development options, a visual
+overview and dedicated product pages (M2.1). The owner approved all nine pages
+for now on 2026-09-09. Topic-area navigation (M2.2a) is next, before edge/network
+coverage; publication remains human-run. See the
 [plan](docs/plan.md) for scope and progress.
 
 ## Contributing

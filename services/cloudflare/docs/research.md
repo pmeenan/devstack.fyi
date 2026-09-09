@@ -470,3 +470,25 @@ event-subscription reference documents emitted lifecycle events. Configuration
 is on the queue via its Subscriptions tab:
 https://developers.cloudflare.com/queues/event-subscriptions/manage-event-subscriptions/
 Events sent to an existing waiting instance are distinguished from creation.
+
+## M2.1 completion and owner acceptance (through 2026-09-09)
+
+The overview and all eight developer-platform product pages are owner-approved
+for now. The accepted final conventions are in the root style guide and content
+schema; earlier research entries document changes over time rather than current
+review blockers. D-018's topic restructuring is approved but not yet implemented.
+
+Validation covered independent service/page/product/limits freshness, the
+180-day boundary, non-fatal stale warnings, and built content exclusion.
+Full-CSP browser checks covered unique diagram IDs, two independent instances,
+hover dismissal, keyboard focus/Escape, native touch/link navigation,
+no-JavaScript reading, reduced motion, and a 200% layout equivalent. Product
+pages were reviewed at 390px/1280px in both themes. Subsequent September 9 changes
+passed targeted browser checks, snippet syntax checks, all seven repository
+tests, and the 11-route static build/output guard.
+
+These are local build/browser checks, not evidence of hosted Cloudflare
+emulator fidelity or deployed API sample execution. No vendor resources were
+provisioned for this content pass. The Durable Objects Free per-object storage
+contradiction remains documented above and visible in its limits. Full-service
+reviewed status and owner publication remain M2.4 work.

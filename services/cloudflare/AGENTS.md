@@ -16,6 +16,7 @@ for now (2026-09-09). Apply
 their visual and content conventions to other product pages: execution/state
 boundaries, runnable local equivalents, and separate deployment tooling.
 
-Next is M2.2a topic restructuring (root docs/plan.md and D-018), before new
-delivery content. Preserve accepted product URLs/content; move the application
-overview into its own area instead of expanding it to cover all Cloudflare.
+M2.2a topic restructuring is implemented (root docs/plan.md and D-018), awaiting
+owner preview review before delivery content. Read docs/areas.md for the complete
+scope map and area membership. Preserve accepted product URLs/content and keep
+the application overview at /cloudflare/build/ focused on its area.

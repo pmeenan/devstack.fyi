@@ -775,11 +775,14 @@ content-layer spike (diagrams in MDX without a framework runtime; excluding
 working docs) are also answered. M1 still implements and validates the shell
 and reference vhost; only the owner changes plex.
 
-## Planned service topic areas (D-018)
+## Service topic areas (D-018)
 
-Approved 2026-09-09; implementation is M2.2a. Cloudflare's root becomes a topic
-directory, and its existing overview moves to /cloudflare/build/. Existing
-product routes remain canonical. Area membership will scope navigation without
-changing the catalog category enum. Use the existing static page/content model;
-define the membership representation and document it in content-schema.md during
-implementation. No new runtime or deployment mechanism is required.
+Implemented in M2.2a, 2026-09-09. Cloudflare's root is a topic directory; the
+accepted application overview lives at /cloudflare/build/. Existing product
+routes remain canonical, including useful root product-anchor destinations.
+Service-local area declarations and explicit page/product membership scope the
+two-row navigation. A breadcrumb disclosure supplies area switching without a
+third row or JavaScript dependency. Planned areas have no routes until coverage
+lands. See content-schema.md for validation and authoring. This uses the existing
+static content collections and catch-all route, with no new runtime or deploy
+mechanism.

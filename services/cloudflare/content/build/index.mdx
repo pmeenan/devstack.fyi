@@ -1,0 +1,63 @@
+---
+title: Build applications
+summary: A visual field guide to Cloudflare’s developer platform. Explore the
+  connections, then open a product for the details.
+area: build
+order: 0
+sections:
+  - id: cloudflare-platform-title
+    name: Application map
+  - id: reading-map
+    name: Read the map
+  - id: explore-products
+    name: Products
+sources:
+  - url: https://developers.cloudflare.com/kv/concepts/how-kv-works/
+    title: KV cached reads and eventual consistency
+  - url: https://developers.cloudflare.com/durable-objects/concepts/what-are-durable-objects/
+    title: Durable Objects shared state and strongly consistent storage
+  - url: https://developers.cloudflare.com/durable-objects/reference/data-location/
+    title: Durable Object placement and latency
+  - url: https://developers.cloudflare.com/workers/
+    title: Workers overview
+  - url: https://developers.cloudflare.com/workers/runtime-apis/bindings/
+    title: Workers resource bindings
+  - url: https://developers.cloudflare.com/pages/
+    title: Pages overview
+  - url: https://developers.cloudflare.com/queues/reference/how-queues-works/
+    title: Producers, queues, and consumer Workers
+  - url: https://developers.cloudflare.com/workflows/build/events-and-parameters/
+    title: Creating Workflow instances from Workers
+  - url: https://developers.cloudflare.com/workflows/build/trigger-workflows/
+    title: Creating Workflow instances from Workers
+  - url: https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/
+    title: Calling Worker services through RPC or HTTP
+  - url: https://developers.cloudflare.com/durable-objects/best-practices/rules-of-durable-objects/
+    title: One Durable Object per room, document, session, or workspace
+lastVerified: 2026-09-08
+---
+
+import CloudflareBindings from '@components/CloudflareBindings.astro';
+import CloudflareDirectory from '@components/CloudflareDirectory.astro';
+
+<CloudflareBindings id="cloudflare-platform" />
+
+<h2 id="reading-map">Read the map</h2>
+
+Start with your application code, then follow the connections to the data or
+background work it needs. Arrowheads show **who initiates the labeled call or operation**, not which
+way all the data travels. A Worker can read from or write to storage through
+the same binding; responses return to the caller. Solid lines show calls,
+while dashed lines show message publishing, delivery, or Workflow creation. This is an example of how the products
+can fit together, not a stack that requires every product.
+
+Hover or focus an icon for a field note. **Click a product to explore its own
+architecture, local-development options, usage limits, and sources.**
+
+<CloudflareDirectory />
+
+## Still being mapped
+
+Images, Stream, Workers AI, Vectorize, AI Gateway, and Hyperdrive are planned
+for this area. See [all Cloudflare topic areas](/cloudflare/) for the rest of
+the guide’s planned coverage.

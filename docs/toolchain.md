@@ -73,6 +73,10 @@ for the same PR; a successful run is the human's merge evidence.
 [setup-node](https://github.com/actions/setup-node) and
 [pnpm/action-setup](https://github.com/pnpm/action-setup) document this ordering.
 
+**Verification follow-up:** local equivalents of the PR checks pass. The first
+hosted GitHub Actions result still needs recording when an actual PR runs it;
+local validation does not establish hosted execution.
+
 ## Dependency audit and the build-tool exception
 
 Direct-package licenses alone are insufficient. The Linux x64 spike's

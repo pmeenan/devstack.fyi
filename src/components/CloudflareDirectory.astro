@@ -4,11 +4,14 @@ import '../styles/diagram-colors.css';
 import { cloudflareIcons } from '@lib/cloudflare-icons';
 import StatusBadge from './StatusBadge.astro';
 const products = (
-  await getCollection('products', (p) => p.id.startsWith('cloudflare/'))
+  await getCollection(
+    'products',
+    (p) => p.id.startsWith('cloudflare/') && p.data.area === 'build',
+  )
 ).sort((a, b) => (a.data.order ?? 0) - (b.data.order ?? 0));
 ---
 
-<section>
+<section id="explore-products">
   <h2>Explore a product</h2><ul class="product-directory">
     {
       products.map(({ id, data }) => (

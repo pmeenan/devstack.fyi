@@ -278,11 +278,18 @@ names, resource names, and exported classes exactly, and explain their connectio
 briefly. Mark configuration excerpts and replacement placeholders explicitly.
 Keep deployment commands in Deployment; avoid duplicating the configuration there.
 
-## Planned topic-area navigation (D-018, approved 2026-09-09)
+## Topic-area navigation (D-018, implemented 2026-09-09)
 
-M2.2a will replace the Cloudflare root overview with a topic directory and move
-the accepted application map to /cloudflare/build/. Keep the existing two-row
-product/section navigation scoped to an area. Add breadcrumbs with an area
-switcher, not a third tab row. Use focused area diagrams and cross-links; retain
-existing product URLs and their accepted presentation. This is the next
-implementation target; the current layout has not yet changed.
+Cloudflare's root is a topic directory; the accepted application map lives at
+/cloudflare/build/. Keep the connected product/section navigation scoped to
+an area, preceded by breadcrumbs with a native details/summary area switcher.
+The switcher names its purpose for assistive technology, links to available
+overviews, and marks unwritten areas Planned without dead links. Escape closes
+the disclosure with JavaScript; native toggling and navigation work without it.
+At phone widths the open menu stays in document flow to avoid clipping.
+
+Root cards use the accepted surface, border, and neon accent tokens. Display
+planned areas as plain headings and available areas as links. Keep visible
+product shortcuts on the root with legacy product anchor ids. Use focused area
+diagrams and cross-links as coverage lands; preserve product URLs, storage tab
+ordering, and accepted product content. There is no third tab row.

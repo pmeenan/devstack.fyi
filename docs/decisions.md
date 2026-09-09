@@ -25,7 +25,7 @@ Decision / Context / Consequences / Reopen if
 
 ---
 
-## D-018: Topic areas within Cloudflare, stable product URLs (2026-09-09, status: accepted; implementation pending M2.2a)
+## D-018: Topic areas within Cloudflare, stable product URLs (2026-09-09, status: accepted; implemented M2.2a)
 
 **Decision.** The owner approved a topic directory at `/cloudflare/`, with the
 current application overview moved to `/cloudflare/build/`. Initial areas are
@@ -44,8 +44,10 @@ products have one canonical detail page and data record. Preserve old root
 product anchors. Topic areas are editorial groupings within a service, distinct
 from catalog categories and research-pass order. All previously agreed M2
 coverage remains; Build applications initially also receives media/AI coverage,
-subject to a density review. Plan M2.2a implements this before new delivery
-content; the site has not yet been restructured.
+subject to a density review. M2.2a implements this before new delivery
+content. Service frontmatter declares ordered areas and availability; pages and
+products carry one matching area id, validated with their overview routes.
+See content-schema.md for the implemented contract.
 
 **Reopen if.** Real content makes an area too broad or product discovery difficult.
 Adjust area boundaries without casually changing product URLs or adding another

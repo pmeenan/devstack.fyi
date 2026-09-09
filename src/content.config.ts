@@ -41,6 +41,16 @@ const services = defineCollection({
     category: z.enum(CATEGORY_IDS),
     summary: z.string().min(1).max(200),
     status: z.enum(['draft', 'reviewed']),
+    areas: z
+      .array(
+        z.strictObject({
+          id: slugId,
+          name: z.string().min(1),
+          summary: z.string().min(1),
+          status: z.enum(['available', 'planned']),
+        }),
+      )
+      .default([]),
     groups: z
       .array(
         z.strictObject({
@@ -67,6 +77,10 @@ const pages = defineCollection({
   schema: z.strictObject({
     title: z.string().min(1),
     summary: z.string().min(1).max(200),
+    area: slugId.optional(),
+    sections: z
+      .array(z.strictObject({ id: slugId, name: z.string().min(1) }))
+      .default([]),
     order: z.number().int().optional(),
     sources,
     lastVerified: calendarDate,
@@ -155,6 +169,7 @@ const products = defineCollection({
     name: z.string().min(1),
     aliases: z.array(z.string().min(1)).default([]),
     group: slugId.optional(),
+    area: slugId.optional(),
     order: z.number().int().optional(),
     docs: z.url(),
     apiReferences: z.array(source).default([]),

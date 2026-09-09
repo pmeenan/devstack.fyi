@@ -117,11 +117,12 @@ build → commit loop, on-demand reviews, and the human commit gate.
 
 ## Current status
 
-**M0, M1, and M2.1 complete (2026-09-08).** The shell is live; the working
-Cloudflare draft now covers eight developer-platform products with sources,
-local-development options, limits, freshness badges, a visual overview and
-dedicated product pages with focused diagrams.
-Local checks and CSP browser checks pass. **Owner review of the overview and all eight product pages is complete for now
-(2026-09-09). M2.2 starts with topic-area navigation (D-018), then edge/network content.** One vendor-docs contradiction is flagged in Cloudflare
-research. Owner review, commits, deployment and server changes remain human-run.
-See [docs/plan.md](docs/plan.md) and the README for commands and verification.
+**M0, M1, and M2.1 complete.** The shell is live; the Cloudflare overview and all
+eight developer-platform pages are owner-approved for now (2026-09-09).
+**M2.2a topic-area navigation is implemented and verified (D-018).** Next is
+owner preview review, then M2.2b delivery content. Start at
+[the active plan](docs/plan.md#m22a--cloudflare-topic-landing-page-and-navigation).
+Cloudflare remains a draft; the storage-docs contradiction and verification
+limits live in [Cloudflare research](services/cloudflare/docs/research.md).
+Completed history is summarized in the plan; durable conventions stay behind
+the doc map above. Commits, deployment, and server changes remain human-run.

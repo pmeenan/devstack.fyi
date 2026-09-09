@@ -485,3 +485,38 @@ before the application code (Wrangler JSON for Cloudflare examples). Identify
 excerpts as changes to an existing configuration, mark resource placeholders,
 and explain how names map to the code. Cite the configuration reference. Samples
 using only global APIs need no binding block.
+
+## Service topic areas (M2.2a, D-018)
+
+Services may declare ordered `areas: [{ id, name, summary, status }]`; status is
+`available` or `planned`. The default is `[]`, preserving services without topic
+areas. Area ids are service-local kebab-case identifiers, separate from the
+catalog category enum and product `groups` (table grouping).
+
+When a service declares areas, every sub-page and product must have one explicit
+`area` matching an available area. A product and its same-id detail page must
+agree. An available area requires an overview page at `/<service>/<area>/` with
+the same membership; a planned area cannot contain published pages/products.
+Duplicate ids, unknown/missing membership, missing overviews, and area/product
+route collisions fail the build through `loadContent()`.
+
+Area overviews use the existing `pages` collection and route loader; product
+routes remain unchanged. Navigation filters pages by area and excludes the
+area overview from the product list, putting it first as Overview. `order`
+continues to sort product destinations. Page frontmatter can declare
+`sections: [{ id, name }]` (default `[]`) for overview/topic section navigation;
+ids must point to real rendered anchors. Product section links retain their
+existing layout contract.
+
+The root renders a topic directory from these declarations. Available areas
+link to their overview, with links to products that have dedicated pages;
+planned areas display their name and summary without a dead destination.
+Visible root product links preserve legacy `#product-<slug>` fragments. The
+breadcrumb's native details/summary switcher works without JavaScript and lists
+all areas, with planned labels and an All topic areas link. Within areas there
+are still exactly two connected navigation rows: destinations and sections.
+
+Cloudflare's complete scope/membership map is in
+[its working docs](../services/cloudflare/docs/areas.md). Moving accepted prose
+and adding editorial membership does not re-verify vendor claims: their original
+source dates remain intact.

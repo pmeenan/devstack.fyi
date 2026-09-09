@@ -123,6 +123,48 @@ import CloudflareBindings from '@components/CloudflareBindings.astro';
       'utf8',
     );
     assert.doesNotMatch(overview, /<table[ >]/);
+    assert.doesNotMatch(overview, /<architecture-map[ >]/);
+    assert.match(overview, /href="\/cloudflare\/build\/"/);
+    assert.match(overview, /Deliver HTTP traffic/);
+    assert.match(overview, /Protect applications/);
+    assert.match(overview, /Connect users and networks/);
+    assert.doesNotMatch(
+      overview,
+      /href="\/cloudflare\/(deliver|protect|connect)\/"/,
+    );
+    const buildOverview = await readFile(
+      join(root, 'dist/cloudflare/build/index.html'),
+      'utf8',
+    );
+    assert.match(buildOverview, /<architecture-map[ >]/);
+    assert.match(buildOverview, /Read the map/);
+    assert.match(buildOverview, /aria-label="More in Build applications"/);
+    assert.match(
+      buildOverview,
+      /href="\/cloudflare\/build\/" aria-current="page"/,
+    );
+    const tabs = buildOverview.slice(
+      buildOverview.indexOf('class="product-tabs"'),
+      buildOverview.indexOf('class="page-sections"'),
+    );
+    const expectedTabs = [
+      'build',
+      'workers',
+      'pages',
+      'r2',
+      'd1',
+      'kv',
+      'durable-objects',
+      'queues',
+      'workflows',
+    ];
+    assert.deepEqual(
+      [...tabs.matchAll(/href="\/cloudflare\/([^/]+)\/"/g)].map(
+        (match) => match[1],
+      ),
+      expectedTabs,
+    );
+
     for (const slug of [
       'workers',
       'pages',
@@ -134,11 +176,19 @@ import CloudflareBindings from '@components/CloudflareBindings.astro';
       'workflows',
     ]) {
       assert.match(overview, new RegExp(`href="/cloudflare/${slug}/"`));
+      assert.match(overview, new RegExp(`id="product-${slug}"`));
+      assert.match(buildOverview, new RegExp(`href="/cloudflare/${slug}/"`));
       const detail = await readFile(
         join(root, `dist/cloudflare/${slug}/index.html`),
         'utf8',
       );
       assert.match(detail, /<architecture-map[ >]/);
+      assert.match(
+        detail,
+        /<summary[^>]*aria-label="Topic area: Build applications. Switch area"/,
+      );
+      assert.match(detail, /href="\/cloudflare\/build\/"/);
+      assert.match(detail, /aria-label="More in Build applications"/);
       const article = detail.slice(detail.indexOf('<article'));
       const firstMap = article.indexOf('<architecture-map');
       const introduction = article.indexOf('class="product-introduction"');
@@ -265,6 +315,7 @@ import CloudflareBindings from '@components/CloudflareBindings.astro';
     );
     // Each invalid fixture is a real Astro build, not a copy of the schema's logic.
     const fixtures: [string, RegExp][] = [
+      [original + '\narea: missing\n', /undeclared area/],
       [original + '\nlastverified: 2026-09-08\n', /lastverified/],
       [
         original.replace('group: compute', 'group: missing'),
@@ -289,8 +340,8 @@ import CloudflareBindings from '@components/CloudflareBindings.astro';
     extraTier.limits.metrics[0]!.values.other = '1';
     const missingTier = structuredClone(record);
     delete missingTier.limits.metrics[0]!.values.paid;
-    fixtures[2] = [stringify(extraTier), /unknown tier/];
-    fixtures[3] = [stringify(missingTier), /missing value for tier/];
+    fixtures[3] = [stringify(extraTier), /unknown tier/];
+    fixtures[4] = [stringify(missingTier), /missing value for tier/];
     for (const [yaml, expected] of fixtures) {
       await writeFile(file, yaml);
       const result = build();
@@ -301,6 +352,87 @@ import CloudflareBindings from '@components/CloudflareBindings.astro';
       );
       assert.match(result.output, expected);
       assert.match(result.output, /widgets|example/);
+    }
+    // A second available area must isolate destination navigation.
+    await writeFile(file, original);
+    const cloudflareFile = join(root, 'services/cloudflare/content/index.mdx');
+    const cloudflareOriginal = await readFile(cloudflareFile, 'utf8');
+    const deliveryFile = join(
+      root,
+      'services/cloudflare/content/deliver/index.mdx',
+    );
+    const availableDelivery = cloudflareOriginal.replace(
+      /(id: deliver[\s\S]*?status:) planned/,
+      '$1 available',
+    );
+    await writeFile(cloudflareFile, availableDelivery);
+    const missingOverview = build();
+    assert.notEqual(missingOverview.status, 0);
+    assert.match(
+      missingOverview.output,
+      /available area needs a matching overview/,
+    );
+    await mkdir(join(root, 'services/cloudflare/content/deliver'));
+    await writeFile(
+      deliveryFile,
+      `---
+title: Delivery fixture
+summary: Fictional area for navigation verification.
+area: deliver
+sources:
+  - url: https://example.com/
+    title: Fixture
+lastVerified: 2026-09-08
+---
+
+Area fixture.
+`,
+    );
+    const twoAreas = build();
+    assert.equal(twoAreas.status, 0, twoAreas.output);
+    const delivery = await readFile(
+      join(root, 'dist/cloudflare/deliver/index.html'),
+      'utf8',
+    );
+    const deliveryTabs = delivery.slice(
+      delivery.indexOf('class="product-tabs"'),
+      delivery.indexOf('class="page-sections"'),
+    );
+    assert.match(deliveryTabs, /href="\/cloudflare\/deliver\/"/);
+    assert.doesNotMatch(deliveryTabs, /workers|build/);
+    const buildWithDelivery = await readFile(
+      join(root, 'dist/cloudflare/build/index.html'),
+      'utf8',
+    );
+    assert.match(buildWithDelivery, /href="\/cloudflare\/deliver\/"/);
+    const buildTabs = buildWithDelivery.slice(
+      buildWithDelivery.indexOf('class="product-tabs"'),
+      buildWithDelivery.indexOf('class="page-sections"'),
+    );
+    assert.doesNotMatch(buildTabs, /deliver/);
+    const workersFile = join(
+      root,
+      'services/cloudflare/content/workers/index.mdx',
+    );
+    const workersOriginal = await readFile(workersFile, 'utf8');
+    for (const [content, expected] of [
+      [
+        workersOriginal.replace('area: build', 'area: deliver'),
+        /page and product area must match/,
+      ],
+      [
+        workersOriginal.replace('area: build', 'area: protect'),
+        /content belongs to a planned area/,
+      ],
+      [
+        workersOriginal.replace('area: build', ''),
+        /missing or undeclared area/,
+      ],
+    ] as const) {
+      await writeFile(workersFile, content);
+      const invalid = build();
+      assert.notEqual(invalid.status, 0);
+      assert.match(invalid.output, expected);
     }
   } finally {
     await rm(root, { recursive: true, force: true });

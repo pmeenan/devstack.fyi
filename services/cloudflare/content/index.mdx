@@ -2,9 +2,26 @@
 title: Cloudflare
 website: https://www.cloudflare.com/
 category: cloud-providers
-summary: A visual field guide to Cloudflare’s developer platform. Explore the
-  connections, then open a product for the details.
+summary: Cloudflare field notes, organized by what you want to do. Start with
+  Build applications; delivery, protection, and connectivity guides are planned.
 status: draft
+areas:
+  - id: build
+    name: Build applications
+    summary: Start with the application map, then explore eight product guides.
+    status: available
+  - id: deliver
+    name: Deliver HTTP traffic
+    summary: Planned guides to CDN caching, DNS, TLS, Rules, and Load Balancing.
+    status: planned
+  - id: protect
+    name: Protect applications
+    summary: Planned guides to WAF, bots, rate limiting, DDoS protection, and Turnstile.
+    status: planned
+  - id: connect
+    name: Connect users and networks
+    summary: Planned guides to Access, Tunnel, and WARP.
+    status: planned
 groups:
   - id: developer-platform
     name: Developer platform
@@ -35,27 +52,5 @@ sources:
 lastVerified: 2026-09-08
 ---
 
-import CloudflareBindings from '@components/CloudflareBindings.astro';
-import CloudflareDirectory from '@components/CloudflareDirectory.astro';
-
-<CloudflareBindings id="cloudflare-platform" />
-
-<h2 id="reading-map">Read the map</h2>
-
-Start with your application code, then follow the connections to the data or
-background work it needs. Arrowheads show **who initiates the labeled call or operation**, not which
-way all the data travels. A Worker can read from or write to storage through
-the same binding; responses return to the caller. Solid lines show calls,
-while dashed lines show message publishing, delivery, or Workflow creation. This is an example of how the products
-can fit together, not a stack that requires every product.
-
-Hover or focus an icon for a field note. **Click a product to explore its own
-architecture, local-development options, usage limits, and sources.**
-
-<CloudflareDirectory />
-
-## Still being mapped
-
-This draft covers the developer platform. Edge/network configuration,
-security/access, and media/AI products will join the map in later passes.
-The content and visual structure are still being reviewed.
+Choose a topic area to explore its guides. This draft currently covers eight
+products in Build applications; the other areas are still being mapped.
