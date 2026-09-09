@@ -2,6 +2,13 @@ name: R2
 group: developer-platform
 order: 3
 docs: https://developers.cloudflare.com/r2/
+apiReferences:
+  - title: Workers API
+    url: https://developers.cloudflare.com/r2/api/workers/workers-api-reference/
+  - title: S3 API
+    url: https://developers.cloudflare.com/r2/api/s3/api/
+  - title: Management REST API
+    url: https://developers.cloudflare.com/api/resources/r2/
 capability: Object storage for files and blobs, accessible through Workers
   bindings and an S3-compatible API.
 notes: The local binding simulation exercises the Workers API. Treat testing an
@@ -67,4 +74,4 @@ sources:
     title: R2 local development
   - url: https://developers.cloudflare.com/r2/api/s3/api/
     title: R2 S3 API compatibility
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09

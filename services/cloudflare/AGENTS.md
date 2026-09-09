@@ -11,6 +11,11 @@ limits verification separately. Record gaps rather than guessing. Keep the
 service `draft` until the owner approves its complete coverage.
 
 For diagram or layout work, read `../../docs/style-guide.md` (Visual architecture
-maps). The overview, Workers, Pages, and Workers KV are owner-approved (product pages for now). Apply
+maps). The overview and all eight developer-platform product pages are owner-approved
+for now (2026-09-09). Apply
 their visual and content conventions to other product pages: execution/state
 boundaries, runnable local equivalents, and separate deployment tooling.
+
+Next is M2.2a topic restructuring (root docs/plan.md and D-018), before new
+delivery content. Preserve accepted product URLs/content; move the application
+overview into its own area instead of expanding it to cover all Cloudflare.

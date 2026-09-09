@@ -328,3 +328,145 @@ every edge location. Verified the DO concepts/location docs and, for the owner's
 question, in-memory state and Workers Cache API locality. A custom in-memory DO
 cache must tolerate instance resets; the Cache API does not replicate its
 contents across data centers.
+
+## 2026-09-09 — Latency coverage across developer-platform products
+
+Added a Latency navigation target to all eight product pages. KV retains its
+advertised <5 ms hot-read figure and freshness explanation. New sources and
+same-day page dates cover Workers runtime startup, Pages Tiered Cache, R2 request
+paths/Local Uploads, D1 replication/timing metadata, DO SQLite/location, Queues
+send/batching, and Workflow scheduling/retries. Product limit records were not
+reverified or changed.
+
+Numeric evidence: Workers warm-instance routing adds <1 ms TTFB for the internal
+proxy hop according to the sharding article, not total request time. R2's February 2026 announcement shows approximately 2 s to
+500 ms p50 upload TTLB but omits object-size/workload details; retain that
+limitation. DO's September 2024 SQLite article describes microsecond internal
+queries, with output gates still waiting for write confirmation. Queues' October
+2024 report measures median sends (~60 ms), not completion or consumer delivery;
+current batching defaults add up to 5 seconds of intentional wait for sparse
+traffic. No general application/request range established for Workers, Pages,
+D1, or Workflows, nor R2 GET/HEAD or DO RPC. Do not infer one from marketing,
+timeouts, CPU budgets, or throughput. Workflows limits prose and table disagree
+on concurrency counts; this pass only uses the scheduling behavior, no count.
+
+Future authoring now requires the same coverage in content-schema.md and the
+service template. Record measured conditions and evidence gaps, not invented
+universal latency ranges. Owner acceptance of the earlier pages is unchanged;
+these additions remain part of the current content iteration.
+
+## 2026-09-09 — Prominent product and API references
+
+All eight products now supply labeled API references beside their existing
+product-docs URL in the shared header. Verified Workers runtime, Pages Functions,
+KV/D1/DO binding indexes, R2 binding/S3 compatibility, Queues JavaScript, Workflows
+Workers API and REST resource indexes. The Workers REST index exceeds the web
+reader size limit; retain its canonical resource URL. Distinguish management
+REST from application APIs for Workers, Pages, R2 and DO. Product verification
+dates updated; limit dates remain unchanged. The optional apiReferences schema
+field and authoring template carry this convention to future services.
+
+## 2026-09-09 — Simple application API examples
+
+Added one TypeScript example to every product page: Worker service-binding HTTP,
+Pages Function greeting, KV lookup/update call, R2 stream/upload call, D1 bound
+query and seed SQL, persistent DO counter via RPC, Queues producer/consumer,
+and Workflow creation plus step implementation. Binding names and setup context
+are explicit, with official API sources and the same-day verification date.
+Examples are illustrative application code, not site runtime code. Typechecked
+all eight fenced TypeScript samples in a scratch project against official
+@cloudflare/workers-types 5.20260908.1 with strict mode; no site dependency added.
+No hosted resource was provisioned and no sample was deployed. D1/DO SQL is
+checked separately against local SQLite. API example anchors are part of the
+existing output fixture checks and future authoring guidance.
+
+## 2026-09-09 — Simplify introductory API samples
+
+Owner prefers official-style JavaScript samples without Env/type declarations.
+Converted the eight examples and replaced the Workers service-binding example
+with global fetch to a fixed HTTP endpoint. Keep a brief service-binding pointer
+for private Worker calls. Resource APIs retain env bindings because they select
+configured namespaces, buckets, databases, queues, or classes. The earlier strict
+TypeScript check applies to the original examples; the revised JavaScript is
+syntax-checked. Authoring guidance records this preference for sample code;
+site TypeScript remains strict.
+
+### D1 query return path (2026-09-09)
+
+Verified the [prepared statement API](https://developers.cloudflare.com/d1/worker-api/prepared-statements/):
+awaited query results are available to the calling Worker. Removed the separate
+application-data destination and routed the result through the binding API
+back to its awaiting Worker handler; result
+shape varies by method (first versus all/run). This is a logical call/return
+sequence, not separate deployed services for each API step.
+
+### Durable Objects general-purpose framing (2026-09-09)
+
+Replaced the chat-room-specific diagram labels with object identity, singleton
+code, private persistent storage, and shared temporary memory. The introduction
+and explanation now lead with coherent caches, counters, tenant coordination,
+and aggregation; collaboration is one application, not the object type. Based on
+the verified [Durable Objects concepts](https://developers.cloudflare.com/durable-objects/concepts/what-are-durable-objects/).
+Patterns are application code built on the primitive, not built-in Memcached
+compatibility. Cache guidance retains eviction and caller-distance limitations.
+
+Owner wording refinement (2026-09-09): use “A named global singleton” and
+explicitly identify the Worker-style code instance specific to each Durable
+Object alongside its private durable storage. The concepts source above describes
+a Durable Object as a special kind of Worker combining compute and storage.
+
+### Pub/sub pattern (2026-09-09)
+
+Added an event bus / pub/sub broker to the Durable Objects use cases and hover.
+An object per topic or partition is an application design built on the documented
+[WebSocket coordination and fan-out APIs](https://developers.cloudflare.com/durable-objects/best-practices/websockets/).
+Subscriber tracking, persistence, and replay are broker code the developer writes,
+not automatic delivery guarantees supplied by Durable Objects.
+
+### Queues work sharing (2026-09-09)
+
+Verified multiple producers and one configured push consumer in
+[How Queues works](https://developers.cloudflare.com/queues/reference/how-queues-works/),
+[concurrent Worker invocations](https://developers.cloudflare.com/queues/configuration/consumer-concurrency/),
+and [multiple pull readers with distinct leased batches](https://developers.cloudflare.com/queues/configuration/pull-consumers/).
+The page and push diagram explain work sharing rather than broadcast. Retain
+at-least-once delivery: a retry or lease expiry may deliver to another reader;
+never describe this as exactly-once processing or a permanent reader assignment.
+
+Queue example wiring (2026-09-09): made the producer binding JOBS versus actual
+queue name jobs explicit, showed matching producers/consumers configuration,
+and used batch.queue in the handler. The previously verified How Queues Works
+source documents one Worker consuming multiple queues through that handler.
+
+### Configuration beside API examples (2026-09-09)
+
+Added relevant Wrangler JSON immediately before JavaScript for KV, R2, D1,
+Durable Objects, Queues, and Workflows; moved Queues configuration out of
+Deployment. Excerpts explicitly merge into an existing Worker configuration.
+Names match the handlers, with placeholders for existing storage resources.
+Verified the Wrangler configuration reference for KV/R2/D1, the Workflow guide
+for name/binding/class_name, and the Durable Objects getting-started guide for
+bindings plus the current exports declaration with SQLite storage. Workers fetch
+and the Pages greeting use no resource bindings and need no extra block.
+
+### Workflow trigger coverage (2026-09-09)
+
+Expanded the Workflow page with a Triggers navigation target and configuration
+for direct schedules, queue consumers, Worker Cron Triggers, cross-Worker bindings,
+and Pages service bindings. Also covers HTTP/webhooks, Durable Object methods,
+parent Workflows, REST, Wrangler, dashboard runs, and local Explorer. The trigger
+node now includes schedules instead of implying a Worker-only entry point.
+
+Verified trigger-workflows, the get-started guide, Wrangler commands, Cron
+Triggers, Pages integration, and the current create-instance REST reference.
+REST params is documented as a JSON-encoded string and accepts Workers Scripts
+Write permission; binding params remains an object. Direct schedules carry
+event.schedule, so the greeting now defaults when no name payload is supplied.
+Queue IDs are stable on repeated starts; production callers must reconcile
+existing instances on redelivery. No trigger was deployed or called remotely.
+
+Event subscriptions are indirect inputs through a queue consumer. The Workflows
+event-subscription reference documents emitted lifecycle events. Configuration
+is on the queue via its Subscriptions tab:
+https://developers.cloudflare.com/queues/event-subscriptions/manage-event-subscriptions/
+Events sent to an existing waiting instance are distinguished from creation.

@@ -2,6 +2,11 @@ name: Workers KV
 group: developer-platform
 order: 5
 docs: https://developers.cloudflare.com/kv/
+apiReferences:
+  - title: Workers API
+    url: https://developers.cloudflare.com/kv/api/
+  - title: REST API
+    url: https://developers.cloudflare.com/api/resources/kv/
 capability: >-
   Persistent key-value data cached near readers for fast, frequent reads. Use it
   for configuration, routing metadata, and content that can tolerate older
@@ -68,4 +73,4 @@ sources:
     title: Workers KV local development
   - url: https://developers.cloudflare.com/kv/concepts/how-kv-works/
     title: KV consistency model
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09

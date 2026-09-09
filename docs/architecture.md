@@ -774,3 +774,12 @@ the implementation contract. The two technical questions from the
 content-layer spike (diagrams in MDX without a framework runtime; excluding
 working docs) are also answered. M1 still implements and validates the shell
 and reference vhost; only the owner changes plex.
+
+## Planned service topic areas (D-018)
+
+Approved 2026-09-09; implementation is M2.2a. Cloudflare's root becomes a topic
+directory, and its existing overview moves to /cloudflare/build/. Existing
+product routes remain canonical. Area membership will scope navigation without
+changing the catalog category enum. Use the existing static page/content model;
+define the membership representation and document it in content-schema.md during
+implementation. No new runtime or deployment mechanism is required.

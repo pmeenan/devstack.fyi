@@ -4,6 +4,8 @@ summary: Web application hosting with static asset delivery, build/deployment
   integration, and optional Pages Functions.
 order: 2
 sources:
+  - url: https://developers.cloudflare.com/pages/configuration/serving-pages/
+    title: Pages asset serving and caching
   - url: https://developers.cloudflare.com/pages/functions/api-reference/
     title: Pages Functions handler and context API
   - url: https://developers.cloudflare.com/pages/functions/routing/
@@ -22,7 +24,7 @@ sources:
     title: Pages Functions bindings
   - url: https://developers.cloudflare.com/pages/platform/limits/
     title: Pages build and Functions limits
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09
 ---
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
@@ -75,6 +77,40 @@ For server-side state, concurrency, Wasm, and fetch/cache APIs, use the
 [Workers runtime model](/cloudflare/workers/#architecture). A binding in a
 Function reaches an external resource; it does not bundle that resource into
 the deployed assets. [Function bindings](https://developers.cloudflare.com/pages/functions/bindings/).
+
+<h2 id="api-example">API example</h2>
+
+Pages Functions uses `onRequestGet(context)` instead of a Worker’s fetch
+handler. Save this as `functions/api/hello.js` in a Pages project; GET
+`/api/hello?name=Sam` returns a JSON greeting. No resource binding is needed.
+
+```javascript
+export const onRequestGet = ({ request }) => {
+  const name = new URL(request.url).searchParams.get('name') ?? 'world';
+  return Response.json({ greeting: `Hello, ${name}!` });
+};
+```
+
+To use storage from this Function, configure a Pages binding and access it via
+`context.env`. A separate Worker can call the deployed Pages URL with `fetch()`;
+Pages does not provide a Pages-specific storage binding for that call.
+
+[Pages Functions API](https://developers.cloudflare.com/pages/functions/api-reference/),
+[Pages resource bindings](https://developers.cloudflare.com/pages/functions/bindings/).
+
+<h2 id="latency">Latency</h2>
+
+**Separate static asset delivery from Functions execution.** Pages serves
+uploaded static assets through Tiered Cache. A nearby cache hit and a request
+that must fill a cache have different paths; asset size and the client network
+also affect completion time. The serving guide does not publish a general TTFB
+(time to first byte) range. [Serving and caching Pages](https://developers.cloudflare.com/pages/configuration/serving-pages/).
+
+For dynamic routes, use the [Workers latency model](/cloudflare/workers/#latency)
+and include the Function’s downstream calls. Our measurement guidance: compare
+static and dynamic routes separately, recording TTFB and full download time for
+representative asset sizes and user locations. Build/deployment duration is a
+separate metric from serving latency.
 
 </div>
 <section slot="deployment">

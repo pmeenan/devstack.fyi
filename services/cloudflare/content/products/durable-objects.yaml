@@ -2,6 +2,11 @@ name: Durable Objects
 group: developer-platform
 order: 6
 docs: https://developers.cloudflare.com/durable-objects/
+apiReferences:
+  - title: Workers API
+    url: https://developers.cloudflare.com/durable-objects/api/
+  - title: Management REST API
+    url: https://developers.cloudflare.com/api/resources/durable_objects/
 capability: >-
   A global singleton per object identity: one instance of your code with shared
   memory and strongly consistent storage.
@@ -80,4 +85,4 @@ sources:
     title: Storage backend availability and conflicting Free limits
   - url: https://developers.cloudflare.com/durable-objects/best-practices/rules-of-durable-objects/
     title: One Durable Object per room, document, session, or workspace
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09

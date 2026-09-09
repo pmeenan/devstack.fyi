@@ -121,7 +121,7 @@ build → commit loop, on-demand reviews, and the human commit gate.
 Cloudflare draft now covers eight developer-platform products with sources,
 local-development options, limits, freshness badges, a visual overview and
 dedicated product pages with focused diagrams.
-Local checks and CSP browser checks pass. **Current focus is owner iteration on the overview/product-page structure;
-M2.2 (edge/network and service-wide configuration) follows.** One vendor-docs contradiction is flagged in Cloudflare
+Local checks and CSP browser checks pass. **Owner review of the overview and all eight product pages is complete for now
+(2026-09-09). M2.2 starts with topic-area navigation (D-018), then edge/network content.** One vendor-docs contradiction is flagged in Cloudflare
 research. Owner review, commits, deployment and server changes remain human-run.
 See [docs/plan.md](docs/plan.md) and the README for commands and verification.

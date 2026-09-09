@@ -2,6 +2,11 @@ name: Pages
 group: developer-platform
 order: 2
 docs: https://developers.cloudflare.com/pages/
+apiReferences:
+  - title: Functions API
+    url: https://developers.cloudflare.com/pages/functions/api-reference/
+  - title: Management REST API
+    url: https://developers.cloudflare.com/api/resources/pages/
 capability: Web application hosting with static asset delivery, build/deployment
   integration, and optional Pages Functions.
 notes: Pages Functions consume Workers quotas; upgrading a zone plan does not
@@ -71,4 +76,4 @@ sources:
     title: Pages local development
   - url: https://developers.cloudflare.com/d1/best-practices/local-development/
     title: D1 local development with Pages
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09

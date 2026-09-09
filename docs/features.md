@@ -146,3 +146,13 @@ is in progress.
     re-verified against current Cloudflare docs when the research starts
     (D-006); this list is the owner's scope statement, not a claim about
     current product naming.
+
+- **9. Cloudflare topic structure (2026-09-09)** → approved: root topic directory;
+  Build applications, Deliver HTTP traffic, Protect applications, Connect users
+  and networks. Focused area overviews, stable product URLs, and breadcrumbs with
+  an area switcher complement the existing two navigation rows (D-018).
+  Implement before expanding content in M2.2. Retain all question 8 coverage;
+  WARP, rate limiting, and DDoS protection join the security/access research pass.
+  Media/AI products initially belong to Build applications, with a navigation
+  density review before they land. The areas organize reading, not milestone
+  boundaries or new catalog services.

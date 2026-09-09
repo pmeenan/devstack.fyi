@@ -472,9 +472,9 @@ export const diagrams = {
     ],
   },
   d1: {
-    title: 'From SQL to application data',
+    title: 'Query D1 and use the result in your Worker',
     summary:
-      'Follow a Worker binding query through preparation, execution, and the result returned to your handler.',
+      'Follow a query to D1 and its result back through the binding API to the awaiting Worker handler.',
     width: 900,
     height: 485,
     nodes: [
@@ -484,7 +484,7 @@ export const diagrams = {
         subtitle: 'Application handler',
         icon: 'compute',
         detail:
-          'Application code accesses a configured D1 database through its binding.',
+          'Your handler calls D1 through its binding, awaits the result, and uses the returned rows in application logic or an HTTP response.',
         x: 140,
         y: 55,
         href: '#piece-worker',
@@ -495,7 +495,7 @@ export const diagrams = {
         subtitle: 'env.DB',
         icon: 'workflow',
         detail:
-          'The binding exposes the D1 database API. Local development normally targets a separate local database, not production data.',
+          'The binding exposes the D1 database API to your Worker. Query results resolve through this API to the awaiting handler; the binding is not a separate deployed service.',
         x: 450,
         y: 55,
         href: '#piece-binding',
@@ -512,23 +512,12 @@ export const diagrams = {
         href: '#piece-statement',
       },
       {
-        id: 'application',
-        label: 'Application data',
-        subtitle: 'Use returned rows',
-        icon: 'browser',
-        detail:
-          'Use the returned rows and result information in your application logic. The API offers different methods for selecting the result shape.',
-        x: 140,
-        y: 340,
-        href: '#piece-application',
-      },
-      {
         id: 'result',
         label: 'Query result',
-        subtitle: 'Rows + metadata',
+        subtitle: 'Shape depends on method',
         icon: 'message',
         detail:
-          'Execution returns result data to your Worker. Usage accounting measures rows read and written, rather than simply counting SQL statements.',
+          'The awaited call returns data to the same Worker handler: first() returns one row or null; all() and run() return results plus metadata. This is a return value, not a separate service.',
         x: 450,
         y: 340,
         href: '#piece-result',
@@ -580,18 +569,26 @@ export const diagrams = {
       },
       {
         from: 'result',
-        to: 'application',
-        d: 'M423 372 L168 372',
-        label: 'consume',
+        to: 'binding',
+        d: 'M450 350 L450 212 Q450 200 462 200 L523 200 Q535 200 535 188 L535 117 Q535 105 523 105 L460 105',
+        label: 'resolve query',
+        x: 535,
+        y: 235,
+      },
+      {
+        from: 'binding',
+        to: 'worker',
+        d: 'M441 105 L189 105 Q177 105 177 96 L165 96',
+        label: 'return to handler',
         x: 295,
-        y: 357,
+        y: 126,
       },
     ],
   },
   'durable-objects': {
-    title: 'One chat room, one named instance',
+    title: 'A named global singleton',
     summary:
-      'An example: participants in the same room reach the same code and stored state. Each other room can have its own object.',
+      'Each Durable Object combines its own Worker-style code instance with private durable storage and shared in-memory state. Callers using the same identity reach that object.',
     width: 900,
     height: 485,
     regions: [
@@ -626,30 +623,30 @@ export const diagrams = {
       },
       {
         id: 'identity',
-        label: 'Room identity',
-        subtitle: 'chat-room:123 → stub',
+        label: 'Object identity',
+        subtitle: 'Name or ID → stub',
         icon: 'keys',
         detail:
-          'Use the room name to address its Durable Object. Callers in the same room use the same identity; another room can use a different object.',
+          'Choose an identity for the state you want to coordinate. The same name within a namespace addresses the same object; different identities address independent objects.',
         x: 450,
         y: 55,
         href: '#piece-identity',
       },
       {
         id: 'object',
-        label: 'Chat room object',
-        subtitle: 'Your code + room state',
+        label: 'Durable Object instance',
+        subtitle: 'Worker code + storage',
         icon: 'object',
         detail:
-          'This object runs the room’s application logic and coordinates its participants. The same model can represent a game session, shared document, or tenant workspace.',
+          'A Worker-style instance specific to this Durable Object runs your code, with its own memory and private durable storage. Use it for a coherent cache, shared counter, pub/sub broker, per-tenant coordinator, or collaborative session.',
         x: 760,
         y: 55,
         href: '#piece-object',
       },
       {
         id: 'another',
-        label: 'Another participant',
-        subtitle: 'Same room name',
+        label: 'Another caller',
+        subtitle: 'Same object identity',
         icon: 'browser',
         detail:
           'A second caller can address the same named object rather than creating a separate copy of its state.',
@@ -660,10 +657,10 @@ export const diagrams = {
       {
         id: 'private',
         label: 'Private SQLite',
-        subtitle: 'Persisted room data',
+        subtitle: 'Persistent application data',
         icon: 'database',
         detail:
-          'The object’s private SQLite storage holds room data that must persist, such as message history. It stays attached to that object’s identity.',
+          'Private, strongly consistent storage holds data that must survive eviction, such as counters, application records, or coordination state. It stays attached to the object’s identity.',
         x: 450,
         y: 340,
         href: '#piece-private',
@@ -671,10 +668,10 @@ export const diagrams = {
       {
         id: 'memory',
         label: 'In-memory state',
-        subtitle: 'Active room state',
+        subtitle: 'Shared while active',
         icon: 'compute',
         detail:
-          'An active object can keep state in memory. Store information that must survive instance lifecycle changes in durable storage.',
+          'Callers share the active object’s in-memory state, useful for coherent caches and aggregation. Memory is temporary; persist data that must survive eviction.',
         x: 760,
         y: 340,
         href: '#piece-memory',
@@ -724,19 +721,19 @@ export const diagrams = {
     ],
   },
   queues: {
-    title: 'The life of a queued message',
+    title: 'A work queue shared by producers and readers',
     summary:
-      'A push-consumer example, including the success and failure paths. Delivery can happen more than once.',
+      'Push delivery: many producers can publish; concurrent invocations share batches instead of receiving broadcast copies. Retries and duplicate delivery remain possible.',
     width: 900,
     height: 485,
     nodes: [
       {
         id: 'producer',
-        label: 'Producer Worker',
-        subtitle: 'send / sendBatch',
+        label: 'Producer Workers',
+        subtitle: 'Multiple writers',
         icon: 'compute',
         detail:
-          'The producer publishes messages through a queue binding. A queue decouples request handling from background processing.',
+          'Multiple producer Workers can publish to the same queue through their bindings using send() or sendBatch().',
         x: 140,
         y: 55,
         href: '#piece-producer',
@@ -755,10 +752,10 @@ export const diagrams = {
       {
         id: 'consumer',
         label: 'Consumer Worker',
-        subtitle: 'Process a batch',
+        subtitle: 'Concurrent invocations',
         icon: 'compute',
         detail:
-          'A push consumer runs when a batch is delivered. Make processing idempotent because a message can be delivered more than once.',
+          'One configured consumer Worker scales to concurrent invocations that share batches. Messages are not broadcast to every invocation. Delivery can repeat, so processing must tolerate duplicates.',
         x: 760,
         y: 55,
         href: '#piece-consumer',
@@ -811,7 +808,7 @@ export const diagrams = {
         from: 'buffer',
         to: 'consumer',
         d: 'M475 87 L733 87',
-        label: 'deliver batch',
+        label: 'assign batch',
         x: 605,
         y: 72,
         kind: 'message',
@@ -863,10 +860,10 @@ export const diagrams = {
       {
         id: 'trigger',
         label: 'Trigger',
-        subtitle: 'Worker / CLI / API',
+        subtitle: 'Code / schedule / API',
         icon: 'compute',
         detail:
-          'Create an instance and pass initial parameters. Each instance has its own execution and state.',
+          'Start through a Worker or Durable Object binding, another Workflow, a direct schedule, the REST API, Wrangler, or the dashboard. HTTP and queue handlers can call the binding; each run has its own state.',
         x: 140,
         y: 55,
         href: '#piece-trigger',

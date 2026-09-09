@@ -157,6 +157,7 @@ const products = defineCollection({
     group: slugId.optional(),
     order: z.number().int().optional(),
     docs: z.url(),
+    apiReferences: z.array(source).default([]),
     capability: z.string().min(1),
     notes: z.string().min(1).optional(),
     localDev: z.array(localDevOption).min(1),

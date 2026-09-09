@@ -4,6 +4,10 @@ summary: Serverless application code running in Cloudflare’s workerd runtime,
   with bindings to data and other services.
 order: 1
 sources:
+  - url: https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/http/
+    title: HTTP service binding API
+  - url: https://blog.cloudflare.com/eliminating-cold-starts-2-shard-and-conquer/
+    title: Workers warm-instance routing overhead
   - url: https://github.com/cloudflare/workerd
     title: Open-source workerd runtime
   - url: https://developers.cloudflare.com/workers/wrangler/commands/
@@ -36,7 +40,7 @@ sources:
     title: Workers resource bindings
   - url: https://developers.cloudflare.com/workers/local-development/
     title: Workers local development
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09
 ---
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
@@ -155,6 +159,48 @@ The request flow below zooms back out to the handler’s inputs, service calls,
 and response.
 
 </WorkersRuntime>
+<div slot="explanation">
+
+<h2 id="api-example">API example</h2>
+
+Call an HTTP endpoint with the global `fetch()` API. No binding is needed.
+Put this in `src/index.js`; each incoming request fetches the example URL and
+returns its response.
+
+```javascript
+export default {
+  async fetch() {
+    return await fetch('https://example.com', {
+      headers: { 'X-Source': 'Cloudflare-Workers' },
+    });
+  },
+};
+```
+
+[Fetch API](https://developers.cloudflare.com/workers/runtime-apis/fetch/).
+To call another Worker privately, use a configured service binding instead,
+such as `env.BACKEND.fetch(request)`.
+[HTTP service bindings](https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/http/).
+
+<h2 id="latency">Latency</h2>
+
+**Startup overhead is only part of request latency.** Workers uses lightweight
+isolates instead of starting a VM for each request. The runtime documentation
+explains fast startup but does not supply a general end-to-end millisecond range
+for your application. Handler work, external calls, and network travel still
+contribute to response time. [Runtime model](https://developers.cloudflare.com/workers/reference/how-workers-works/).
+
+Cloudflare reports **less than 1 ms of added TTFB** for routing to a warm Worker
+on another server within a data center. That describes the internal proxy hop,
+not total request latency or cold-start time.
+[Warm-instance routing](https://blog.cloudflare.com/eliminating-cold-starts-2-shard-and-conquer/).
+
+Our measurement guidance: record elapsed request time separately from CPU time,
+and compare first requests after deployment with repeated requests. Measure
+`fetch()` and each storage binding separately so a fast handler does not hide a
+slow dependency. CPU limits are execution budgets, not response-time promises.
+
+</div>
 <div slot="local-content">
 
 To run workerd directly, install a [prebuilt binary](https://github.com/cloudflare/workerd#running-workerd)

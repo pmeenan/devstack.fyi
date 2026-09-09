@@ -4,6 +4,14 @@ summary: Managed relational database with SQLite SQL semantics, queried through
   Workers bindings or an HTTP API.
 order: 4
 sources:
+  - url: https://developers.cloudflare.com/workers/wrangler/configuration/#d1-databases
+    title: Wrangler binding configuration
+  - url: https://developers.cloudflare.com/d1/worker-api/prepared-statements/
+    title: D1 prepared statement API
+  - url: https://developers.cloudflare.com/d1/worker-api/return-object/
+    title: D1 SQL timing and serving metadata
+  - url: https://developers.cloudflare.com/d1/best-practices/read-replication/
+    title: D1 read replication and latency
   - url: https://developers.cloudflare.com/workers/platform/storage-options/
     title: Storage models and use cases
   - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
@@ -20,7 +28,7 @@ sources:
     title: D1 local development
   - url: https://developers.cloudflare.com/d1/platform/pricing/
     title: D1 row-based usage accounting
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09
 ---
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
@@ -31,15 +39,86 @@ import CloudflareProduct from '@components/CloudflareProduct.astro';
 ## SQL execution is a service call
 
 The Worker prepares and executes a statement through its binding; the database
-stores the records outside the isolate. Returned rows become application data
-in that invocation. SQL semantics are SQLite-based, but the D1 binding is the
-interface your application must exercise.
+stores the records outside the isolate. The awaited call resolves through the D1 binding API to the same
+Worker handler, which can read the rows, use them in application logic, or build
+an HTTP response. The query result in the diagram is that return value.
+SQL semantics are SQLite-based, but the D1 binding is the interface your
+application must exercise.
 [D1 overview](https://developers.cloudflare.com/d1/),
-[Worker API](https://developers.cloudflare.com/d1/worker-api/).
+[Worker API](https://developers.cloudflare.com/d1/worker-api/),
+[Query return values](https://developers.cloudflare.com/d1/worker-api/prepared-statements/).
 
 Rows read and written drive usage accounting. A query returning a few rows may
 still scan many rows; examine query shape and indexes, not just response size.
 [Usage accounting](https://developers.cloudflare.com/d1/platform/pricing/).
+
+<h2 id="api-example">API example</h2>
+
+Bind a database as `DB`. For this example, first create and seed the table
+through a migration or your local SQL tooling:
+
+```sql
+CREATE TABLE greetings (name TEXT PRIMARY KEY, message TEXT NOT NULL);
+INSERT INTO greetings VALUES ('world', 'Hello from D1!');
+```
+
+Put this handler in `src/index.js`; GET `/?name=world` returns the matching row.
+
+**wrangler.jsonc — relevant configuration**
+
+Merge this into your existing Worker configuration.
+Replace the database name and ID with yours; `DB` becomes `env.DB`.
+[Configuration reference](https://developers.cloudflare.com/workers/wrangler/configuration/#d1-databases).
+
+```json
+{
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "<YOUR_DATABASE_NAME>",
+      "database_id": "<YOUR_DATABASE_ID>"
+    }
+  ]
+}
+```
+
+**src/index.js**
+
+```javascript
+export default {
+  async fetch(request, env) {
+    const name = new URL(request.url).searchParams.get('name') ?? 'world';
+    const row = await env.DB.prepare(
+      'SELECT message FROM greetings WHERE name = ?',
+    )
+      .bind(name)
+      .first();
+    return row === null
+      ? new Response('Greeting not found', { status: 404 })
+      : Response.json(row);
+  },
+};
+```
+
+The parameter is bound separately from SQL text. For writes, use a prepared
+INSERT or UPDATE and call `run()` instead of `first()`.
+
+[D1 prepared statement API](https://developers.cloudflare.com/d1/worker-api/prepared-statements/).
+
+<h2 id="latency">Latency</h2>
+
+**Query execution and the trip to the database are separate costs.** Without
+read replication, reads and writes reach the primary database’s location.
+Read replication can shorten the trip for reads; writes still reach the primary.
+Use the Sessions API when using replicas so queries preserve session ordering.
+The replication guide does not publish a general read/write millisecond range.
+[D1 placement and replication](https://developers.cloudflare.com/d1/best-practices/read-replication/).
+
+Our measurement guidance: time the complete binding call and inspect its returned
+metadata. `timings.sql_duration_ms` measures SQL execution; it is not the full
+Worker-to-database round trip. Record `served_by_region` and `served_by_primary`
+to distinguish primary and replica reads, alongside query shape, indexes, and
+result size. [D1 result metadata](https://developers.cloudflare.com/d1/worker-api/return-object/).
 
 </div>
 <div slot="local-content">

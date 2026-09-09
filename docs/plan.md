@@ -421,36 +421,107 @@ The service remains a draft; publication is still human-run.
 related overview descriptions and tab ordering. Preserve the latency/consistency
 explanation and the distinction between cached KV reads and a Durable Object
 singleton per identity. Overview, Workers, Pages, and KV are accepted for now;
-R2, D1, Durable Objects, Queues, and Workflows remain for the next review session.
-The owner paused iteration until the morning; M2.2 has not started.
+R2 was subsequently accepted (see below); D1, Durable Objects, Queues, and
+Workflows remain for review.
+Iteration resumed on 2026-09-09 with sourced latency guidance across all eight
+product pages and a matching requirement in the authoring template. M2.2 has
+not started.
 
-### M2.2 — Edge, network, and service-wide configuration
+**R2 accepted for now, 2026-09-09:** the owner approved the R2 page after the
+latency guidance, API examples, and product-specific documentation links were
+added. Overview, Workers, Pages, KV, and R2 are now accepted for now. D1, Durable
+Objects, Queues, and Workflows remain for review; M2.2 has not started.
+
+**D1 accepted for now, 2026-09-09:** the owner approved the D1 page after
+clarifying the query result path through the D1 binding API back to the awaiting
+Worker. Overview, Workers, Pages, KV, R2, and D1 are accepted for now. Durable
+Objects, Queues, and Workflows remain for review; M2.2 has not started.
+
+**Durable Objects accepted for now, 2026-09-09:** the owner approved the page
+after reframing the diagram as a named global singleton with its own Worker-style
+code and private storage, and broadening examples to caches, counters,
+coordination, aggregation, pub/sub brokers, and collaboration. Queues and
+Workflows remain for review; M2.2 has not started.
+
+**Queues accepted for now, 2026-09-09:** the owner approved the page after
+clarifying work sharing versus broadcast, concurrent readers, and producer versus
+consumer configuration. Required Wrangler configuration now precedes JavaScript
+examples across applicable pages. Workflows remains for review; M2.2 has not started.
+
+**Workflows accepted for now, 2026-09-09:** the owner approved the page after
+expanding trigger coverage and configuration. The overview and all eight
+developer-platform product pages have completed this round of owner review.
+M2.2 is next and has not started; the broader Cloudflare service remains a draft.
+
+### M2.2 — Topic structure, then edge/network and service-wide configuration
+
+**Owner-approved sequencing, 2026-09-09:** restructure navigation before adding
+more products. The accepted application-services diagram should stay focused;
+it must not grow into a diagram of everything Cloudflare offers. See D-018.
+
+#### M2.2a — Cloudflare topic landing page and navigation
+
+- [ ] Turn `/cloudflare/` into a topic directory with these initial areas:
+      **Build applications**, **Deliver HTTP traffic**, **Protect applications**,
+      and **Connect users and networks**.
+- [ ] Move the accepted overview to `/cloudflare/build/`; retain all eight
+      existing product URLs, their accepted content, and storage tab ordering.
+      Preserve existing root `#product-<slug>` links with useful destinations.
+- [ ] Keep two connected navigation rows within each area: product/topic
+      destinations, then the current page's section links. Add a breadcrumb
+      such as Cloudflare / Build applications / Workers and an accessible
+      area switcher on the area name. Do not add a third tab row.
+- [ ] Give each area a focused overview as its coverage lands. Cross-link
+      intersections (such as Workers and CDN caching) instead of duplicating
+      product records or crowding one universal diagram. Unwritten areas must
+      be clearly marked as planned and must not link to missing pages.
+- [ ] Define explicit area membership for pages/products and separate it from
+      the catalog's service-category enum. Update the content schema, route
+      handling, authoring template, and working docs with the implementation.
+      Map every existing M2 scope item before moving content.
+- [ ] Verify root/area/product navigation, old links, breadcrumbs, keyboard and
+      no-JavaScript access, phone widths, and both themes. Run checks/build and
+      present the restructured preview for owner review before expanding content.
+
+**Structure exit:** the root explains the available topic areas; the accepted
+application overview is reachable in its own area; product URLs and content
+remain intact; navigation uses two rows plus breadcrumbs/area switching.
+
+#### M2.2b — Delivery content
 
 - [ ] Research and document CDN cache and Cache Rules, DNS, TLS and origin
       TLS modes, Rules, and Load Balancing; explain overlapping scope without
       duplicating product records needlessly.
 - [ ] Write the owner's required service-wide notes on strict origin TLS
       and honoring origin cache headers, backed by current official sources.
-      Add a second diagram if it helps explain the request/configuration path;
-      one effective diagram is enough for the M2 total.
+      Add a focused Deliver HTTP traffic overview for the request/configuration
+      path; link relevant application and security pages at the intersections.
 
-**Pass exit:** every scope item and both required service-wide notes are
+**Pass exit:** M2.2a structure is reviewed; every delivery scope item and both required service-wide notes are
 covered, cited and dated; any diagrams meet the M2.1 interaction checks.
 
 ### M2.3 — Security and access
 
-- [ ] Research and document WAF, Bot Management, Zero Trust Access, Tunnel,
-      and Turnstile, including plan-dependent availability and realistic
+Present this pass across **Protect applications** (WAF, bots, rate limiting,
+DDoS protection, Turnstile) and **Connect users and networks** (WARP, Access,
+Tunnel). WARP, rate limiting, and DDoS coverage were added with the owner's
+topic-structure approval; research their practical scope and product boundaries.
+Each area gets its own focused introduction/overview using M2.2a navigation.
+
+- [ ] Research and document WAF, Bot Management, rate limiting, DDoS protection,
+      Zero Trust Access, Tunnel, WARP, and Turnstile, including plan-dependent availability and realistic
       local-development options where current official sources support them.
 
-**Pass exit:** all five scope items meet the common sourcing, local-dev,
+**Pass exit:** all security/access scope items meet the common sourcing, local-dev,
 limits and rendering requirements, with unresolved research recorded.
 
 ### M2.4 — Media, AI, and complete-service review
 
 - [ ] Research and document Images, Stream, Workers AI, Vectorize, AI Gateway,
       and Hyperdrive. Keep the owner's grouping unless current research
-      warrants a documented presentation adjustment.
+      warrants a documented presentation adjustment. Place these initially
+      under Build applications; review its tab density before adding all six,
+      and propose a focused additional area if needed rather than dropping scope.
 - [ ] Reconcile every scope item in features.md answered question 8 against
       the page and working docs; resolve remaining gaps before calling the
       promised first pass complete. Check the complete page's navigation,

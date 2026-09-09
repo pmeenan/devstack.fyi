@@ -25,6 +25,32 @@ Decision / Context / Consequences / Reopen if
 
 ---
 
+## D-018: Topic areas within Cloudflare, stable product URLs (2026-09-09, status: accepted; implementation pending M2.2a)
+
+**Decision.** The owner approved a topic directory at `/cloudflare/`, with the
+current application overview moved to `/cloudflare/build/`. Initial areas are
+Build applications, Deliver HTTP traffic, Protect applications, and Connect
+users and networks. Existing `/cloudflare/<product>/` URLs stay unchanged.
+This amends D-017's root-overview presentation, not its dedicated product pages.
+
+**Context.** The accepted diagram explains application services well but cannot
+legibly represent the full Cloudflare scope. Adding category tabs above the
+existing two navigation rows would make the hierarchy cumbersome.
+
+**Consequences.** Each area has a focused overview and scoped product/topic tabs,
+followed by in-page navigation. Breadcrumbs and an area switcher provide
+cross-area navigation without a third tab row. Cross-links explain intersections;
+products have one canonical detail page and data record. Preserve old root
+product anchors. Topic areas are editorial groupings within a service, distinct
+from catalog categories and research-pass order. All previously agreed M2
+coverage remains; Build applications initially also receives media/AI coverage,
+subject to a density review. Plan M2.2a implements this before new delivery
+content; the site has not yet been restructured.
+
+**Reopen if.** Real content makes an area too broad or product discovery difficult.
+Adjust area boundaries without casually changing product URLs or adding another
+persistent navigation row.
+
 ## D-017: Visual service overview with dedicated product pages (2026-09-08, status: accepted)
 
 **Decision.** At the owner's request, `/cloudflare/` becomes a visual overview

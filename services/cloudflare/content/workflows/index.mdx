@@ -4,6 +4,26 @@ summary: Durable multi-step execution with persisted state, retries, sleeps, and
   waits for external events.
 order: 8
 sources:
+  - url: https://developers.cloudflare.com/workflows/reference/wrangler-commands/
+    title: Manual and local Workflow triggers
+  - url: https://developers.cloudflare.com/api/resources/workflows/subresources/instances/methods/create/
+    title: REST instance creation
+  - url: https://developers.cloudflare.com/workflows/build/call-workflows-from-pages/
+    title: Pages Functions through a Worker service
+  - url: https://developers.cloudflare.com/workers/configuration/cron-triggers/
+    title: Worker Cron Trigger configuration
+  - url: https://developers.cloudflare.com/workers/wrangler/configuration/#workflows
+    title: Cross-Worker Workflow bindings
+  - url: https://developers.cloudflare.com/queues/event-subscriptions/manage-event-subscriptions/
+    title: Product events routed through Queues
+  - url: https://developers.cloudflare.com/workflows/reference/event-subscriptions/
+    title: Outgoing Workflow lifecycle events
+  - url: https://developers.cloudflare.com/queues/reference/delivery-guarantees/
+    title: Queue redelivery when starting a Workflow
+  - url: https://developers.cloudflare.com/workflows/build/workers-api/
+    title: Workflow instance and step APIs
+  - url: https://developers.cloudflare.com/workflows/reference/limits/
+    title: Workflow scheduling and concurrency
   - url: https://developers.cloudflare.com/workflows/build/local-development/
     title: Local development
   - url: https://developers.cloudflare.com/workflows/get-started/guide/
@@ -17,12 +37,12 @@ sources:
   - url: https://developers.cloudflare.com/workflows/build/events-and-parameters/
     title: Workflow parameters, events, and persisted results
   - url: https://developers.cloudflare.com/workflows/build/trigger-workflows/
-    title: Creating Workflow instances from Workers
+    title: Binding, scheduled, and external Workflow triggers
   - url: https://developers.cloudflare.com/workers/runtime-apis/bindings/
     title: Resource bindings on Workflow classes
   - url: https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/
     title: Calling Worker services through RPC or HTTP
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09
 ---
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
@@ -32,7 +52,8 @@ import CloudflareProduct from '@components/CloudflareProduct.astro';
 
 ## Who runs the work?
 
-A Worker starts an instance with a Workflow binding’s `create()` method.
+A run can start through a binding call, a schedule, the REST API, or manual
+triggering. See [Ways to start a Workflow](#triggers) for configuration.
 The Workflow then runs **its own step code**. It can save results, retry failed
 steps, sleep, or wait for an external event. Starting a Workflow does not mean
 that each step is dispatched to a separate Worker.
@@ -57,6 +78,318 @@ separate concerns.
 The [Workers runtime model](/cloudflare/workers/#architecture) explains code
 execution. Workflow persistence adds a longer-lived layer around that execution;
 it does not make every JavaScript variable durable.
+
+<h2 id="api-example">API example</h2>
+
+Configure a Workflow binding named `GREETING` for the exported `GreetingFlow`
+class. Put this class and Worker handler in `src/index.js`.
+POST creates a run whose single step produces a greeting.
+
+**wrangler.jsonc — relevant configuration**
+
+Merge this into your existing Worker configuration.
+`GREETING` becomes `env.GREETING`; `GreetingFlow` matches the class exported below.
+`greeting` is the deployed Workflow name.
+[Configuration reference](https://developers.cloudflare.com/workflows/get-started/guide/).
+
+```json
+{
+  "workflows": [
+    {
+      "name": "greeting",
+      "binding": "GREETING",
+      "class_name": "GreetingFlow"
+    }
+  ]
+}
+```
+
+**src/index.js**
+
+```javascript
+import { WorkflowEntrypoint } from 'cloudflare:workers';
+export class GreetingFlow extends WorkflowEntrypoint {
+  async run(event, step) {
+    return await step.do('make greeting', async () => {
+      return { greeting: `Hello, ${event.payload?.name ?? 'scheduled run'}!` };
+    });
+  }
+}
+export default {
+  async fetch(request, env) {
+    if (request.method !== 'POST') {
+      return new Response('Use POST', {
+        status: 405,
+        headers: { Allow: 'POST' },
+      });
+    }
+    const instance = await env.GREETING.create({ params: { name: 'Sam' } });
+    return Response.json({ id: instance.id }, { status: 202 });
+  },
+};
+```
+
+Creation returns an instance ID while the Workflow runs separately. To inspect
+progress from Worker code, get a handle with `await env.GREETING.get(id)`, then
+call `await instance.status()`. Steps doing real external work must tolerate
+retries; this example only computes a value.
+
+[Workflow instance and step APIs](https://developers.cloudflare.com/workflows/build/workers-api/).
+
+<h2 id="triggers">Ways to start a Workflow</h2>
+
+A binding call is one entry point. You can also start runs on a direct schedule,
+through the REST API, or manually. The examples below are alternatives built
+around the `greeting` Workflow above; merge the relevant configuration into your
+project and keep its exported `GreetingFlow` class.
+
+### HTTP requests and webhooks
+
+The [API example](#api-example) already exposes a POST handler that calls
+`env.GREETING.create()`. Configure a Worker URL or route and point your caller
+or webhook sender at it. For real webhooks, verify the sender and pass the
+validated payload as `params`.
+[HTTP entry points](https://developers.cloudflare.com/workflows/build/trigger-workflows/).
+
+### Direct recurring schedule
+
+Add `schedules` to the Workflow entry. This example starts a run at the top of
+every hour, without a separate Worker `scheduled()` handler. Use a current
+Wrangler release that recognizes this field.
+[Workflow schedules](https://developers.cloudflare.com/workflows/get-started/guide/).
+
+**wrangler.jsonc — replace the example Workflow entry**
+
+```json
+{
+  "workflows": [
+    {
+      "name": "greeting",
+      "binding": "GREETING",
+      "class_name": "GreetingFlow",
+      "schedules": ["0 * * * *"]
+    }
+  ]
+}
+```
+
+**GreetingFlow.run — schedule information**
+
+Scheduled runs expose `event.schedule.cron` and `event.schedule.scheduledTime`.
+They do not get the HTTP handler's `{ name: 'Sam' }` parameters. The greeting
+example uses a default name so it also works for these runs.
+[Scheduled event data](https://developers.cloudflare.com/workflows/build/events-and-parameters/).
+
+### Queue messages
+
+Configure the Worker as the consumer of an existing `greeting-jobs` queue and
+retain the Workflow binding. Send messages shaped like `{ "name": "Sam" }`.
+[Queue consumer configuration](/cloudflare/queues/#api-example).
+
+**wrangler.jsonc — relevant configuration**
+
+```json
+{
+  "workflows": [
+    { "name": "greeting", "binding": "GREETING", "class_name": "GreetingFlow" }
+  ],
+  "queues": {
+    "consumers": [{ "queue": "greeting-jobs" }]
+  }
+}
+```
+
+**src/index.js — alternative default handler; keep GreetingFlow**
+
+```javascript
+export default {
+  async queue(batch, env) {
+    for (const message of batch.messages) {
+      await env.GREETING.create({
+        id: message.id,
+        params: message.body,
+      });
+      message.ack();
+    }
+  },
+};
+```
+
+Acknowledge after instance creation succeeds. A stable instance ID lets you
+recognize a repeated start attempt; production code should reconcile an existing
+instance on redelivery. This acknowledgement means “Workflow started,” not
+“Workflow finished.”
+[Instance creation](https://developers.cloudflare.com/workflows/build/workers-api/),
+[Queue redelivery](https://developers.cloudflare.com/queues/reference/delivery-guarantees/).
+
+Cloudflare product events can feed this path: configure a supported event
+subscription to send to your queue, then let this consumer create runs. In the
+Queues dashboard, select the queue → Subscriptions → Subscribe to events,
+then choose the source and event types. Adapt the message payload to your job.
+The Workflows “event subscriptions” page describes lifecycle events emitted
+by Workflows; it is not a direct incoming trigger configuration.
+[Event subscription setup](https://developers.cloudflare.com/queues/event-subscriptions/manage-event-subscriptions/),
+[Workflow lifecycle events](https://developers.cloudflare.com/workflows/reference/event-subscriptions/).
+
+### Worker Cron Trigger
+
+Use a Worker Cron Trigger when you want code to choose parameters or decide
+whether to start a run. Cron expressions use UTC. Choose this or the direct
+Workflow schedule above for a given recurring job.
+[Worker Cron configuration](https://developers.cloudflare.com/workers/configuration/cron-triggers/).
+
+**wrangler.jsonc — relevant configuration**
+
+```json
+{
+  "workflows": [
+    { "name": "greeting", "binding": "GREETING", "class_name": "GreetingFlow" }
+  ],
+  "triggers": { "crons": ["0 * * * *"] }
+}
+```
+
+**src/index.js — alternative default handler; keep GreetingFlow**
+
+```javascript
+export default {
+  async scheduled(controller, env) {
+    await env.GREETING.create({
+      params: { name: 'Hourly job' },
+    });
+  },
+};
+```
+
+### Other Workers, Durable Objects, and Workflows
+
+A caller in another Worker project can bind to the Workflow by identifying its
+owning Worker with `script_name`. Replace the placeholder below with that
+Worker's deployed name.
+[Cross-Worker binding configuration](https://developers.cloudflare.com/workers/wrangler/configuration/#workflows).
+
+**Calling Worker's wrangler.jsonc — relevant configuration**
+
+```json
+{
+  "workflows": [
+    {
+      "name": "greeting",
+      "binding": "GREETING",
+      "class_name": "GreetingFlow",
+      "script_name": "<WORKFLOW_WORKER_NAME>"
+    }
+  ]
+}
+```
+
+**Calling Worker's src/index.js**
+
+```javascript
+export default {
+  async fetch(request, env) {
+    const instance = await env.GREETING.create({ params: { name: 'Sam' } });
+    return Response.json({ id: instance.id }, { status: 202 });
+  },
+};
+```
+
+For a Durable Object, configure the same binding on its owning Worker and call
+`this.env.GREETING.create({ params: { name: 'Sam' } })` from an object method.
+A parent Workflow can use that binding inside `step.do()` to create a child;
+return the child's ID from the step and use a stable child ID for retries.
+Creation does not wait for the child to complete.
+[Object and Workflow callers](https://developers.cloudflare.com/workflows/build/trigger-workflows/).
+
+### Pages Functions
+
+Pages calls a separate Worker that owns the Workflow. Use a service binding to
+the Worker from the HTTP example above.
+[Pages-to-Workflow setup](https://developers.cloudflare.com/workflows/build/call-workflows-from-pages/).
+
+**Pages project's wrangler.jsonc — relevant configuration**
+
+```json
+{
+  "services": [
+    { "binding": "WORKFLOW_SERVICE", "service": "<WORKFLOW_WORKER_NAME>" }
+  ]
+}
+```
+
+**functions/start.js**
+
+```javascript
+export const onRequestPost = ({ request, env }) => {
+  return env.WORKFLOW_SERVICE.fetch(request);
+};
+```
+
+This forwards to the example Worker's POST handler, which supplies the greeting
+parameters. A regular HTTP call to that Worker is also supported.
+
+### External services and scripts: REST API
+
+No caller-side Wrangler binding is required. Use the deployed Workflow name,
+your account ID, and an API token with `Workers Scripts Write` permission.
+The REST API's `params` field is a JSON-encoded string.
+[Create-instance REST reference](https://developers.cloudflare.com/api/resources/workflows/subresources/instances/methods/create/).
+
+```bash
+curl --request POST \
+  "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workflows/greeting/instances" \
+  --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  --header "Content-Type: application/json" \
+  --data '{"params":"{\"name\":\"Sam\"}"}'
+```
+
+### Manual runs: Wrangler and browser tools
+
+From an authenticated Wrangler session, trigger the deployed Workflow by name:
+
+```bash
+npx wrangler workflows trigger greeting '{"name":"Sam"}'
+```
+
+For local execution, run `npx wrangler dev` and use a second terminal:
+
+```bash
+npx wrangler workflows trigger greeting '{"name":"Sam"}' --local
+```
+
+[Wrangler trigger command](https://developers.cloudflare.com/workflows/reference/wrangler-commands/#workflows-trigger).
+
+You can also trigger deployed runs from the Workflow in the Cloudflare dashboard.
+For a local browser interface, press `e` during `wrangler dev` to open Local
+Explorer and trigger a run there. Local Explorer requires Wrangler 4.82.1 or later.
+[Dashboard runs](https://developers.cloudflare.com/workflows/get-started/guide/),
+[Local Explorer](https://developers.cloudflare.com/workflows/build/local-development/).
+
+### Starting a run versus sending it an event
+
+`create()`, schedules, and the trigger commands start new instances.
+`instance.sendEvent()` supplies an event to an existing instance waiting in
+`step.waitForEvent()`; it does not create a new run. Use the instance ID and
+matching event type when sending that follow-up input.
+[Events and parameters](https://developers.cloudflare.com/workflows/build/events-and-parameters/).
+
+<h2 id="latency">Latency</h2>
+
+**Measure creation, first-step start, and completion separately.** The reviewed
+Workflows scheduling and retry documentation does not give a general numeric
+startup or per-step overhead range. Instances can queue when execution
+concurrency is exhausted, including when resuming from a wait.
+[Workflow scheduling](https://developers.cloudflare.com/workflows/reference/limits/).
+
+Workflow duration includes your step code, downstream I/O, configured sleeps,
+event waits, and retry backoff. A configured 10-second retry delay, for example,
+is an intentional wait before another attempt, not a 10-second service latency.
+[Sleeping and retrying](https://developers.cloudflare.com/workflows/build/sleeping-and-retrying/).
+
+Our measurement guidance: record creation-to-first-step delay, each step’s elapsed
+time, and end-to-end completion time. Compare normal and retrying runs under
+representative concurrency. Use a Worker request handler for work whose result
+you need inline; treat a Workflow as durable background execution.
 
 </div>
 <section slot="deployment">

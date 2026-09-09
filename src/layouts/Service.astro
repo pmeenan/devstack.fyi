@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
 import Base from './Base.astro';
 import { CATEGORIES } from '@lib/taxonomy';
 import Sources from '@components/Sources.astro';
@@ -13,6 +13,9 @@ interface Props {
 }
 const { service, page, pages, productSlug } = Astro.props;
 const entry = page ?? service;
+const product = page
+  ? (await getCollection('products', (item) => item.id === page.id))[0]
+  : undefined;
 ---
 
 <Base
@@ -72,6 +75,9 @@ const entry = page ?? service;
           <>
             <a href="#architecture">Architecture</a>
             <a href="#components">Components &amp; connections</a>
+            <a href="#api-example">API example</a>
+            {productSlug === 'workflows' && <a href="#triggers">Triggers</a>}
+            <a href="#latency">Latency</a>
             <a href="#local-development">Local development</a>
             <a href="#deployment">Deployment</a>
             <a href={`#product-${productSlug}`}>Usage limits</a>
@@ -81,6 +87,20 @@ const entry = page ?? service;
       <a href="#page-sources">Sources</a>
     </nav>
   </div>
+  {
+    product && (
+      <nav class="official-docs" aria-label="Official documentation">
+        <a href={product.data.docs}>
+          {product.data.name} docs <span aria-hidden="true">↗</span>
+        </a>
+        {product.data.apiReferences.map(({ title, url }) => (
+          <a href={url}>
+            {product.data.name} {title} <span aria-hidden="true">↗</span>
+          </a>
+        ))}
+      </nav>
+    )
+  }
   <article class="prose"><slot /></article>
   <section id="page-sources">
     <h2>Sources and verification</h2><Sources
@@ -91,6 +111,26 @@ const entry = page ?? service;
 </Base>
 
 <style>
+  .official-docs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 1rem 0 1.4rem;
+  }
+  .official-docs a {
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    background: var(--surface);
+    padding: 0.55rem 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .official-docs a:hover {
+    background: var(--soft);
+    text-decoration: underline;
+  }
+
   .service-navigation {
     --navigation-surface: var(--soft);
     margin: 1.5rem 0 2rem;

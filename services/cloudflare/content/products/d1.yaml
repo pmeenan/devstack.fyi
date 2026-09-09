@@ -2,6 +2,11 @@ name: D1
 group: developer-platform
 order: 4
 docs: https://developers.cloudflare.com/d1/
+apiReferences:
+  - title: Workers API
+    url: https://developers.cloudflare.com/d1/worker-api/
+  - title: REST API
+    url: https://developers.cloudflare.com/api/resources/d1/
 capability: Managed relational database with SQLite SQL semantics, queried
   through Workers bindings or an HTTP API.
 notes: Usage counts rows read or written, not just SQL statements. Local and
@@ -64,4 +69,4 @@ sources:
     title: D1 overview
   - url: https://developers.cloudflare.com/d1/best-practices/local-development/
     title: D1 local development
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09

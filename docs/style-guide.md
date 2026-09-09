@@ -148,7 +148,8 @@ licensed Inter font. Per-service generated cards remain M3.
 ## Visual architecture maps (approved baseline, 2026-09-08)
 
 The owner approved the Cloudflare overview. Apply its visual conventions to
-every overview and product page; Workers, Pages, and Workers KV are also owner-approved for now; other product content and layouts remain open for review. `ArchitectureMap.astro` renders authored
+every overview and product page. All eight Cloudflare developer-platform product
+pages are owner-approved for now (2026-09-09). `ArchitectureMap.astro` renders authored
 SVGs with representative chip, database, bucket, key/value, message-bus, object,
 and workflow icons from `Icon.astro`. These are capability illustrations, not
 vendor logos. Diagram content stays in Cloudflare's content area.
@@ -251,3 +252,37 @@ development and deployment.
 The required product introduction belongs in the page’s content and answers
 what the product is and what developers use it for. Keep API details, caveats,
 and longer explanations after the diagram and its component descriptions.
+
+Every product page includes a Latency section within the explanatory content,
+with a shared navigation link. Follow the evidence and measurement rules in
+[content-schema.md](content-schema.md#latency-coverage-for-every-service-and-product).
+Keep rough figures beside their operation and qualifications; do not present
+unlike measurements as a single comparable “speed” score.
+
+Show official product docs and clearly labeled API references as prominent,
+wrapping links below the product tabs and in-page navigation, before the
+introduction. Include the product name in each link label. Keep these external
+references visually separate from the connected in-page navigation.
+
+API examples use the existing keyboard-focusable code blocks after architecture
+and component descriptions, before latency. Add an API example navigation link;
+keep binding/setup context next to the snippet, not inside the diagram.
+
+Disable standard and contextual font ligatures in code blocks and inline code.
+Operators such as `!==`, `=>`, and `===` must display their literal characters so
+readers can transcribe examples accurately. Keep this rule when changing fonts.
+
+When a usage example requires bindings or configuration, show a separate labeled
+configuration code block immediately before its JavaScript block. Match binding
+names, resource names, and exported classes exactly, and explain their connection
+briefly. Mark configuration excerpts and replacement placeholders explicitly.
+Keep deployment commands in Deployment; avoid duplicating the configuration there.
+
+## Planned topic-area navigation (D-018, approved 2026-09-09)
+
+M2.2a will replace the Cloudflare root overview with a topic directory and move
+the accepted application map to /cloudflare/build/. Keep the existing two-row
+product/section navigation scoped to an area. Add breadcrumbs with an area
+switcher, not a third tab row. Use focused area diagrams and cross-links; retain
+existing product URLs and their accepted presentation. This is the next
+implementation target; the current layout has not yet changed.

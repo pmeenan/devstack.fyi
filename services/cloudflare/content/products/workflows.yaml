@@ -2,6 +2,11 @@ name: Workflows
 group: developer-platform
 order: 8
 docs: https://developers.cloudflare.com/workflows/
+apiReferences:
+  - title: Workers API
+    url: https://developers.cloudflare.com/workflows/build/workers-api/
+  - title: REST API
+    url: https://developers.cloudflare.com/api/resources/workflows/
 capability: Durable multi-step execution with persisted state, retries, sleeps,
   and waits for external events.
 notes: A Worker can create a Workflow instance. The Workflow runs its own step
@@ -74,4 +79,4 @@ sources:
     title: Resource bindings on Workflow classes
   - url: https://developers.cloudflare.com/workers/runtime-apis/bindings/service-bindings/
     title: Calling Worker services through RPC or HTTP
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09

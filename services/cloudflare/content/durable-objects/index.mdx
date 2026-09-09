@@ -4,6 +4,14 @@ summary: 'Your code plus its own database, addressable by name: one instance per
   chat room, game session, shared document, or tenant workspace.'
 order: 6
 sources:
+  - url: https://developers.cloudflare.com/durable-objects/best-practices/websockets/
+    title: WebSocket connections and fan-out for a custom pub/sub broker
+  - url: https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/
+    title: Durable Object SQL API
+  - url: https://developers.cloudflare.com/durable-objects/reference/data-location/
+    title: Durable Object placement and call latency
+  - url: https://blog.cloudflare.com/sqlite-in-durable-objects/
+    title: SQLite query latency and output gates, September 2024
   - url: https://developers.cloudflare.com/workers/platform/storage-options/
     title: Storage models and use cases
   - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
@@ -26,37 +34,52 @@ sources:
     title: Durable Objects limits
   - url: https://developers.cloudflare.com/durable-objects/best-practices/rules-of-durable-objects/
     title: One Durable Object per room, document, session, or workspace
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09
 ---
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
 
-<CloudflareProduct slug="durable-objects" introduction="Durable Objects combines your code with private durable storage for each named instance. Use one per chat room, game session, or shared document to coordinate participants and state.">
+<CloudflareProduct slug="durable-objects" introduction="A Durable Object is a named global singleton combining its own Worker-style code instance with shared memory and private durable storage. Use them for coherent caches, shared counters, pub/sub brokers, per-tenant coordination, or collaborative applications.">
 <div slot="explanation">
 
 ## A small stateful service for each thing in your app
 
-Think **one named instance of your code, with its own database**. Give a chat
-room, multiplayer session, shared document, or tenant workspace its own object.
-Requests for the same name reach the same object, bringing the code that manages
-that thing together with its stored state.
+Think **a Worker-style instance specific to each Durable Object, with its own
+memory and private database**. Its code runs on the Workers runtime; the object
+identity lets callers address that particular stateful instance. Callers using the same identity in a namespace reach the same
+object. You choose what that identity represents: a cache partition, counter,
+topic, tenant, document, game session, or chat room.
 
-For a chat room, the object can coordinate the connected participants and keep
-room history. For a shared document, it can coordinate edits. The useful part
-is being able to address that stateful unit directly, instead of spreading its
-coordination across otherwise separate request handlers.
+Some useful patterns you can build with this primitive:
 
-The diagram uses a chat room as a concrete example. Other rooms get their own
-objects. Memory is temporary; data that must survive instance lifecycle changes
-belongs in the object’s durable storage.
-[Cloudflare’s design guidance](https://developers.cloudflare.com/durable-objects/best-practices/rules-of-durable-objects/)
-explains how to choose that unit of state.
+- **A coherent cache:** keep shared values in one object's memory, with reads and
+  updates handled by its code. This can serve a Memcached-style role; it is not
+  a drop-in Memcached server. Memory can be lost on eviction, and callers still
+  pay the network round trip to the object's location.
+- **Shared counters and per-tenant coordination:** send operations for one
+  identity to the same code and state, persisting values that must survive.
+- **An event bus (pub/sub broker):** use an object per topic or partition to
+  track subscribers and fan published events out over WebSockets. Your code
+  implements the broker, including persistence and replay if subscribers need
+  to catch up after disconnecting.
+  [WebSocket coordination and fan-out](https://developers.cloudflare.com/durable-objects/best-practices/websockets/).
+- **Aggregation:** collect updates in memory and periodically persist a batch.
+- **Collaborative applications:** coordinate document edits, game state, or chat
+  participants. These are examples of the primitive, not a special object type.
+
+The diagram shows the common architecture behind these patterns. Separate
+identities give you independent objects; a single identity is not copied into
+an independent active instance at every edge location.
+[Durable Objects concepts](https://developers.cloudflare.com/durable-objects/concepts/what-are-durable-objects/),
+[Cloudflare’s design guidance](https://developers.cloudflare.com/durable-objects/best-practices/rules-of-durable-objects/).
+See [Latency](#latency) for the distinction between local state access and the
+caller-to-object trip.
 
 ## Object identity survives; the active instance can change
 
-A room’s durable storage and its current in-memory state have different
+An object’s durable storage and its current in-memory state have different
 lifetimes. Eviction discards memory; a later activation reconstructs an instance
-that can read its stored data. Put room history in storage and treat active
+that can read its stored data. Put persistent application data in storage and treat active
 connections or temporary calculations as lifecycle-dependent.
 [Object lifecycle](https://developers.cloudflare.com/durable-objects/concepts/durable-object-lifecycle/).
 
@@ -64,6 +87,98 @@ Use the [Workers page](/cloudflare/workers/#runtime-concurrency) for the base
 single-threaded execution model, but do not transfer stateless Worker routing
 assumptions to a named Durable Object. Identity is the reason callers can meet
 at the same stateful unit.
+
+<h2 id="api-example">API example</h2>
+
+Configure `COUNTERS` as a binding to the exported `Counter` class with
+SQLite-backed storage. Put both exports in `src/index.js`.
+Each POST increments the same named object’s persistent counter.
+
+**wrangler.jsonc — relevant configuration**
+
+Merge this into your existing Worker configuration.
+`COUNTERS` becomes `env.COUNTERS`; `Counter` matches the class exported below.
+The `exports` declaration registers the class with SQLite storage.
+[Configuration reference](https://developers.cloudflare.com/durable-objects/get-started/).
+
+```json
+{
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "COUNTERS",
+        "class_name": "Counter"
+      }
+    ]
+  },
+  "exports": {
+    "Counter": {
+      "type": "durable-object",
+      "storage": "sqlite"
+    }
+  }
+}
+```
+
+**src/index.js**
+
+```javascript
+import { DurableObject } from 'cloudflare:workers';
+export class Counter extends DurableObject {
+  increment() {
+    const sql = this.ctx.storage.sql;
+    sql.exec(`CREATE TABLE IF NOT EXISTS counter (
+      id INTEGER PRIMARY KEY, value INTEGER NOT NULL
+    )`);
+    return sql
+      .exec(
+        `
+      INSERT INTO counter (id, value) VALUES (1, 1)
+      ON CONFLICT(id) DO UPDATE SET value = value + 1
+      RETURNING value
+    `,
+      )
+      .one().value;
+  }
+}
+export default {
+  async fetch(request, env) {
+    if (request.method !== 'POST') {
+      return new Response('Use POST', {
+        status: 405,
+        headers: { Allow: 'POST' },
+      });
+    }
+    const counter = env.COUNTERS.getByName('demo-counter');
+    return Response.json({ value: await counter.increment() });
+  },
+};
+```
+
+Every caller using `demo-counter` in this namespace reaches the same global
+singleton. A different name selects a different object. The increment happens
+inside one SQL statement, rather than a caller reading and writing shared state.
+
+[Calling a Durable Object](https://developers.cloudflare.com/durable-objects/get-started/),
+[Durable Object SQL API](https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/).
+
+<h2 id="latency">Latency</h2>
+
+**Local SQL queries can complete in microseconds.** Cloudflare’s September 2024
+SQLite-in-Durable-Objects explanation describes same-thread database execution
+with no network hop between your object code and SQLite. This is an internal
+query timescale, not a bound on a Worker’s RPC call. Write responses can also
+wait for durable confirmation through the runtime’s output gates.
+[SQLite execution and write confirmation](https://blog.cloudflare.com/sqlite-in-durable-objects/).
+
+**A globally addressable object still lives at a particular location.** Caller
+distance adds a network round trip; the location guide does not give a universal
+RPC latency range. A singleton is therefore coherent shared state, not a local
+copy at every edge. [Placement and latency](https://developers.cloudflare.com/durable-objects/reference/data-location/).
+
+Our measurement guidance: compare calls from nearby and distant Workers, reads
+and persisted writes, and active versus newly activated objects. Include waiting
+under load in the caller’s elapsed time, not just time spent inside a method.
 
 </div>
 <div slot="local-content">

@@ -151,7 +151,14 @@ import CloudflareBindings from '@components/CloudflareBindings.astro';
         1,
         `${slug}: only the introduction precedes the diagram`,
       );
+      assert.match(detail, /aria-label="Official documentation"/);
+      assert.match(detail, /docs\s+<span\b/);
       assert.match(detail, /Components &amp; connections/);
+      assert.match(detail, /id="api-example"/);
+      assert.match(detail, /href="#api-example"/);
+      assert.match(detail, /<pre[ >]/);
+      assert.match(detail, /id="latency"/);
+      assert.match(detail, /href="#latency"/);
       assert.match(detail, /id="local-development"/);
       assert.match(detail, /id="deployment"/);
       assert.match(detail, /href="#deployment"/);

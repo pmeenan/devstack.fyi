@@ -378,6 +378,14 @@ section[aria-label='Sources and verification'] ul {
 section[aria-label='Sources and verification'] p {
   margin-bottom: 0.5rem;
 }
+/* Preserve literal operator glyphs in instructional code. */
+pre,
+code {
+  font-variant-ligatures: none;
+  font-feature-settings:
+    'liga' 0,
+    'calt' 0;
+}
 pre {
   overflow-x: auto;
   padding: 1rem;

@@ -4,6 +4,12 @@ summary: Object storage for files and blobs, accessible through Workers bindings
   and an S3-compatible API.
 order: 3
 sources:
+  - url: https://developers.cloudflare.com/workers/wrangler/configuration/#r2-buckets
+    title: Wrangler binding configuration
+  - url: https://developers.cloudflare.com/r2/api/workers/workers-api-reference/
+    title: R2 Workers API
+  - url: https://developers.cloudflare.com/changelog/post/2026-02-03-r2-local-uploads/
+    title: R2 Local Uploads benchmark, February 2026
   - url: https://developers.cloudflare.com/workers/platform/storage-options/
     title: Storage models and use cases
   - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
@@ -18,7 +24,7 @@ sources:
     title: R2 S3 API compatibility
   - url: https://developers.cloudflare.com/r2/api/workers/workers-api-usage/
     title: R2 Workers binding API
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09
 ---
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
@@ -36,6 +42,80 @@ API surface. [R2 architecture](https://developers.cloudflare.com/r2/how-r2-works
 Choose local tests for the interface you actually use. A passing Workers-binding
 test says nothing about an S3 client’s request signing or operation support.
 [R2 S3 compatibility](https://developers.cloudflare.com/r2/api/s3/api/).
+
+<h2 id="api-example">API example</h2>
+
+Bind a bucket as `FILES` and upload an object named `hello.txt`. This handler
+streams that object to the client, preserving its HTTP metadata. Put it in
+`src/index.js`; call it with GET.
+
+**wrangler.jsonc — relevant configuration**
+
+Merge this into your existing Worker configuration.
+Replace the bucket name with yours; `FILES` becomes `env.FILES`.
+[Configuration reference](https://developers.cloudflare.com/workers/wrangler/configuration/#r2-buckets).
+
+```json
+{
+  "r2_buckets": [
+    {
+      "binding": "FILES",
+      "bucket_name": "<YOUR_BUCKET_NAME>"
+    }
+  ]
+}
+```
+
+**src/index.js**
+
+```javascript
+export default {
+  async fetch(request, env) {
+    if (request.method !== 'GET') {
+      return new Response('Use GET', {
+        status: 405,
+        headers: { Allow: 'GET' },
+      });
+    }
+    const object = await env.FILES.get('hello.txt');
+    if (object === null) {
+      return new Response('Object not found', { status: 404 });
+    }
+    const headers = new Headers();
+    object.writeHttpMetadata(headers);
+    headers.set('ETag', object.httpEtag);
+    return new Response(object.body, { headers });
+  },
+};
+```
+
+To store text from Worker code, use
+`await env.FILES.put("hello.txt", "Hello from R2!")`.
+This uses the Worker binding rather than S3 credentials. The example serves one
+fixed object; it does not implement range or conditional GET handling.
+
+[R2 Workers API](https://developers.cloudflare.com/r2/api/workers/workers-api-reference/).
+
+<h2 id="latency">Latency</h2>
+
+**Published upload example: roughly 500 ms p50, down from roughly 2 seconds.**
+Cloudflare’s February 3, 2026 Local Uploads announcement reports this improvement
+in upload time to last byte (TTLB), with up to a 75% reduction in its tests.
+This is a vendor benchmark for that feature, not a general R2 `put()` latency
+or a guarantee. The short announcement does not specify enough workload details,
+such as object size, to apply those absolute times to every upload.
+[Local Uploads benchmark](https://developers.cloudflare.com/changelog/post/2026-02-03-r2-local-uploads/).
+
+**Reads depend on the path.** Bucket location, caller location, and access
+patterns matter. A custom-domain CDN cache hit can bypass the R2 gateway; an
+uncached request must retrieve the object through R2. The architecture guide
+does not give a general millisecond range for GET, HEAD, or PUT. CDN-cached
+copies may remain stale even though R2 itself is strongly consistent.
+[R2 architecture and performance](https://developers.cloudflare.com/r2/how-r2-works/).
+
+Our measurement guidance: separate metadata/first-byte latency from full object
+transfer time, and compare cached public downloads with direct binding or S3
+requests. Record object sizes and caller/bucket regions with p50, p95, and p99.
 
 </div>
 <div slot="local-content">

@@ -4,6 +4,8 @@ summary: Distributed key-value storage for read-heavy data that can tolerate
   eventual consistency.
 order: 5
 sources:
+  - url: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces
+    title: Wrangler binding configuration
   - url: https://developers.cloudflare.com/workers/platform/storage-options/
     title: Storage models and use cases
   - url: https://developers.cloudflare.com/workers/testing/miniflare/get-started/
@@ -28,7 +30,7 @@ sources:
     title: Durable Objects as globally addressable state
   - url: https://developers.cloudflare.com/durable-objects/reference/data-location/
     title: Durable Object placement and network latency
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09
 ---
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
@@ -38,7 +40,51 @@ import CloudflareProduct from '@components/CloudflareProduct.astro';
 
 <div slot="explanation">
 
-## Latency: hot reads, cold reads, and writes
+<h2 id="api-example">API example</h2>
+
+Bind a KV namespace as `CONFIG` and seed its `greeting` key with a text value
+using the local-data commands or dashboard. This Worker reads it on each request.
+Put the handler in `src/index.js`.
+
+**wrangler.jsonc — relevant configuration**
+
+Merge this into your existing Worker configuration.
+Replace the namespace ID with yours; `CONFIG` becomes `env.CONFIG`.
+[Configuration reference](https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces).
+
+```json
+{
+  "kv_namespaces": [
+    {
+      "binding": "CONFIG",
+      "id": "<YOUR_KV_NAMESPACE_ID>"
+    }
+  ]
+}
+```
+
+**src/index.js**
+
+```javascript
+export default {
+  async fetch(_request, env) {
+    const greeting = await env.CONFIG.get('greeting');
+    if (greeting === null) {
+      return new Response('Greeting not configured', { status: 404 });
+    }
+    return Response.json({ greeting });
+  },
+};
+```
+
+To update it from Worker code, use `await env.CONFIG.put("greeting", "Hello!")`
+in your update handler. A completed write does not guarantee that the next read
+returns the new value; the freshness rules above still apply.
+
+[KV read API](https://developers.cloudflare.com/kv/api/read-key-value-pairs/),
+[KV write API](https://developers.cloudflare.com/kv/api/write-key-value-pairs/).
+
+<h2 id="latency">Latency: hot reads, cold reads, and writes</h2>
 
 KV combines persistent central storage with caches near readers. A local cache
 hit takes the shortest path; a miss travels through regional and central cache

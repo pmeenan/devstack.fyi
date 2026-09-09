@@ -4,6 +4,14 @@ summary: Message queues for buffering and moving background work between
   producers and consumers.
 order: 7
 sources:
+  - url: https://developers.cloudflare.com/queues/configuration/consumer-concurrency/
+    title: Concurrent invocations of a consumer Worker
+  - url: https://developers.cloudflare.com/queues/configuration/pull-consumers/
+    title: Multiple pull readers and message leases
+  - url: https://developers.cloudflare.com/queues/configuration/javascript-apis/
+    title: Queues producer and consumer APIs
+  - url: https://blog.cloudflare.com/how-we-built-cloudflare-queues/
+    title: Queues send-latency benchmark, October 2024
   - url: https://developers.cloudflare.com/queues/configuration/local-development/
     title: Local development
   - url: https://developers.cloudflare.com/queues/get-started/
@@ -16,13 +24,38 @@ sources:
     title: Queues batching, acknowledgements, and retries
   - url: https://developers.cloudflare.com/queues/configuration/dead-letter-queues/
     title: Queues dead-letter handling
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09
 ---
 
 import CloudflareProduct from '@components/CloudflareProduct.astro';
 
-<CloudflareProduct slug="queues" introduction="Queues buffers messages between producers and consumers. Use it to move processing out of a request and into background work that can be retried.">
+<CloudflareProduct slug="queues" introduction="Queues is a work queue: multiple producers can write messages, and concurrent readers share the processing rather than each receiving a broadcast copy. Use it for background jobs, with retries and possible duplicate delivery.">
 <div slot="explanation">
+
+## Multiple writers, readers that share the work
+
+Multiple producer Workers can write to the same queue. On the reading side,
+choose one delivery mode:
+
+- **Push:** configure one consumer Worker; Cloudflare can run multiple
+  invocations of that Worker concurrently to process batches.
+- **Pull:** multiple HTTP clients can read concurrently. Each receives a
+  distinct batch with a temporary lease on its messages.
+
+[Producers and consumer configuration](https://developers.cloudflare.com/queues/reference/how-queues-works/),
+[Push concurrency](https://developers.cloudflare.com/queues/configuration/consumer-concurrency/),
+[Concurrent pull readers](https://developers.cloudflare.com/queues/configuration/pull-consumers/).
+
+**Readers share jobs; they do not each receive a copy of every message.**
+For example, three readers can divide image-resizing jobs among them. Adding
+readers increases processing capacity rather than creating broadcast subscribers.
+A retry or expired pull lease can send a message to another reader, and delivery
+is at least once, so duplicate processing remains possible.
+[Delivery guarantees](https://developers.cloudflare.com/queues/reference/delivery-guarantees/),
+[Pull leases and redelivery](https://developers.cloudflare.com/queues/configuration/pull-consumers/).
+
+For a pub/sub broker you assemble yourself, see the
+[Durable Objects use cases](/cloudflare/durable-objects/#a-small-stateful-service-for-each-thing-in-your-app).
 
 ## Publishing and processing are separate invocations
 
@@ -36,6 +69,97 @@ queue gives exhausted messages a destination for inspection.
 [Delivery guarantees](https://developers.cloudflare.com/queues/reference/delivery-guarantees/),
 [Retries](https://developers.cloudflare.com/queues/configuration/batching-retries/).
 
+<h2 id="api-example">API example</h2>
+
+Create a queue named `jobs`, bind it as the producer `JOBS`, and configure this
+Worker as its consumer. Put both handlers in `src/index.js`. POST enqueues a
+small job; the queue handler logs it when a batch arrives.
+
+**wrangler.jsonc — relevant configuration**
+
+Merge this into your existing Worker configuration.
+`JOBS` becomes `env.JOBS` for sending; the consumer entry routes `jobs` batches
+to this Worker’s `queue(batch)` handler.
+[Configuration reference](https://developers.cloudflare.com/queues/reference/how-queues-works/).
+
+```json
+{
+  "queues": {
+    "producers": [
+      {
+        "binding": "JOBS",
+        "queue": "jobs"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "jobs"
+      }
+    ]
+  }
+}
+```
+
+**src/index.js**
+
+```javascript
+export default {
+  async fetch(request, env) {
+    if (request.method !== 'POST') {
+      return new Response('Use POST', {
+        status: 405,
+        headers: { Allow: 'POST' },
+      });
+    }
+    const id = crypto.randomUUID();
+    await env.JOBS.send({ id, kind: 'demo' });
+    return Response.json({ queued: id }, { status: 202 });
+  },
+  async queue(batch) {
+    for (const message of batch.messages) {
+      console.log('Received from', batch.queue, 'job', message.body.id);
+      message.ack();
+    }
+  },
+};
+```
+
+**A Worker can consume multiple queues.** Cloudflare invokes its single
+`queue(batch)` handler for each configured source queue; `batch.queue` contains
+the actual queue name (here, `jobs`). Branch on that name when different queues
+need different processing.
+
+`env.JOBS` only names the producer API used to send messages. Incoming delivery
+is wired through `queues.consumers` in the Worker configuration, so the handler
+does not read from `env.JOBS`. A consumer-only Worker needs no producer binding.
+[Consumer configuration and multiple source queues](https://developers.cloudflare.com/queues/reference/how-queues-works/).
+
+The 202 response means the send succeeded, not that processing finished.
+Acknowledge after the real work succeeds. Delivery can repeat, so use the job ID
+to make any real side effect idempotent.
+
+[Queues producer and consumer APIs](https://developers.cloudflare.com/queues/configuration/javascript-apis/),
+[Queue delivery guarantees](https://developers.cloudflare.com/queues/reference/delivery-guarantees/).
+
+<h2 id="latency">Latency</h2>
+
+**Published send latency: about 60 ms median.** Cloudflare reported this after
+its 2024 Queues architecture migration, down from about 200 ms. This is a
+historical vendor measurement of sending a message, not a delivery deadline or
+the time until the consumer finishes processing it.
+[Queues architecture benchmark, October 2024](https://blog.cloudflare.com/how-we-built-cloudflare-queues/).
+
+**Batching can add seconds before processing starts.** A push consumer defaults
+to batches of 10 messages with a 5-second batch timeout; whichever threshold is
+reached first triggers delivery. The timeout can be set from 0 to 60 seconds.
+Zero removes the intentional batch wait, not all delivery latency. Backlogs,
+configured delays, and retries can extend the wait further.
+[Batching and delays](https://developers.cloudflare.com/queues/configuration/batching-retries/).
+
+Our measurement guidance: record producer send time, message age when the
+consumer starts, and time until processing completes as three separate metrics.
+A successful send establishes neither immediate delivery nor completed work.
+
 </div>
 <section slot="deployment">
 
@@ -45,6 +169,12 @@ Create the queue, configure the producer binding and consumer settings, then
 deploy the relevant Workers with Wrangler. Set batching, retries, and any
 dead-letter destination deliberately.
 [Queue setup](https://developers.cloudflare.com/queues/get-started/).
+
+The [API example](#api-example) shows the producer and consumer configuration.
+To consume another queue in the same Worker, add another entry to
+`consumers`. Its batches reach the same `queue(batch)` handler with their own
+`batch.queue` name.
+[Queue configuration](https://developers.cloudflare.com/queues/reference/how-queues-works/).
 
 The local wrapper is `npx wrangler dev`; use multiple `-c` configuration
 arguments to run separate producer and consumer Workers together.

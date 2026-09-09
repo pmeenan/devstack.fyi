@@ -2,6 +2,11 @@ name: Workers
 group: developer-platform
 order: 1
 docs: https://developers.cloudflare.com/workers/
+apiReferences:
+  - title: Runtime APIs
+    url: https://developers.cloudflare.com/workers/runtime-apis/
+  - title: Management REST API
+    url: https://developers.cloudflare.com/api/resources/workers/
 capability: Serverless application code running in Cloudflare’s workerd runtime,
   with bindings to data and other services.
 notes: Workers can also serve static assets. Set explicit CPU limits for paid
@@ -68,4 +73,4 @@ sources:
     title: Workers overview
   - url: https://developers.cloudflare.com/workers/local-development/
     title: Workers local development
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09

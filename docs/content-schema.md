@@ -228,6 +228,7 @@ const products = defineCollection({
     group: slugId.optional(),
     order: z.number().int().optional(),
     docs: z.url(),
+    apiReferences: z.array(source).default([]),
     capability: z.string().min(1),
     notes: z.string().min(1).optional(),
     localDev: z.array(localDevOption).min(1),
@@ -427,3 +428,60 @@ example/buckets` for a record dated 2026-02-01.
   free sentence today. The index will need a shared key (for example
   `edge-functions`) per product; add it as an optional `capabilityId` enum
   when the third service is planned, not before.
+
+## Latency coverage for every service and product
+
+Include a discoverable latency section in each product page (or its service-page
+section when there is no dedicated page). This is an authoring requirement, not
+an additional YAML field. Use `id="latency"` on dedicated product pages for the
+shared navigation. Keep it after the architecture and component descriptions,
+within the explanatory content and before local development.
+
+Give rough values when official documentation or a documented measurement
+supports them. Name the operation, units, measurement boundary, percentile (if
+published), workload/location/cache conditions, source date, and verification
+date. Label guarantees, advertised figures, historical vendor benchmarks, and
+our own measurements distinctly. Our measurements need a reproducible method
+and environment; anecdotes or training-memory numbers are not evidence.
+
+Cover relevant hot/cold paths, reads/writes, network placement, payload/query
+size, and queue/startup delays. Separate CPU time, internal execution, full call
+latency, transfer completion, and consistency/propagation delay. Do not turn
+throughput limits, configured waits, or timeouts into expected response times.
+When credible numbers are unavailable, say what the reviewed sources omit,
+explain the drivers, and suggest what to measure; never invent a range. This
+applies to current pages and future service research, including M2.2 onward.
+
+## Prominent official documentation links
+
+Product pages show `docs` and `apiReferences` below the tabbed
+product navigation, before the introduction. Prefix each link label with the
+product name. `apiReferences` is an optional array (defaults to empty) of
+`{ title, url, note? }` source-shaped records. Populate it for products with APIs;
+use precise labels distinguishing runtime/binding, S3-compatible, and management
+REST references. Verify destinations and update the product's verification date.
+Products without an API still show their official product docs. These shortcuts
+complement the dated evidence in Sources. Future services should use the same
+product records and shared layout rather than hard-coded provider link lists.
+
+## Small API examples
+
+For products callable from application code, include a short API example after
+architecture/components and before latency/local development, with a stable
+`api-example` target. Show the handler context, required binding names and setup,
+a representative operation, and its result. Link the official API reference.
+Prefer plain JavaScript for introductory samples, without Env/type boilerplate
+(owner preference, 2026-09-09). Use strict TypeScript when types are the subject.
+Keep real resource bindings explicit; global fetch needs no env binding. Match the actual
+API surface (for example, Pages Functions versus a Worker fetch handler).
+Keep samples small, distinguish acceptance from completion for background work,
+and identify required seed data or provider-side exports. Check snippets against
+current vendor types where available; compiling the MDX does not typecheck the
+code inside a fence. Do not present samples as deployed or runtime-tested unless
+those checks were actually performed.
+
+Show required binding/configuration changes in a separate labeled block directly
+before the application code (Wrangler JSON for Cloudflare examples). Identify
+excerpts as changes to an existing configuration, mark resource placeholders,
+and explain how names map to the code. Cite the configuration reference. Samples
+using only global APIs need no binding block.

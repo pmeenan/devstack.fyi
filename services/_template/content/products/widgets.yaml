@@ -3,6 +3,9 @@ aliases: [Widget Functions]
 group: compute
 order: 1
 docs: https://example.com/docs/widgets/
+apiReferences:
+  - title: API reference
+    url: https://example.com/docs/widgets/api/
 capability: Serverless functions that run at the edge.
 localDev:
   - kind: vendor

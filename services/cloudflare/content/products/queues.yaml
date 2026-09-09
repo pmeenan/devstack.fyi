@@ -2,6 +2,11 @@ name: Queues
 group: developer-platform
 order: 7
 docs: https://developers.cloudflare.com/queues/
+apiReferences:
+  - title: Workers API
+    url: https://developers.cloudflare.com/queues/configuration/javascript-apis/
+  - title: REST API
+    url: https://developers.cloudflare.com/api/resources/queues/
 capability: Message queues for buffering and moving background work between
   producers and consumers.
 notes: A typical successful delivery uses write, read, and delete operations.
@@ -60,4 +65,4 @@ sources:
     title: Queues overview
   - url: https://developers.cloudflare.com/queues/configuration/local-development/
     title: Queues local development
-lastVerified: 2026-09-08
+lastVerified: 2026-09-09
